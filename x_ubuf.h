@@ -30,65 +30,60 @@ enum {
 	ioctlUBUF_UNDEFINED,
 	ioctlUBUF_I_PTR_CNTL,
 	ioctlUBUF_NUMBER,
-};
+} ;
+
 // ####################################### structures  #############################################
 
 typedef	struct ubuf_s {
-	uint8_t *			pBuf ;
+	char *				pBuf ;
 	SemaphoreHandle_t	mux ;
-	int32_t				flags ;
-	uint16_t			size ;
-	volatile uint16_t	IdxIn ;
-	volatile uint16_t	IdxOut ;
-	volatile uint16_t	used ;
+	uint16_t			flags ;							// stdlib related flags
+	union {
+		struct {
+			uint8_t		f_init	: 1 ;
+			uint8_t		f_alloc	: 1 ;
+		} ;
+		uint16_t			_flags ;					// module flags
+	} ;
+	uint16_t			Size ;
+	volatile uint16_t	IdxWR ;							// index to next space to WRITE to
+	volatile uint16_t	IdxRD ;							// index to next char to be READ from
+	volatile uint16_t	Used ;
 } ubuf_t ;
 
 extern ubuf_t	sUBuf[ubufMAX_OPEN] ;
 
 // ################################### EXTERNAL FUNCTIONS ##########################################
 
-inline void xUBufLock(ubuf_t * psUBuf)	{ xSemaphoreTake(psUBuf->mux, portMAX_DELAY) ; }
-inline void xUBufUnLock(ubuf_t * psUBuf)	{ xSemaphoreGive(psUBuf->mux) ; }
+void	xUBufLock(ubuf_t * psUBuf) ;
+void	xUBufUnLock(ubuf_t * psUBuf) ;
 
-size_t	xUBufSetDefaultSize(size_t BufSize) ;
-int32_t	xUBufCreate(ubuf_t * psUBuf, size_t BufSize)  ;
-int32_t	xUBufDestroy(ubuf_t * psUBuf) ;
-int32_t	xUBufGotChar(ubuf_t * psUBuf) ;
-int32_t	xUBufGetChar(ubuf_t * psUBuf) ;
-int32_t	xUBufGotSpace(ubuf_t * psUBuf) ;
-int32_t	xUBufPutChar(ubuf_t * psUBuf, int32_t cChr) ;
-int32_t	xUBufStat(ubuf_t * psUBuf) ;
+inline int32_t	xUBufAvail(ubuf_t * psUBuf)		{ return psUBuf->Used ; }
+inline int32_t	xUBufSpace(ubuf_t * psUBuf)		{ return psUBuf->Size - psUBuf->Used ; }
+
+inline char * pcUBufTellWrite(ubuf_t * psUBuf)	{ return psUBuf->pBuf + psUBuf->IdxWR ; }
+inline char * pcUBufTellRead(ubuf_t * psUBuf)	{ return psUBuf->pBuf + psUBuf->IdxRD ; }
+
+inline void	vUBufStepWrite(ubuf_t * psUBuf, int32_t Step)	{ psUBuf->IdxWR += Step ; psUBuf->Used += Step ; }
+inline void	vUBufStepRead(ubuf_t * psUBuf, int32_t Step)	{ psUBuf->IdxRD += Step ; psUBuf->Used -= Step ; }
+
+size_t	xUBufSetDefaultSize(size_t) ;
+int32_t	xUBufCreate(ubuf_t *, char *, size_t, size_t)  ;
+void	vUBufDestroy(ubuf_t *) ;
+int32_t	xUBufGetC(ubuf_t *) ;
+char *	pcUBufGetS(char *, int32_t, ubuf_t *) ;
+int32_t	xUBufPutC(ubuf_t *, int32_t) ;
+int32_t	xUBufStat(ubuf_t *) ;
 
 // VFS support functions
 void	vUBufInit(void) ;
 int32_t	xUBufOpen(const char *, int, int) ;
-int32_t	xUBufClose(int32_t fd) ;
-ssize_t	xUBufRead(int fd, void * dst, size_t size) ;
-ssize_t	xUBufWrite(int fd, const void * data, size_t size) ;
-int32_t	xUBufIoctl(int fd, int request, va_list vArgs) ;
+int32_t	xUBufClose(int) ;
+ssize_t	xUBufRead(int, void *, size_t) ;
+ssize_t	xUBufWrite(int, const void *, size_t) ;
+int32_t	xUBufIoctl(int, int, va_list) ;
 
-void	vUBufReport(ubuf_t * psUBuf) ;
-
-// ############################### Simple read OR write buffer structure ###########################
-
-typedef	struct uubuf_s {
-	char *				pBuf ;
-	uint16_t			Idx ;
-	uint16_t			Size ;
-	uint16_t			Used ;
-	uint16_t			Alloc ;
-} uubuf_t ;
-
-inline	size_t	xUUBufFree(uubuf_t * psUUBuf)			{ return psUUBuf->Size - psUUBuf->Used ; }
-inline	size_t	xUUBufUsed(uubuf_t * psUUBuf)			{ return psUUBuf->Used ; }
-inline	char *	pcUUBufPos(uubuf_t * psUUBuf)			{ return psUUBuf->pBuf + psUUBuf->Idx ; }
-
-int32_t	xUUBufGetC(uubuf_t * psUUBuf) ;
-char *	pcUUBufGetS(char * pBuf, int32_t Number, uubuf_t * psUUBuf) ;
-int32_t	xUUBufCreate(uubuf_t * psUUBuf, char * pBuf, size_t BufSize, size_t Used) ;
-void	vUUBufDestroy(uubuf_t * psUUBuf) ;
-void	vUUBufAdjust(uubuf_t * psUUBuf, ssize_t Adj) ;
-void	vUUBufReport(int32_t Handle, uubuf_t * psUUBuf) ;
+void	vUBufReport(int, ubuf_t *) ;
 
 #ifdef __cplusplus
 }
