@@ -6,6 +6,8 @@
 #include	"x_debug.h"
 #include	"x_errors_events.h"
 
+#include	<string.h>
+
 // ########################################## Macros ###############################################
 
 
