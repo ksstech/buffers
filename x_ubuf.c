@@ -289,6 +289,7 @@ int32_t	xUBufIoctl(int fd, int request, va_list vArgs) {
 		*ppsUBuf = &sUBuf[fd] ;
 		break ;
 	default:
+		IF_myASSERT(DEBUG, 0) ;
 		break ;
 	}
 	return 1 ;
