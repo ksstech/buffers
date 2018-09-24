@@ -525,7 +525,7 @@ char * pTmp ;
 		IF_myASSERT(debugASSERT_CIRCULAR, 0) ;
 		return erFAILURE ;								// yes, abort
 	}
-	IF_PRINT_ERR(debugSTRUCTURE, "[Seek 1] B=%p R=%p W=%p S=%d U=%d\n", psBuf->pBeg, psBuf->pRead, psBuf->pWrite, psBuf->xSize, psBuf->xUsed) ;
+	IF_CPRINT(debugSTRUCTURE, "[Seek 1] B=%p R=%p W=%p S=%d U=%d\n", psBuf->pBeg, psBuf->pRead, psBuf->pWrite, psBuf->xSize, psBuf->xUsed) ;
 
 	vBufIsrEntry(psBuf) ;
 	if (flags & FF_MODER) {
@@ -558,7 +558,7 @@ char * pTmp ;
 	vBufIsrExit(psBuf) ;
 
 	IF_myASSERT(debugASSERT_SIZE, (psBuf->xUsed <= psBuf->xSize)) ;
-	IF_PRINT_ERR(debugSTRUCTURE, "[Seek 2] B=%p R=%p W=%p S=%d U=%u\n", psBuf->pBeg, psBuf->pRead, psBuf->pWrite, psBuf->xSize, psBuf->xUsed) ;
+	IF_CPRINT(debugSTRUCTURE, "[Seek 2] B=%p R=%p W=%p S=%d U=%u\n", psBuf->pBeg, psBuf->pRead, psBuf->pWrite, psBuf->xSize, psBuf->xUsed) ;
 	return erSUCCESS ;
 }
 

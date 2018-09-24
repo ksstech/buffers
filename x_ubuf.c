@@ -143,7 +143,7 @@ int32_t	xUBufGetC(ubuf_t * psUBuf) {
 	if (--psUBuf->Used == 0) {							// buffer now empty
 		psUBuf->IdxRD = psUBuf->IdxWR = 0 ;			// reset both In & Out indexes to start
 	}
-	IF_DEBUGPRINT_ERR(debugTRACK, "s=%d  i=%d  o=%d  cChr=%d", psUBuf->Size, psUBuf->IdxWR, psUBuf->IdxRD, cChr) ;
+	IF_CPRINT(debugTRACK, "s=%d  i=%d  o=%d  cChr=%d", psUBuf->Size, psUBuf->IdxWR, psUBuf->IdxRD, cChr) ;
 	xUBufUnLock(psUBuf) ;
 	return cChr ;
 }
@@ -184,7 +184,7 @@ int32_t	xUBufPutC(ubuf_t * psUBuf, int32_t cChr) {
 		psUBuf->IdxWR = 0 ;
 	}
 	++psUBuf->Used ;
-	IF_DEBUGPRINT_ERR(debugTRACK, "s=%d  i=%d  o=%d  cChr=%d", psUBuf->Size, psUBuf->IdxWR, psUBuf->IdxRD, cChr) ;
+	IF_CPRINT(debugTRACK, "s=%d  i=%d  o=%d  cChr=%d", psUBuf->Size, psUBuf->IdxWR, psUBuf->IdxRD, cChr) ;
 	xUBufUnLock(psUBuf) ;
 	return cChr ;
 }
@@ -194,7 +194,7 @@ int32_t	xUBufPutC(ubuf_t * psUBuf, int32_t cChr) {
 void	vUBufInit(void) { ESP_ERROR_CHECK(esp_vfs_register(ubufDEV_PATH, &dev_ubuf, NULL)) ; }
 
 int32_t	xUBufOpen(const char * pccPath, int flags, int Size) {
-	IF_TRACK_PRINT(debugTRACK, "path='%s'  flags=0x%x  Size=%d\n", pccPath, flags, Size) ;
+	IF_TRACK(debugTRACK, "path='%s'  flags=0x%x  Size=%d\n", pccPath, flags, Size) ;
 	IF_myASSERT(debugPARAM, (*pccPath == CHR_FWDSLASH) && INRANGE(ubufSIZE_MINIMUM, Size, ubufSIZE_MAXIMUM, size_t)) ;
 	int32_t fd = 0 ;
 	do {
