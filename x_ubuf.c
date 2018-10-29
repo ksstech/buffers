@@ -127,6 +127,11 @@ void	vUBufDestroy(ubuf_t * psUBuf) {
 	vSemaphoreDelete(psUBuf->mux) ;
 }
 
+void	vUBufReset(ubuf_t * psUBuf) {
+	IF_myASSERT(debugPARAM, INRANGE_SRAM(psUBuf)) ;
+	psUBuf->IdxRD = psUBuf->IdxWR = psUBuf->Used = 0 ;
+}
+
 int32_t	xUBufGetC(ubuf_t * psUBuf) {
 	if ((psUBuf->pBuf == NULL) || (psUBuf->Size == 0)) {
 		errno = ENOMEM ;

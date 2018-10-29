@@ -70,6 +70,7 @@ inline void	vUBufStepRead(ubuf_t * psUBuf, int32_t Step)	{ psUBuf->IdxRD += Step
 size_t	xUBufSetDefaultSize(size_t) ;
 int32_t	xUBufCreate(ubuf_t *, char *, size_t, size_t)  ;
 void	vUBufDestroy(ubuf_t *) ;
+void	vUBufReset(ubuf_t *) ;
 int32_t	xUBufGetC(ubuf_t *) ;
 char *	pcUBufGetS(char *, int32_t, ubuf_t *) ;
 int32_t	xUBufPutC(ubuf_t *, int32_t) ;
