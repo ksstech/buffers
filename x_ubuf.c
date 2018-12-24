@@ -10,8 +10,6 @@
 
 #include	<fcntl.h>
 
-// ##################################### DEBUG build macros ########################################
-
 #define	debugFLAG					0x0001
 #define	debugPARAM					(debugFLAG & 0x0001)
 #define	debugTRACK					(debugFLAG & 0x0002)
@@ -294,7 +292,7 @@ int32_t	xUBufIoctl(int fd, int request, va_list vArgs) {
 		*ppsUBuf = &sUBuf[fd] ;
 		break ;
 	default:
-		IF_myASSERT(DEBUG, 0) ;
+		IF_myASSERT(debugPARAM, 0) ;
 		break ;
 	}
 	return 1 ;
