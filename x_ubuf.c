@@ -5,6 +5,7 @@
 #include	"x_ubuf.h"
 #include	"x_debug.h"
 #include	"x_errors_events.h"
+#include	"x_syslog.h"
 
 #include	"esp_vfs.h"
 
@@ -292,7 +293,7 @@ int32_t	xUBufIoctl(int fd, int request, va_list vArgs) {
 		*ppsUBuf = &sUBuf[fd] ;
 		break ;
 	default:
-		IF_myASSERT(debugPARAM, 0) ;
+		SL_ERR(debugAPPL_PLACE) ;
 		break ;
 	}
 	return 1 ;
