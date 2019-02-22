@@ -294,7 +294,7 @@ int32_t	xUBufIoctl(int fd, int request, va_list vArgs) {
 		break ;
 	default:
 		SL_ERR(debugAPPL_PLACE) ;
-		break ;
+		return erFAILURE ;
 	}
 	return 1 ;
 }
