@@ -11,9 +11,11 @@
 
 #include	<fcntl.h>
 
-#define	debugFLAG					0x0001
-#define	debugPARAM					(debugFLAG & 0x0001)
-#define	debugTRACK					(debugFLAG & 0x0002)
+#define	debugFLAG				0xC000
+
+#define	debugTRACK				(debugFLAG & 0x2000)
+#define	debugPARAM				(debugFLAG & 0x4000)
+#define	debugRESULT				(debugFLAG & 0x8000)
 
 // #################################### PRIVATE structures #########################################
 
@@ -89,10 +91,8 @@ size_t	xUBufSetDefaultSize(size_t NewSize) {
 }
 
 int32_t	xUBufCreate(ubuf_t * psUBuf, char * pcBuf, size_t BufSize, size_t Used) {
-	IF_myASSERT(debugPARAM, INRANGE_SRAM(psUBuf)) ;
-	IF_myASSERT(debugPARAM, (pcBuf == NULL) || INRANGE_SRAM(pcBuf)) ;
-	IF_myASSERT(debugPARAM, INRANGE(ubufSIZE_MINIMUM, BufSize, ubufSIZE_MAXIMUM, size_t)) ;
-	IF_myASSERT(debugPARAM, Used <= BufSize) ;
+	IF_myASSERT(debugPARAM, INRANGE_SRAM(psUBuf) && ((pcBuf == NULL) || INRANGE_SRAM(pcBuf))) ;
+	IF_myASSERT(debugPARAM, INRANGE(ubufSIZE_MINIMUM, BufSize, ubufSIZE_MAXIMUM, size_t) && Used <= BufSize) ;
 	psUBuf->Size	= BufSize ;
 	if (pcBuf != NULL) {
 		psUBuf->pBuf	= pcBuf ;
@@ -103,6 +103,7 @@ int32_t	xUBufCreate(ubuf_t * psUBuf, char * pcBuf, size_t BufSize, size_t Used) 
 		psUBuf->f_alloc = 1 ;
 	}
 	psUBuf->mux		= xSemaphoreCreateMutex() ;
+	IF_myASSERT(debugRESULT, psUBuf->mux) ;
 	if (Used == 0) {
 		memset(psUBuf->pBuf, 0, psUBuf->Size) ;			// clear buffer ONLY if nothing to be used
 		psUBuf->Used	= 0 ;
@@ -152,6 +153,22 @@ int32_t	xUBufGetC(ubuf_t * psUBuf) {
 	return cChr ;
 }
 
+int32_t	xUBufPutC(ubuf_t * psUBuf, int32_t cChr) {
+	IF_myASSERT(debugPARAM, INRANGE_SRAM(psUBuf) && INRANGE_SRAM(psUBuf->pBuf) && (psUBuf->Size > 0)) ;
+	if (xUBufBlockSpace(psUBuf, sizeof(char)) != erSUCCESS) {
+		return EOF ;
+	}
+	xUBufLock(psUBuf) ;
+	*(psUBuf->pBuf + psUBuf->IdxWR++) = cChr ;			// store character in buffer, adjust pointer
+	if (psUBuf->IdxWR == psUBuf->Size) {				// and handle wrap
+		psUBuf->IdxWR = 0 ;
+	}
+	++psUBuf->Used ;
+	IF_CPRINT(debugTRACK, "s=%d  i=%d  o=%d  cChr=%d", psUBuf->Size, psUBuf->IdxWR, psUBuf->IdxRD, cChr) ;
+	xUBufUnLock(psUBuf) ;
+	return cChr ;
+}
+
 char *	pcUBufGetS(char * pBuf, int32_t Number, ubuf_t * psUBuf) {
 	IF_myASSERT(debugPARAM, INRANGE_SRAM(pBuf))
 	char *	pTmp = pBuf ;
@@ -175,22 +192,6 @@ char *	pcUBufGetS(char * pBuf, int32_t Number, ubuf_t * psUBuf) {
 // If we get here we have read (Number - 1) characters and still no NEWLINE
 	*pTmp = CHR_NUL ;									// terminate buffer
 	return pBuf ;										// and return a valid state
-}
-
-int32_t	xUBufPutC(ubuf_t * psUBuf, int32_t cChr) {
-	IF_myASSERT(debugPARAM, INRANGE_SRAM(psUBuf) && INRANGE_SRAM(psUBuf->pBuf) && (psUBuf->Size > 0)) ;
-	if (xUBufBlockSpace(psUBuf, sizeof(char)) != erSUCCESS) {
-		return EOF ;
-	}
-	xUBufLock(psUBuf) ;
-	*(psUBuf->pBuf + psUBuf->IdxWR++) = cChr ;			// store character in buffer, adjust pointer
-	if (psUBuf->IdxWR == psUBuf->Size) {				// and handle wrap
-		psUBuf->IdxWR = 0 ;
-	}
-	++psUBuf->Used ;
-	IF_CPRINT(debugTRACK, "s=%d  i=%d  o=%d  cChr=%d", psUBuf->Size, psUBuf->IdxWR, psUBuf->IdxRD, cChr) ;
-	xUBufUnLock(psUBuf) ;
-	return cChr ;
 }
 
 // ################################# ESP-IDF VFS compatible functions ##############################

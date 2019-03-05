@@ -72,9 +72,8 @@ int32_t	xUBufCreate(ubuf_t *, char *, size_t, size_t)  ;
 void	vUBufDestroy(ubuf_t *) ;
 void	vUBufReset(ubuf_t *) ;
 int32_t	xUBufGetC(ubuf_t *) ;
-char *	pcUBufGetS(char *, int32_t, ubuf_t *) ;
 int32_t	xUBufPutC(ubuf_t *, int32_t) ;
-int32_t	xUBufStat(ubuf_t *) ;
+char *	pcUBufGetS(char *, int32_t, ubuf_t *) ;
 
 // VFS support functions
 void	vUBufInit(void) ;
