@@ -80,7 +80,7 @@ typedef struct buf_s {
 void *	pvBufTake(size_t ) ;
 int32_t	xBufGive(void * pvBuf) ;
 
-int32_t	xBufReport(int32_t Handle, buf_t * psBuf) ;
+int32_t	xBufReport(buf_t * psBuf) ;
 void	vBufReset( buf_t * psBuf, size_t Used) ;
 buf_t *	psBufOpen(void * pBuf, size_t Size, uint32_t flags, size_t Used) ;
 int32_t	xBufClose(buf_t * psBuf) ;

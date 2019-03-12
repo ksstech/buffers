@@ -213,9 +213,9 @@ int32_t	xBufCompact(buf_t * psBuf) {
  * @param psBuf
  * @return
  */
-int32_t	xBufReport(int32_t Handle, buf_t * psBuf) {
+int32_t	xBufReport(buf_t * psBuf) {
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
-	return xdprintf(Handle, "B=%p  E=%p  R=%p  W=%p  S=%d  U=%d",
+	return xprintf("B=%p  E=%p  R=%p  W=%p  S=%d  U=%d",
 								psBuf->pBeg,	psBuf->pEnd,
 								psBuf->pRead,	psBuf->pWrite,
 								psBuf->xSize,	psBuf->xUsed) ;

@@ -83,7 +83,7 @@ ssize_t	xUBufRead(int, void *, size_t) ;
 ssize_t	xUBufWrite(int, const void *, size_t) ;
 int32_t	xUBufIoctl(int, int, va_list) ;
 
-void	vUBufReport(int, ubuf_t *) ;
+void	vUBufReport(ubuf_t *) ;
 
 #ifdef __cplusplus
 }

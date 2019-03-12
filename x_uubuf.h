@@ -45,7 +45,7 @@ char *	pcUUBufGetS(char * pBuf, int32_t Number, uubuf_t * psUUBuf) ;
 int32_t	xUUBufCreate(uubuf_t * psUUBuf, char * pBuf, size_t BufSize, size_t Used) ;
 void	vUUBufDestroy(uubuf_t * psUUBuf) ;
 void	vUUBufAdjust(uubuf_t * psUUBuf, ssize_t Adj) ;
-void	vUUBufReport(int32_t Handle, uubuf_t * psUUBuf) ;
+void	vUUBufReport(uubuf_t * psUUBuf) ;
 
 #ifdef __cplusplus
 }

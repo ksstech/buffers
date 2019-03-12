@@ -300,10 +300,10 @@ int32_t	xUBufIoctl(int fd, int request, va_list vArgs) {
 	return 1 ;
 }
 
-void	vUBufReport(int Handle, ubuf_t * psUBuf) {
-	xdprintf(Handle, "p=%p  s=%d  u=%d  i=%d  o=%d  f=0x%x\n", psUBuf->pBuf, psUBuf->Size, psUBuf->Used, psUBuf->IdxWR, psUBuf->IdxRD, psUBuf->flags) ;
+void	vUBufReport(ubuf_t * psUBuf) {
+	xprintf("p=%p  s=%d  u=%d  i=%d  o=%d  f=0x%x\n", psUBuf->pBuf, psUBuf->Size, psUBuf->Used, psUBuf->IdxWR, psUBuf->IdxRD, psUBuf->flags) ;
 	if (psUBuf->Used) {
-		xdprintf(Handle, "%'!+b", psUBuf->Used, psUBuf->pBuf) ;
+		xprintf("%'!+b", psUBuf->Used, psUBuf->pBuf) ;
 	}
 }
 
@@ -325,7 +325,7 @@ void	vUBufTest(void) {
 	}
 
 	// check that it is full
-	vUBufReport(1, &sUBuf[0]) ;
+	vUBufReport(&sUBuf[0]) ;
 
 	// Check that error is returned
 	Result = write(fd, "A", 1) ;
@@ -341,7 +341,7 @@ void	vUBufTest(void) {
 	}
 
 	// check that it is empty
-	vUBufReport(1, &sUBuf[0]) ;
+	vUBufReport(&sUBuf[0]) ;
 
 	// Check that error is returned
 	Result = read(fd, cBuf, 1) ;
@@ -354,7 +354,7 @@ void	vUBufTest(void) {
 	xprintf("dprintf() %s with %d expected %d\n", (Result == Count) ? "PASSED" : "FAILED" , Result, Count) ;
 
 	// check that it is full
-	vUBufReport(1, &sUBuf[0]) ;
+	vUBufReport(&sUBuf[0]) ;
 
 	// Check that error is returned
 	Result = xdprintf(fd, "%c", CHR_A) ;
@@ -377,7 +377,7 @@ void	vUBufTest(void) {
 	}
 	Result = write(fd, "0123456789", 10) ;
 	// check that it is full but with overwrite
-	vUBufReport(1, &sUBuf[0]) ;
+	vUBufReport(&sUBuf[0]) ;
 
 	Result = close(fd) ;
 	xprintf("Result (%d) close() buffer =  %s\n", Result, (Result == erSUCCESS) ? "Passed" : "Failed") ;

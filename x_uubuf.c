@@ -91,11 +91,11 @@ void	vUUBufAdjust(uubuf_t * psUUBuf, ssize_t Adj)	{
 	psUUBuf->Used += Adj;
 }
 
-void	vUUBufReport(int32_t Handle, uubuf_t * psUUBuf) {
-	xdprintf(Handle, "P=%p  B=%p  I=%d  S=%d  U=%d  A=%d\n",
+void	vUUBufReport(uubuf_t * psUUBuf) {
+	xprintf("P=%p  B=%p  I=%d  S=%d  U=%d  A=%d\n",
 			psUUBuf, psUUBuf->pBuf, psUUBuf->Idx, psUUBuf->Size, psUUBuf->Used, psUUBuf->Alloc) ;
 	if (psUUBuf->Used) {
-		xdprintf(Handle, "%!'+b", psUUBuf->Used, psUUBuf->pBuf) ;
+		xprintf("%!'+b", psUUBuf->Used, psUUBuf->pBuf) ;
 	}
 }
 
