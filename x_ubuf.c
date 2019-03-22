@@ -142,11 +142,9 @@ int32_t	xUBufGetC(ubuf_t * psUBuf) {
 	}
 	xUBufLock(psUBuf) ;
 	int32_t cChr = *(psUBuf->pBuf + psUBuf->IdxRD++) ;
-	if (psUBuf->IdxRD == psUBuf->Size) {				// past the end?
-		psUBuf->IdxRD = 0 ;							// yes, reset to start
-	}
+	psUBuf->IdxRD %= psUBuf->Size ;						// handle wrap
 	if (--psUBuf->Used == 0) {							// buffer now empty
-		psUBuf->IdxRD = psUBuf->IdxWR = 0 ;			// reset both In & Out indexes to start
+		psUBuf->IdxRD = psUBuf->IdxWR = 0 ;				// reset both In & Out indexes to start
 	}
 	IF_CPRINT(debugTRACK, "s=%d  i=%d  o=%d  cChr=%d", psUBuf->Size, psUBuf->IdxWR, psUBuf->IdxRD, cChr) ;
 	xUBufUnLock(psUBuf) ;
