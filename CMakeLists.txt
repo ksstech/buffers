@@ -1,0 +1,5 @@
+set(COMPONENT_SRCS "x_buffers.c" "x_ubuf.c" "x_uubuf.c")
+set(COMPONENT_ADD_INCLUDEDIRS)
+set(COMPONENT_REQUIRES)
+set(COMPONENT_PRIV_REQUIRES)
+register_component()
