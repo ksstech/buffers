@@ -43,13 +43,15 @@ typedef	struct ubuf_s {
 			uint8_t		f_init	: 1 ;
 			uint8_t		f_alloc	: 1 ;
 		} ;
-		uint16_t			_flags ;					// module flags
+		uint16_t		_flags ;						// module flags
 	} ;
 	uint16_t			Size ;
 	volatile uint16_t	IdxWR ;							// index to next space to WRITE to
 	volatile uint16_t	IdxRD ;							// index to next char to be READ from
 	volatile uint16_t	Used ;
 } ubuf_t ;
+
+DUMB_STATIC_ASSERT(sizeof(ubuf_t) == 20) ;
 
 extern ubuf_t	sUBuf[ubufMAX_OPEN] ;
 

@@ -24,6 +24,8 @@
 
 #pragma once
 
+#include	"x_definitions.h"
+
 #include	<stdint.h>
 #include	<stdlib.h>
 
@@ -74,6 +76,8 @@ typedef struct buf_s {
     size_t			xSize ;
 	int32_t			handle ;
 } buf_t ;
+
+DUMB_STATIC_ASSERT(sizeof(buf_t) == 32) ;
 
 // #################################################################################################
 

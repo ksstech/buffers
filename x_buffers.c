@@ -651,13 +651,12 @@ int32_t	iRetVal ;
 #define	bufSTEP		10
 
 void	vBufUnitTest(void) {
-buf_t * psBuf ;
-int32_t	iRetVal ;
-	psBuf = psBufOpen(0, bufSIZE, FF_MODER|FF_MODEW, 0) ;
+	int32_t	iRV ;
+	buf_t * psBuf = psBufOpen(0, bufSIZE, FF_MODER|FF_MODEW, 0) ;
 	for(int32_t a = 0; a < bufSIZE; a += bufSTEP) {
 		for(int32_t b = 0; b < bufSTEP; b++) {
-			iRetVal = xBufPutC(b + '0', psBuf) ;
-			if (iRetVal != (b + '0')) 	PRINT("Failed")  ;
+			iRV = xBufPutC(b + '0', psBuf) ;
+			if (iRV != (b + '0')) 	PRINT("Failed")  ;
 		}
 	}
 	// buffer should be full
