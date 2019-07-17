@@ -32,6 +32,7 @@
 #include	"hal_nvic.h"
 
 #include	"x_debug.h"
+#include	"x_printf.h"
 #include	"x_stdio.h"
 #include	"x_utilities.h"
 #include	"x_errors_events.h"

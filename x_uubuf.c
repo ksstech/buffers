@@ -4,6 +4,7 @@
 
 #include	"x_uubuf.h"
 #include	"x_debug.h"
+#include	"x_printf.h"
 #include	"x_errors_events.h"
 
 #include	<string.h>

@@ -6,6 +6,7 @@
 #include	"x_debug.h"
 #include	"x_errors_events.h"
 #include	"x_syslog.h"
+#include	"x_printf.h"
 
 #include	"esp_vfs.h"
 
