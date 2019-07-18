@@ -216,7 +216,7 @@ int32_t	xBufCompact(buf_t * psBuf) {
  */
 int32_t	xBufReport(buf_t * psBuf) {
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
-	return xprintf("B=%p  E=%p  R=%p  W=%p  S=%d  U=%d",
+	return printfx("B=%p  E=%p  R=%p  W=%p  S=%d  U=%d",
 								psBuf->pBeg,	psBuf->pEnd,
 								psBuf->pRead,	psBuf->pWrite,
 								psBuf->xSize,	psBuf->xUsed) ;
@@ -526,7 +526,7 @@ char * pTmp ;
 		IF_myASSERT(debugASSERT_CIRCULAR, 0) ;
 		return erFAILURE ;								// yes, abort
 	}
-	IF_CPRINT(debugSTRUCTURE, "[Seek 1] B=%p R=%p W=%p S=%d U=%d\n", psBuf->pBeg, psBuf->pRead, psBuf->pWrite, psBuf->xSize, psBuf->xUsed) ;
+	IF_PRINT(debugSTRUCTURE, "[Seek 1] B=%p R=%p W=%p S=%d U=%d\n", psBuf->pBeg, psBuf->pRead, psBuf->pWrite, psBuf->xSize, psBuf->xUsed) ;
 
 	vBufIsrEntry(psBuf) ;
 	if (flags & FF_MODER) {
@@ -559,7 +559,7 @@ char * pTmp ;
 	vBufIsrExit(psBuf) ;
 
 	IF_myASSERT(debugASSERT_SIZE, (psBuf->xUsed <= psBuf->xSize)) ;
-	IF_CPRINT(debugSTRUCTURE, "[Seek 2] B=%p R=%p W=%p S=%d U=%u\n", psBuf->pBeg, psBuf->pRead, psBuf->pWrite, psBuf->xSize, psBuf->xUsed) ;
+	IF_PRINT(debugSTRUCTURE, "[Seek 2] B=%p R=%p W=%p S=%d U=%u\n", psBuf->pBeg, psBuf->pRead, psBuf->pWrite, psBuf->xSize, psBuf->xUsed) ;
 	return erSUCCESS ;
 }
 
@@ -628,7 +628,7 @@ char * pcRetVal = (char *) erFAILURE ;
 int32_t	xBufPrintClose(buf_t * psBuf) {
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
 	IF_myASSERT(debugASSERT_SIZE, psBuf->xUsed > 0)
-	int32_t iRetVal = xnprintf(psBuf->xUsed, psBuf->pRead) ;
+	int32_t iRetVal = nprintfx(psBuf->xUsed, psBuf->pRead) ;
 	xBufClose(psBuf) ;
 	return iRetVal ;
 }
