@@ -70,7 +70,7 @@ int32_t	xUUBufCreate(uubuf_t * psUUBuf, char * pcBuf, size_t BufSize, size_t Use
 		psUUBuf->Used	= Used ;
 		psUUBuf->Alloc	= 0 ;							// show memory as provided, NOT allocated
 	} else {
-		psUUBuf->pBuf	= pvPortMalloc(psUUBuf->Size) ;
+		psUUBuf->pBuf	= malloc(psUUBuf->Size) ;
 		psUUBuf->Used	= 0 ;
 		psUUBuf->Alloc	= psUUBuf->Size ;				// show memory as ALLOCATED
 	}
@@ -83,7 +83,7 @@ int32_t	xUUBufCreate(uubuf_t * psUUBuf, char * pcBuf, size_t BufSize, size_t Use
 void	vUUBufDestroy(uubuf_t * psUUBuf) {
 	IF_myASSERT(debugPARAM, INRANGE_SRAM(psUUBuf)) ;
 	if (psUUBuf->Alloc) {
-		vPortFree(psUUBuf->pBuf) ;
+		free(psUUBuf->pBuf) ;
 	}
 }
 

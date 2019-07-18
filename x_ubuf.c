@@ -100,7 +100,7 @@ int32_t	xUBufCreate(ubuf_t * psUBuf, char * pcBuf, size_t BufSize, size_t Used) 
 		psUBuf->f_alloc = 0 ;
 	} else {
 		IF_myASSERT(debugPARAM, Used == 0) ;
-		psUBuf->pBuf	= pvPortMalloc(BufSize) ;
+		psUBuf->pBuf	= malloc(BufSize) ;
 		psUBuf->f_alloc = 1 ;
 	}
 	psUBuf->mux		= xSemaphoreCreateMutex() ;
@@ -120,7 +120,7 @@ int32_t	xUBufCreate(ubuf_t * psUBuf, char * pcBuf, size_t BufSize, size_t Used) 
 void	vUBufDestroy(ubuf_t * psUBuf) {
 	IF_myASSERT(debugPARAM, INRANGE_SRAM(psUBuf)) ;
 	if (psUBuf->f_alloc == 1) {
-		vPortFree(psUBuf->pBuf) ;
+		free(psUBuf->pBuf) ;
 		psUBuf->pBuf 	= NULL ;
 		psUBuf->Size 	= 0 ;
 		psUBuf->f_init	= 0 ;
@@ -203,7 +203,7 @@ int32_t	xUBufOpen(const char * pccPath, int flags, int Size) {
 	int32_t fd = 0 ;
 	do {
 		if (sUBuf[fd].pBuf == NULL) {
-			sUBuf[fd].pBuf	= pvPortMalloc(Size) ;
+			sUBuf[fd].pBuf	= malloc(Size) ;
 			sUBuf[fd].mux	= xSemaphoreCreateMutex() ;
 			sUBuf[fd].flags	= flags ;
 			sUBuf[fd].Size	= Size ;
@@ -220,7 +220,7 @@ int32_t	xUBufOpen(const char * pccPath, int flags, int Size) {
 int32_t	xUBufClose(int32_t fd) {
 	if (INRANGE(0, fd, ubufMAX_OPEN-1, int32_t)) {
 		ubuf_t * psUBuf = &sUBuf[fd] ;
-		vPortFree(psUBuf->pBuf) ;
+		free(psUBuf->pBuf) ;
 		vSemaphoreDelete(psUBuf->mux) ;
 		memset(psUBuf, 0, sizeof(ubuf_t)) ;
 		return erSUCCESS ;

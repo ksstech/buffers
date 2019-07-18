@@ -276,12 +276,12 @@ buf_t * psBufOpen(void * pBuf, size_t Size, uint32_t flags, size_t Used) {
 		myASSERT(0) ;
 		return pvFAILURE ;
 	}
-	IF_myASSERT(debugASSERT_SIZE, Used <= Size)
-	buf_t *	psBuf = vBufTakePointer() ;							// get a free table entry
+	IF_myASSERT(debugASSERT_SIZE, Used <= Size) ;
+	buf_t *	psBuf = vBufTakePointer() ;					// get a free table entry
 	if (psBuf != NULL) {								// unused entry found?
 		vBufIsrEntry(psBuf) ;
 		if (pBuf == 0) {
-			pBuf 	= pvPortMalloc(Size) ;				// allocate memory for buffer
+			pBuf 	= malloc(Size) ;					// allocate memory for buffer
 			flags	|= FF_BUFFALOC ;					// make sure flag is SET !!
 			memset(pBuf, 0, Size) ;
 			Used	= 0 ;								// cannot have used something in a new buffer
@@ -313,7 +313,7 @@ char *	pTmp ;
 #elif 	defined( __TI_ARM__ )
 		psBuf->flags = 0 ;
 #endif
-		vPortFree(pTmp) ;								// return buffer
+		free(pTmp) ;									// return buffer
 	}
 	vBufIsrExit(psBuf) ;
 	return iRetVal ;
