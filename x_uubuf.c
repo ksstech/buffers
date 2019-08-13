@@ -3,9 +3,10 @@
  */
 
 #include	"x_uubuf.h"
-#include	"x_debug.h"
 #include	"x_printf.h"
 #include	"x_errors_events.h"
+
+#include	"hal_debug.h"
 
 #include	<string.h>
 
@@ -93,10 +94,10 @@ void	vUUBufAdjust(uubuf_t * psUUBuf, ssize_t Adj)	{
 }
 
 void	vUUBufReport(uubuf_t * psUUBuf) {
-	printfx("P=%p  B=%p  I=%d  S=%d  U=%d  A=%d\n",
+	PRINT("P=%p  B=%p  I=%d  S=%d  U=%d  A=%d\n",
 			psUUBuf, psUUBuf->pBuf, psUUBuf->Idx, psUUBuf->Size, psUUBuf->Used, psUUBuf->Alloc) ;
 	if (psUUBuf->Used) {
-		printfx("%!'+b", psUUBuf->Used, psUUBuf->pBuf) ;
+		PRINT("%!'+b", psUUBuf->Used, psUUBuf->pBuf) ;
 	}
 }
 

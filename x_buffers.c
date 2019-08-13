@@ -30,8 +30,8 @@
 
 #include	"hal_config.h"
 #include	"hal_nvic.h"
+#include	"hal_debug.h"
 
-#include	"x_debug.h"
 #include	"x_printf.h"
 #include	"x_stdio.h"
 #include	"x_utilities.h"
@@ -216,7 +216,7 @@ int32_t	xBufCompact(buf_t * psBuf) {
  */
 int32_t	xBufReport(buf_t * psBuf) {
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
-	return printfx("B=%p  E=%p  R=%p  W=%p  S=%d  U=%d",
+	return PRINT("B=%p  E=%p  R=%p  W=%p  S=%d  U=%d",
 								psBuf->pBeg,	psBuf->pEnd,
 								psBuf->pRead,	psBuf->pWrite,
 								psBuf->xSize,	psBuf->xUsed) ;
@@ -627,10 +627,24 @@ char * pcRetVal = (char *) erFAILURE ;
  */
 int32_t	xBufPrintClose(buf_t * psBuf) {
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
-	IF_myASSERT(debugASSERT_SIZE, psBuf->xUsed > 0)
-	int32_t iRetVal = nprintfx(psBuf->xUsed, psBuf->pRead) ;
+	IF_myASSERT(debugASSERT_SIZE, psBuf->xUsed > 0) ;
+#if 0
+	/* This option will output the buffer contents as if it is a format string.
+	 * The contents will thus be interpreted as if consisting of format specifiers
+	 * and modifiers and hence could try to access non-existing variables and pointers
+	 * from the stack, causing garbage and possibly application crashes.
+	 */
+	int32_t iRV = nprintfx(psBuf->xUsed, psBuf->pRead) ;
+#else
+	/* This option will treat the buffer contents as a string and will not try to
+	 * interpret it. All embedded modifier and specifier characters will be ignored.
+	 * Any embedded NUL characters will however be interpreted as string terminators
+	 * hence possibly causing premature termination of the buffer output.
+	 */
+	int32_t iRV = nprintfx(psBuf->xUsed, "%s", psBuf->pRead) ;
+#endif
 	xBufClose(psBuf) ;
-	return iRetVal ;
+	return iRV ;
 }
 
 /**

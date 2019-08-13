@@ -3,10 +3,11 @@
  */
 
 #include	"x_ubuf.h"
-#include	"x_debug.h"
 #include	"x_errors_events.h"
 #include	"x_syslog.h"
 #include	"x_printf.h"
+
+#include	"hal_debug.h"
 
 #include	"esp_vfs.h"
 
@@ -198,7 +199,7 @@ char *	pcUBufGetS(char * pBuf, int32_t Number, ubuf_t * psUBuf) {
 void	vUBufInit(void) { ESP_ERROR_CHECK(esp_vfs_register(ubufDEV_PATH, &dev_ubuf, NULL)) ; }
 
 int32_t	xUBufOpen(const char * pccPath, int flags, int Size) {
-	IF_TRACK(debugTRACK, "path='%s'  flags=0x%x  Size=%d\n", pccPath, flags, Size) ;
+	IF_TRACK(debugTRACK, "path='%s'  flags=0x%x  Size=%d", pccPath, flags, Size) ;
 	IF_myASSERT(debugPARAM, (*pccPath == CHR_FWDSLASH) && INRANGE(ubufSIZE_MINIMUM, Size, ubufSIZE_MAXIMUM, size_t)) ;
 	int32_t fd = 0 ;
 	do {
@@ -300,9 +301,9 @@ int32_t	xUBufIoctl(int fd, int request, va_list vArgs) {
 }
 
 void	vUBufReport(ubuf_t * psUBuf) {
-	printfx("p=%p  s=%d  u=%d  i=%d  o=%d  f=0x%x\n", psUBuf->pBuf, psUBuf->Size, psUBuf->Used, psUBuf->IdxWR, psUBuf->IdxRD, psUBuf->flags) ;
+	PRINT("p=%p  s=%d  u=%d  i=%d  o=%d  f=0x%x\n", psUBuf->pBuf, psUBuf->Size, psUBuf->Used, psUBuf->IdxWR, psUBuf->IdxRD, psUBuf->flags) ;
 	if (psUBuf->Used) {
-		printfx("%'!+b", psUBuf->Used, psUBuf->pBuf) ;
+		PRINT("%'!+b", psUBuf->Used, psUBuf->pBuf) ;
 	}
 }
 
@@ -314,12 +315,12 @@ void	vUBufTest(void) {
 	vUBufInit() ;
 	int32_t Count, Result ;
 	int32_t fd = open("/ubuf", O_RDWR | O_NONBLOCK) ;
-	printfx("fd=%d\n", fd) ;
+	PRINT("fd=%d\n", fd) ;
 	// fill the buffer
 	for (Count = 0; Count < ubufSIZE_DEFAULT; ++Count) {
 		Result = write(fd, "a", 1) ;
 		if (Result != 1) {
-			printfx("write() FAILED with %d\n", Result) ;
+			PRINT("write() FAILED with %d\n", Result) ;
 		}
 	}
 
@@ -328,14 +329,14 @@ void	vUBufTest(void) {
 
 	// Check that error is returned
 	Result = write(fd, "A", 1) ;
-	printfx("Result (%d) write() to FULL buffer =  %s\n", Result, (Result == 0) ? "Passed" : "Failed") ;
+	PRINT("Result (%d) write() to FULL buffer =  %s\n", Result, (Result == 0) ? "Passed" : "Failed") ;
 
 	// empty the buffer and check what is returned...
 	char cBuf[4] = { 0 } ;
 	for (Count = 0; Count < ubufSIZE_DEFAULT; ++Count) {
 		Result = read(fd, cBuf, 1) ;
 		if ((Result != 1) || (cBuf[0] != 'a')) {
-			printfx("read() FAILED with %d & '%c\n", Result, cBuf[0]) ;
+			PRINT("read() FAILED with %d & '%c\n", Result, cBuf[0]) ;
 		}
 	}
 
@@ -344,34 +345,34 @@ void	vUBufTest(void) {
 
 	// Check that error is returned
 	Result = read(fd, cBuf, 1) ;
-	printfx("Result (%d) read() from EMPTY buffer = %s\n", Result, (Result == erFAILURE) ? "Passed" : "Failed") ;
+	PRINT("Result (%d) read() from EMPTY buffer = %s\n", Result, (Result == erFAILURE) ? "Passed" : "Failed") ;
 
 	// Test printing to buffer
 	for (Count = 0, Result = 0; Count < ubufSIZE_DEFAULT; ++Count) {
 		Result += dprintfx(fd, "%c", (Count % 10) + CHR_0) ;
 	}
-	printfx("dprintf() %s with %d expected %d\n", (Result == Count) ? "PASSED" : "FAILED" , Result, Count) ;
+	PRINT("dprintf() %s with %d expected %d\n", (Result == Count) ? "PASSED" : "FAILED" , Result, Count) ;
 
 	// check that it is full
 	vUBufReport(&sUBuf[0]) ;
 
 	// Check that error is returned
 	Result = dprintfx(fd, "%c", CHR_A) ;
-	printfx("Result (%d) dprintf() to FULL buffer (without O_TRUNC) =  %s\n", Result, (Result == erFAILURE) ? "Passed" : "Failed") ;
+	PRINT("Result (%d) dprintf() to FULL buffer (without O_TRUNC) =  %s\n", Result, (Result == erFAILURE) ? "Passed" : "Failed") ;
 
 	Result = close(fd) ;
-	printfx("Result (%d) close() buffer =  %s\n", Result, (Result == erSUCCESS) ? "Passed" : "Failed") ;
+	PRINT("Result (%d) close() buffer =  %s\n", Result, (Result == erSUCCESS) ? "Passed" : "Failed") ;
 
 	// Now test the O_TRUNC functionality
 	size_t Size = xUBufSetDefaultSize(ubufTEST_SIZE) ;
-	printfx("xUBufSetDefaultSize(%d) %s with %d\n", ubufTEST_SIZE, (Size == ubufTEST_SIZE) ? "PASSED" : "FAILED", Size) ;
+	PRINT("xUBufSetDefaultSize(%d) %s with %d\n", ubufTEST_SIZE, (Size == ubufTEST_SIZE) ? "PASSED" : "FAILED", Size) ;
 	fd = open("/ubuf", O_RDWR | O_TRUNC) ;
-	printfx("fd=%d\n", fd) ;
+	PRINT("fd=%d\n", fd) ;
 	// fill the buffer
 	for (Count = 0; Count < ubufTEST_SIZE; ++Count) {
 		Result = write(fd, "a", 1) ;
 		if (Result != 1) {
-			printfx("write() FAILED with %d\n", Result) ;
+			PRINT("write() FAILED with %d\n", Result) ;
 		}
 	}
 	Result = write(fd, "0123456789", 10) ;
@@ -379,5 +380,5 @@ void	vUBufTest(void) {
 	vUBufReport(&sUBuf[0]) ;
 
 	Result = close(fd) ;
-	printfx("Result (%d) close() buffer =  %s\n", Result, (Result == erSUCCESS) ? "Passed" : "Failed") ;
+	PRINT("Result (%d) close() buffer =  %s\n", Result, (Result == erSUCCESS) ? "Passed" : "Failed") ;
 }
