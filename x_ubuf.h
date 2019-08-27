@@ -66,8 +66,8 @@ inline int32_t	xUBufSpace(ubuf_t * psUBuf)		{ return psUBuf->Size - psUBuf->Used
 inline char * pcUBufTellWrite(ubuf_t * psUBuf)	{ return psUBuf->pBuf + psUBuf->IdxWR ; }
 inline char * pcUBufTellRead(ubuf_t * psUBuf)	{ return psUBuf->pBuf + psUBuf->IdxRD ; }
 
-inline void	vUBufStepWrite(ubuf_t * psUBuf, int32_t Step)	{ psUBuf->IdxWR += Step ; psUBuf->Used += Step ; }
-inline void	vUBufStepRead(ubuf_t * psUBuf, int32_t Step)	{ psUBuf->IdxRD += Step ; psUBuf->Used -= Step ; }
+void	vUBufStepWrite(ubuf_t * psUBuf, int32_t Step) ;
+void	vUBufStepRead(ubuf_t * psUBuf, int32_t Step) ;
 
 size_t	xUBufSetDefaultSize(size_t) ;
 int32_t	xUBufCreate(ubuf_t *, char *, size_t, size_t)  ;

@@ -256,6 +256,8 @@ ssize_t	xUBufRead(int fd, void * pBuf, size_t Size) {
 	return count ;
 }
 
+inline void	vUBufStepRead(ubuf_t * psUBuf, int32_t Step)	{ psUBuf->IdxRD += Step ; psUBuf->Used -= Step ; }
+
 /**
  * xUBufWrite() -
  */
@@ -281,6 +283,8 @@ ssize_t	xUBufWrite(int fd, const void * pBuf, size_t Size) {
 	xUBufUnLock(psUBuf) ;
 	return count ;
 }
+
+inline void	vUBufStepWrite(ubuf_t * psUBuf, int32_t Step)	{ psUBuf->IdxWR += Step ; psUBuf->Used += Step ; }
 
 int32_t	xUBufIoctl(int fd, int request, va_list vArgs) {
 	ubuf_t ** ppsUBuf ;
