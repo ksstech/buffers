@@ -74,18 +74,9 @@ static int32_t	xUBufBlockSpace(ubuf_t * psUBuf, size_t Size) {
 
 // ################################### Global/public functions #####################################
 
-void	xUBufLock(ubuf_t * psUBuf) {
-	IF_myASSERT(debugPARAM, INRANGE_SRAM(psUBuf)) ;
-	if (psUBuf->mux == NULL) {
-		psUBuf->mux	= xSemaphoreCreateMutex() ;
-	}
-	xSemaphoreTake(psUBuf->mux, portMAX_DELAY) ;
-}
+void	xUBufLock(ubuf_t * psUBuf) { xRtosSemaphoreTake(&psUBuf->mux, portMAX_DELAY) ; }
 
-void	xUBufUnLock(ubuf_t * psUBuf) {
-	IF_myASSERT(debugPARAM, INRANGE_SRAM(psUBuf->mux)) ;
-	xSemaphoreGive(psUBuf->mux) ;
-}
+void	xUBufUnLock(ubuf_t * psUBuf) { xRtosSemaphoreGive(&psUBuf->mux) ; }
 
 size_t	xUBufSetDefaultSize(size_t NewSize) {
 	IF_myASSERT(debugPARAM, INRANGE(ubufSIZE_MINIMUM, NewSize, ubufSIZE_MAXIMUM, size_t)) ;

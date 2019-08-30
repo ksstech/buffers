@@ -26,17 +26,17 @@
  * Enforce RO & WO modes for different files (circular/linear buffer) streams.
  */
 
+#include	"FreeRTOS_Support.h"
+
 #include	"x_buffers.h"
+#include	"x_printf.h"
+#include	"x_stdio.h"
+#include	"x_errors_events.h"
+#include	"x_syslog.h"
 
 #include	"hal_config.h"
 #include	"hal_nvic.h"
 #include	"hal_debug.h"
-
-#include	"x_printf.h"
-#include	"x_stdio.h"
-#include	"x_utilities.h"
-#include	"x_errors_events.h"
-#include	"x_syslog.h"
 
 #include	<string.h>
 
@@ -70,13 +70,13 @@ uint8_t	Buffer256[configBUFSIZE_256], Buffer512[configBUFSIZE_512], Buffer1K[con
  */
 void *	pvBufTake(size_t BufSize) {
 	if (BufSize <= configBUFSIZE_256) {
-		xUtilLockResource(&Buf256Lock, portMAX_DELAY) ;
+		xRtosSemaphoreTake(&Buf256Lock, portMAX_DELAY) ;
 		return &Buffer256[0] ;
 	} else if (BufSize <= configBUFSIZE_512) {
-		xUtilLockResource(&Buf512Lock, portMAX_DELAY) ;
+		xRtosSemaphoreTake(&Buf512Lock, portMAX_DELAY) ;
 		return &Buffer512[0] ;
 	} else 	if (BufSize <= configBUFSIZE_1K) {
-		xUtilLockResource(&Buf1KLock, portMAX_DELAY) ;
+		xRtosSemaphoreTake(&Buf1KLock, portMAX_DELAY) ;
 		return &Buffer1K[0] ;
 	}
 	IF_myASSERT(debugASSERT_SIZE, 0)
@@ -90,11 +90,11 @@ void *	pvBufTake(size_t BufSize) {
  */
 int32_t	xBufGive(void * pvBuf) {
 	if (pvBuf == &Buffer256[0]) {
-		return xUtilUnlockResource(&Buf256Lock) ;
+		return xRtosSemaphoreGive(&Buf256Lock) ;
 	} else if (pvBuf == &Buffer512[0]) {
-		return xUtilUnlockResource(&Buf512Lock) ;
+		return xRtosSemaphoreGive(&Buf512Lock) ;
 	} else 	if (pvBuf == &Buffer1K[0]) {
-		return xUtilUnlockResource(&Buf1KLock) ;
+		return xRtosSemaphoreGive(&Buf1KLock) ;
 	}
 	IF_myASSERT(debugASSERT_POINTER, 0)
 	return (BaseType_t) pdFAIL ;
