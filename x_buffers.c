@@ -248,9 +248,7 @@ void	vBufReset(buf_t * psBuf, size_t Used) {
  * @return			erSUCCESS
  */
 static int32_t	xBufReuse(buf_t * psBuf, char * pBuf, size_t Size, uint32_t flags, size_t Used) {
-	IF_myASSERT(debugASSERT_POINTER, INRANGE_SRAM(psBuf))
-	IF_myASSERT(debugASSERT_POINTER, INRANGE_MEM(pBuf))		// support RO buffers in FLASH
-	IF_myASSERT(debugASSERT_SIZE, Used <= Size)
+	IF_myASSERT(debugASSERT_POINTER, INRANGE_SRAM(psBuf) && pBuf != 0 && Used <= Size)
 	vBufIsrEntry(psBuf) ;
 	psBuf->pBeg		= pBuf ;
 	psBuf->pEnd		= pBuf + Size ;						// calculate & save end

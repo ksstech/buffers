@@ -65,8 +65,6 @@ int32_t	xUUBufCreate(uubuf_t * psUUBuf, char * pcBuf, size_t BufSize, size_t Use
 	psUUBuf->Size	= BufSize ;
 	psUUBuf->Idx	= 0 ;
 	if (pcBuf) {
-	// test pBuf against MEM not SRAM in case from flash..
-		IF_myASSERT(debugPARAM, INRANGE_MEM(pcBuf)) ;
 		psUUBuf->pBuf	= pcBuf ;
 		psUUBuf->Used	= Used ;
 		psUUBuf->Alloc	= 0 ;							// show memory as provided, NOT allocated
