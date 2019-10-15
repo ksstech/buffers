@@ -299,13 +299,12 @@ buf_t * psBufOpen(void * pBuf, size_t Size, uint32_t flags, size_t Used) {
  * @return	SUCCESS if deleted with error, FAILURE otherwise
  */
 int32_t	xBufClose(buf_t * psBuf) {
-int32_t	iRetVal ;
 char *	pTmp ;
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
 	vBufIsrEntry(psBuf) ;
 	pTmp = psBuf->pBeg ;								// save pointer for later use..
-	iRetVal = vBufGivePointer(psBuf) ;
-	if ((iRetVal == erSUCCESS) && FF_STCHK(psBuf, FF_BUFFALOC)) {
+	int32_t iRV = vBufGivePointer(psBuf) ;
+	if ((iRV == erSUCCESS) && FF_STCHK(psBuf, FF_BUFFALOC)) {
 #if 	defined( __GNUC__ )
 		psBuf->_flags = 0 ;
 #elif 	defined( __TI_ARM__ )
@@ -314,7 +313,7 @@ char *	pTmp ;
 		free(pTmp) ;									// return buffer
 	}
 	vBufIsrExit(psBuf) ;
-	return iRetVal ;
+	return iRV ;
 }
 
 /**
@@ -350,11 +349,11 @@ size_t	xBufSpace(buf_t * psBuf) {
  */
 int32_t	xBufPutC(int32_t cChr, buf_t * psBuf) {
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
-	int32_t	iRetVal ;
+	int32_t	iRV ;
 	if ((cChr == CHR_LF) && (FF_STCHK(psBuf, FF_MODEBIN) == 0)) {
-		iRetVal = xBufPutC(CHR_CR, psBuf) ;
-		if (iRetVal == EOF) {
-			return iRetVal ;
+		iRV = xBufPutC(CHR_CR, psBuf) ;
+		if (iRV == EOF) {
+			return iRV ;
 		}
 	}
 	if (psBuf->xSize > psBuf->xUsed) {
@@ -365,11 +364,11 @@ int32_t	xBufPutC(int32_t cChr, buf_t * psBuf) {
 			psBuf->pWrite = psBuf->pBeg ;					// yes, wrap write pointer to start
 		}
 		vBufIsrExit(psBuf) ;
-		iRetVal = cChr ;
+		iRV = cChr ;
 	} else {
-		iRetVal = EOF ;
+		iRV = EOF ;
 	}
-	return iRetVal ;
+	return iRV ;
 }
 
 /**
@@ -568,7 +567,7 @@ char * pTmp ;
  * @return
  */
 int32_t	xBufTell(buf_t * psBuf, int32_t flags) {
-int32_t		iRetVal = erFAILURE;
+	int32_t	iRV = erFAILURE;
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
 	if (FF_STCHK(psBuf, FF_CIRCULAR)) {				// working on circular buffer
 		IF_myASSERT(debugASSERT_CIRCULAR, 0)
@@ -582,12 +581,12 @@ int32_t		iRetVal = erFAILURE;
 	}
 	vBufIsrEntry(psBuf) ;
 	if (flags & FF_MODER) {
-		iRetVal =  psBuf->pRead - psBuf->pBeg ;
+		iRV =  psBuf->pRead - psBuf->pBeg ;
 	} else if (FF_STCHK(psBuf, FF_MODEW)) {
-		iRetVal = psBuf->pWrite - psBuf->pBeg ;
+		iRV = psBuf->pWrite - psBuf->pBeg ;
 	}
 	vBufIsrExit(psBuf) ;
-	return iRetVal ;
+	return iRV ;
 }
 
 /**
