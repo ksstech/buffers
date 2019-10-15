@@ -299,10 +299,9 @@ buf_t * psBufOpen(void * pBuf, size_t Size, uint32_t flags, size_t Used) {
  * @return	SUCCESS if deleted with error, FAILURE otherwise
  */
 int32_t	xBufClose(buf_t * psBuf) {
-char *	pTmp ;
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
 	vBufIsrEntry(psBuf) ;
-	pTmp = psBuf->pBeg ;								// save pointer for later use..
+	char *	pTmp = psBuf->pBeg ;								// save pointer for later use..
 	int32_t iRV = vBufGivePointer(psBuf) ;
 	if ((iRV == erSUCCESS) && FF_STCHK(psBuf, FF_BUFFALOC)) {
 #if 	defined( __GNUC__ )
@@ -418,11 +417,10 @@ int32_t xBufPeek(buf_t * psBuf) {
  * @return
  */
 char *	pcBufGetS(char * pBuf, int32_t Number, buf_t * psBuf) {
-int32_t	cChr ;
-char *	pTmp = pBuf ;
+	char *	pTmp = pBuf ;
 	IF_myASSERT(debugASSERT_POINTER, INRANGE_SRAM(pBuf))
 	while (Number > 1) {
-		cChr = xBufGetC(psBuf) ;
+		int32_t	cChr = xBufGetC(psBuf) ;
 		if (cChr == EOF) {								// EOF reached?
 			*pTmp = CHR_NUL ;							// terminate buffer
 			return NULL ;								// indicate EOF before NEWLINE
@@ -651,12 +649,10 @@ int32_t	xBufPrintClose(buf_t * psBuf) {
  * @return			status of the buffer close event
  */
 int32_t	xBufSyslogClose(buf_t * psBuf, uint32_t Prio) {
-int32_t	iRetVal ;
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
 	IF_myASSERT(debugASSERT_SIZE, psBuf->xUsed > 0)
 	xSyslog(Prio, psBuf->pRead, "") ;
-	iRetVal = xBufClose(psBuf) ;
-	return iRetVal ;
+	return xBufClose(psBuf) ;
 }
 
 #define	bufSIZE		100
