@@ -11,8 +11,10 @@
 #include	<string.h>
 
 #undef	debugFLAG
-#define	debugFLAG					0x0001
-#define	debugPARAM					(debugFLAG & 0x0001)
+#define	debugFLAG					0xC000
+
+#define	debugPARAM					(debugFLAG & 0x4000)
+#define	debugRESULT					(debugFLAG & 0x8000)
 
 // ################################### Global/public functions #####################################
 
