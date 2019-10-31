@@ -34,14 +34,15 @@ enum {
 
 // ####################################### structures  #############################################
 
-typedef	struct ubuf_s {
+typedef	struct __attribute__((packed)) ubuf_s {
 	char *				pBuf ;
 	SemaphoreHandle_t	mux ;
 	uint16_t			flags ;							// stdlib related flags
 	union {
 		struct {
-			uint8_t		f_init	: 1 ;
+			uint8_t		f_init	: 1 ;					// LSB
 			uint8_t		f_alloc	: 1 ;
+			uint16_t	_spare : 14 ;					// MSB
 		} ;
 		uint16_t		_flags ;						// module flags
 	} ;
