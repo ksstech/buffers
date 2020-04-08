@@ -57,6 +57,8 @@ buf_t		bufTable[configBUFFERS_MAX_OPEN] ;
 
 #if		(ESP32_PLATFORM == 1)
 	portMUX_TYPE	muxBuffers = { 0 } ;
+//	#include	"soc/spinlock.h"
+//	portMUX_TYPE	muxBuffers = { .owner = SPINLOCK_FREE, .count = 0 } ;
 #endif
 
 // ############################## Heap and memory de/allocation related ############################
@@ -124,11 +126,11 @@ static	void	vBufIsrEntry(buf_t * psBuf) {
 	if (halNVIC_CalledFromISR() > 0) {					// if called from an ISR
 		FF_SET(psBuf, FF_FROMISR) ;						// just set the flag
 	} else {
-#if		(ESP32_PLATFORM == 1)
+	#if	(ESP32_PLATFORM == 1)
 		portENTER_CRITICAL(&muxBuffers) ;				// else disable interrupts
-#else
+	#else
 		taskENTER_CRITICAL() ;							// else disable interrupts
-#endif
+	#endif
 	}
 }
 
@@ -140,7 +142,7 @@ static	void	vBufIsrExit(buf_t * psBuf) {
 	if (FF_STCHK(psBuf, FF_FROMISR)) {					// if called from an ISR
 		FF_UNSET(psBuf, FF_FROMISR) ;					// just clear the flag
 	} else {
-#if		(ESP32_PLATFORM == 1)
+	#if	(ESP32_PLATFORM == 1)
 		portEXIT_CRITICAL(&muxBuffers) ;				// else re-enable interrupts
 	#else
 		taskEXIT_CRITICAL() ;							// else re-enable interrupts
@@ -154,11 +156,11 @@ static	void	vBufIsrExit(buf_t * psBuf) {
  */
 static	buf_t * vBufTakePointer( void ) {
 int32_t	Index ;
-#if		(ESP32_PLATFORM == 1)
-	if ((muxBuffers.count == 0) && (muxBuffers.owner == 0)) {
+	#if	(ESP32_PLATFORM == 1)
+//	if ((muxBuffers.count == 0) && (muxBuffers.owner == 0)) {
 		vPortCPUInitializeMutex(&muxBuffers) ;
-	}
-#endif
+//	}
+	#endif
 	for (Index = 0; Index < configBUFFERS_MAX_OPEN; Index++) {
 		if (bufTable[Index].pBeg == 0) {
 			IF_PRINT(debugTAKE_GIVE_PTR, "Take:%d\n", Index) ;
