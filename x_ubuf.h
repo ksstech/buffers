@@ -4,7 +4,9 @@
 
 #pragma	once
 
-#include	"FreeRTOS_Support.h"
+#include	"freertos/FreeRTOS.h"
+#include	"freertos/semphr.h"
+#include	"x_definitions.h"
 
 #include	<stdint.h>
 #include	<stdarg.h>

@@ -2,6 +2,8 @@
  * x_ubuf.c
  */
 
+#include	"FreeRTOS_Support.h"
+
 #include	"x_ubuf.h"
 #include	"x_errors_events.h"
 #include	"x_syslog.h"
@@ -12,6 +14,7 @@
 #include	"esp_vfs.h"
 
 #include	<fcntl.h>
+#include	<errno.h>
 
 #define	debugFLAG				0xC000
 
