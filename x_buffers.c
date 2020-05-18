@@ -29,10 +29,10 @@
 #include	"FreeRTOS_Support.h"
 
 #include	"x_buffers.h"
-#include	"x_printf.h"
+#include	"printfx.h"
 #include	"x_stdio.h"
 #include	"x_errors_events.h"
-#include	"x_syslog.h"
+#include	"syslog.h"
 
 #include	"hal_config.h"
 #include	"hal_nvic.h"
