@@ -53,7 +53,6 @@ typedef	struct __attribute__((packed)) ubuf_s {
 	volatile uint16_t	IdxRD ;							// index to next char to be READ from
 	volatile uint16_t	Used ;
 } ubuf_t ;
-
 DUMB_STATIC_ASSERT(sizeof(ubuf_t) == 20) ;
 
 extern ubuf_t	sUBuf[ubufMAX_OPEN] ;
