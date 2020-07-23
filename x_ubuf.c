@@ -2,6 +2,7 @@
  * x_ubuf.c
  */
 
+#include	"hal_config.h"
 #include	"FreeRTOS_Support.h"
 
 #include	"x_ubuf.h"
