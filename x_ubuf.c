@@ -58,16 +58,15 @@ static int32_t	xUBufBlockAvail(ubuf_t * psUBuf) {
 
 static int32_t	xUBufBlockSpace(ubuf_t * psUBuf, size_t Size) {
 	IF_myASSERT(debugPARAM, psUBuf->Size > Size) ;
-	if (((psUBuf->Size - psUBuf->Used) < Size) &&		// if we have insufficient space
-		(psUBuf->flags & O_TRUNC)) {					// we are supposed to TRUNCate
-		Size -= psUBuf->Size - psUBuf->Used ;			// calculate space required
-		psUBuf->IdxRD += Size ;							// adjust output/read index accordingly
-		psUBuf->IdxRD %= psUBuf->Size ;					// then correct for wrap
+	if ((psUBuf->Size - psUBuf->Used) < Size &&			// insufficient space ?
+		(psUBuf->flags & O_TRUNC)) {					// yes, supposed to TRUNCate ?
+		Size -= psUBuf->Size - psUBuf->Used ;			// yes, calculate space required
+		psUBuf->IdxRD	+= Size ;						// adjust output/read index accordingly
+		psUBuf->IdxRD	%= psUBuf->Size ;				// then correct for wrap
 		psUBuf->Used	-= Size ;						// adjust remaining character count
-	} else if (psUBuf->Size == psUBuf->Used) {
-	// not even 1 slot spare in buffer
-		if (psUBuf->flags & O_NONBLOCK) {				// NOT supposed to block ?
-			errno = EAGAIN ;							// set the error code
+	} else if (psUBuf->Size == psUBuf->Used) {			// not even 1 slot spare in buffer
+		if (psUBuf->flags & O_NONBLOCK) {				// supposed to block ?
+			errno = EAGAIN ;							// no, set the error code
 			return EOF ;								// and return
 		} else {
 			while (psUBuf->Size == psUBuf->Used) {		// wait for a single spot to open...
