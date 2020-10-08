@@ -42,14 +42,14 @@
 
 // ############################### BUILD: debug configuration options ##############################
 
-#define	flagDEBUG							(0x0000)
-#define	debugASSERT_POINTER					(flagDEBUG & 0x0001)
-#define	debugASSERT_SIZE					(flagDEBUG & 0x0002)
-#define	debugASSERT_CIRCULAR				(flagDEBUG & 0x0004)
-#define	debugASSERT_MODE					(flagDEBUG & 0x0008)
-#define	debugASSERT_RETURN					(flagDEBUG & 0x0010)
-#define	debugSTRUCTURE						(flagDEBUG & 0x0020)
-#define	debugTAKE_GIVE_PTR					(flagDEBUG & 0x0040)
+#define	debugFLAG					(0x0000)
+
+#define	debugSTRUCTURE				(debugFLAG & 0x0001)
+
+#define	debugTIMING					(debugFLAG_GLOBAL & debugFLAG & 0x1000)
+#define	debugTRACK					(debugFLAG_GLOBAL & debugFLAG & 0x2000)
+#define	debugPARAM					(debugFLAG_GLOBAL & debugFLAG & 0x4000)
+#define	debugRESULT					(debugFLAG_GLOBAL & debugFLAG & 0x8000)
 
 // ################################### Private/local variables #####################################
 
@@ -81,7 +81,6 @@ void *	pvBufTake(size_t BufSize) {
 		xRtosSemaphoreTake(&Buf1KLock, portMAX_DELAY) ;
 		return &Buffer1K[0] ;
 	}
-	IF_myASSERT(debugASSERT_SIZE, 0)
 	return (void *) pdFAIL ;
 }
 
@@ -98,7 +97,6 @@ int32_t	xBufGive(void * pvBuf) {
 	} else 	if (pvBuf == &Buffer1K[0]) {
 		return xRtosSemaphoreGive(&Buf1KLock) ;
 	}
-	IF_myASSERT(debugASSERT_POINTER, 0)
 	return (BaseType_t) pdFAIL ;
 }
 
@@ -163,7 +161,6 @@ int32_t	Index ;
 	#endif
 	for (Index = 0; Index < configBUFFERS_MAX_OPEN; Index++) {
 		if (bufTable[Index].pBeg == 0) {
-			IF_PRINT(debugTAKE_GIVE_PTR, "Take:%d\n", Index) ;
 			return &bufTable[Index] ;
 		}
 	}
@@ -185,7 +182,6 @@ int32_t	Index ;
 	for (Index = 0; Index < configBUFFERS_MAX_OPEN; Index++) {
 		if (psBuf == &bufTable[Index]) {
 			psBuf->pBeg = 0 ;							/* Mark as closed/unused */
-			IF_PRINT(debugTAKE_GIVE_PTR, "Give:%d\n", Index) ;
 			return erSUCCESS ;
 		}
 	}
@@ -250,7 +246,7 @@ void	vBufReset(buf_t * psBuf, size_t Used) {
  * @return			erSUCCESS
  */
 static int32_t	xBufReuse(buf_t * psBuf, char * pBuf, size_t Size, uint32_t flags, size_t Used) {
-	IF_myASSERT(debugASSERT_POINTER, INRANGE_SRAM(psBuf) && pBuf != 0 && Used <= Size)
+	IF_myASSERT(debugPARAM, INRANGE_SRAM(psBuf) && pBuf != 0 && Used <= Size)
 	vBufIsrEntry(psBuf) ;
 	psBuf->pBeg		= pBuf ;
 	psBuf->pEnd		= pBuf + Size ;						// calculate & save end
@@ -276,7 +272,7 @@ buf_t * psBufOpen(void * pBuf, size_t Size, uint32_t flags, size_t Used) {
 		myASSERT(0) ;
 		return pvFAILURE ;
 	}
-	IF_myASSERT(debugASSERT_SIZE, Used <= Size) ;
+	IF_myASSERT(debugPARAM, Used <= Size) ;
 	buf_t *	psBuf = vBufTakePointer() ;					// get a free table entry
 	if (psBuf != NULL) {								// unused entry found?
 		vBufIsrEntry(psBuf) ;
@@ -419,8 +415,8 @@ int32_t xBufPeek(buf_t * psBuf) {
  * @return
  */
 char *	pcBufGetS(char * pBuf, int32_t Number, buf_t * psBuf) {
+	IF_myASSERT(debugPARAM, INRANGE_SRAM(pBuf))
 	char *	pTmp = pBuf ;
-	IF_myASSERT(debugASSERT_POINTER, INRANGE_SRAM(pBuf))
 	while (Number > 1) {
 		int32_t	cChr = xBufGetC(psBuf) ;
 		if (cChr == EOF) {								// EOF reached?
@@ -454,9 +450,9 @@ char *	pcBufGetS(char * pBuf, int32_t Number, buf_t * psBuf) {
  */
 size_t	xBufWrite(void * pvBuf, size_t Size, size_t Count, buf_t * psBuf) {
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
-	IF_myASSERT(debugASSERT_POINTER, INRANGE_SRAM(pvBuf))
+	IF_myASSERT(debugPARAM, INRANGE_SRAM(pvBuf))
 	if (FF_STCHK(psBuf, FF_CIRCULAR)) {
-		IF_myASSERT(debugASSERT_CIRCULAR, 0)
+		IF_myASSERT(debugRESULT, 0)
 		return 0 ;										// indicate nothing written
 	}
 
@@ -483,13 +479,13 @@ size_t	xBufWrite(void * pvBuf, size_t Size, size_t Count, buf_t * psBuf) {
  */
 size_t	xBufRead(void * pvBuf, size_t Size, size_t Count, buf_t * psBuf) {
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
-	IF_myASSERT(debugASSERT_POINTER, INRANGE_SRAM(pvBuf))
+	IF_myASSERT(debugPARAM, INRANGE_SRAM(pvBuf))
 	if (FF_STCHK(psBuf, FF_CIRCULAR)) {
-		IF_myASSERT(debugASSERT_CIRCULAR, 0)
+		IF_myASSERT(debugRESULT, 0)
 		return 0 ;										// indicate nothing read
 	}
 	if (Size == 0 || Count == 0) {
-		IF_myASSERT(debugASSERT_SIZE, 0)
+		IF_myASSERT(debugRESULT, 0)
 		return 0 ;
 	}
 
@@ -520,7 +516,7 @@ int32_t	xBufSeek(buf_t * psBuf, int32_t Offset, int32_t whence, int32_t flags) {
 char * pTmp ;
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
 	if (FF_STCHK(psBuf, FF_CIRCULAR)) {					// working on CIRCULAR buffer
-		IF_myASSERT(debugASSERT_CIRCULAR, 0) ;
+		IF_myASSERT(debugRESULT, 0) ;
 		return erFAILURE ;								// yes, abort
 	}
 	IF_PRINT(debugSTRUCTURE, "[Seek 1] B=%p R=%p W=%p S=%d U=%d\n", psBuf->pBeg, psBuf->pRead, psBuf->pWrite, psBuf->xSize, psBuf->xUsed) ;
@@ -555,7 +551,7 @@ char * pTmp ;
 	psBuf->xUsed = psBuf->pWrite - psBuf->pRead ;
 	vBufIsrExit(psBuf) ;
 
-	IF_myASSERT(debugASSERT_SIZE, (psBuf->xUsed <= psBuf->xSize)) ;
+	IF_myASSERT(debugRESULT, (psBuf->xUsed <= psBuf->xSize)) ;
 	IF_PRINT(debugSTRUCTURE, "[Seek 2] B=%p R=%p W=%p S=%d U=%u\n", psBuf->pBeg, psBuf->pRead, psBuf->pWrite, psBuf->xSize, psBuf->xUsed) ;
 	return erSUCCESS ;
 }
@@ -570,13 +566,13 @@ int32_t	xBufTell(buf_t * psBuf, int32_t flags) {
 	int32_t	iRV = erFAILURE;
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
 	if (FF_STCHK(psBuf, FF_CIRCULAR)) {				// working on circular buffer
-		IF_myASSERT(debugASSERT_CIRCULAR, 0)
+		IF_myASSERT(debugRESULT, 0)
 		return erFAILURE ;							// yes, abort..
 	}
 
 	// Can only ask for MODER or MODEW not both or MODERW
 	if (((flags & FF_MODER) && (flags & FF_MODEW)) || (flags & FF_MODERW)) {
-		IF_myASSERT(debugASSERT_MODE, 0)
+		IF_myASSERT(debugRESULT, 0)
 		return erFAILURE ;
 	}
 	vBufIsrEntry(psBuf) ;
@@ -599,13 +595,13 @@ char *	pcBufTellPointer(buf_t * psBuf, int32_t flags) {
 char * pcRetVal = (char *) erFAILURE ;
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
 	if (FF_STCHK(psBuf, FF_CIRCULAR)) {				// working on circular buffer
-		IF_myASSERT(debugASSERT_CIRCULAR, 0)
+		IF_myASSERT(debugRESULT, 0)
 		return pcRetVal ;
 	}
 
 	// Can only ask for MODER or MODEW not both nor MODERW
 	if (((flags & FF_MODER) && (flags & FF_MODEW)) || (flags & FF_MODERW)) {
-		IF_myASSERT(debugASSERT_MODE, 0)
+		IF_myASSERT(debugRESULT, 0)
 		return pcRetVal ;
 	}
 	if (flags & FF_MODER) {
@@ -613,7 +609,7 @@ char * pcRetVal = (char *) erFAILURE ;
 	} else if (flags & FF_MODEW) {
 		pcRetVal = psBuf->pWrite ;
 	}
-	IF_myASSERT(debugASSERT_RETURN, INRANGE_SRAM(pcRetVal))
+	IF_myASSERT(debugRESULT, INRANGE_SRAM(pcRetVal))
 	return pcRetVal ;
 }
 
@@ -624,7 +620,7 @@ char * pcRetVal = (char *) erFAILURE ;
  */
 int32_t	xBufPrintClose(buf_t * psBuf) {
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
-	IF_myASSERT(debugASSERT_SIZE, psBuf->xUsed > 0) ;
+	IF_myASSERT(debugPARAM, psBuf->xUsed > 0) ;
 #if 0
 	/* This option will output the buffer contents as if it is a format string.
 	 * The contents will thus be interpreted as if consisting of format specifiers
@@ -652,8 +648,8 @@ int32_t	xBufPrintClose(buf_t * psBuf) {
  */
 int32_t	xBufSyslogClose(buf_t * psBuf, uint32_t Prio) {
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
-	IF_myASSERT(debugASSERT_SIZE, psBuf->xUsed > 0)
-	xSyslog(Prio, psBuf->pRead, "") ;
+	IF_myASSERT(debugPARAM, psBuf->xUsed > 0)
+	xSyslog(SL_MOD2LOCAL(Prio), psBuf->pRead, "") ;
 	return xBufClose(psBuf) ;
 }
 

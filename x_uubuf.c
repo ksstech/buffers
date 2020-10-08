@@ -11,7 +11,6 @@
 
 #include	<string.h>
 
-#undef	debugFLAG
 #define	debugFLAG					0xC000
 
 #define	debugTIMING					(debugFLAG_GLOBAL & debugFLAG & 0x1000)
@@ -40,9 +39,9 @@ int32_t	xUUBufGetC(uubuf_t * psUUBuf) {
 }
 
 char *	pcUUBufGetS(char * pBuf, int32_t Number, uubuf_t * psUUBuf) {
+	IF_myASSERT(debugPARAM, INRANGE_SRAM(pBuf))
 	int32_t	cChr ;
 	char *	pTmp = pBuf ;
-	IF_myASSERT(debugPARAM, INRANGE_SRAM(pBuf))
 	while (Number > 1) {
 		cChr = xUUBufGetC(psUUBuf) ;
 		if (cChr == EOF) {								// EOF reached?

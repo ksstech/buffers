@@ -89,7 +89,8 @@ size_t	xUBufSetDefaultSize(size_t NewSize) {
 }
 
 int32_t	xUBufCreate(ubuf_t * psUBuf, char * pcBuf, size_t BufSize, size_t Used) {
-	IF_myASSERT(debugPARAM, INRANGE_SRAM(psUBuf) && ((pcBuf == NULL) || INRANGE_SRAM(pcBuf))) ;
+	IF_myASSERT(debugPARAM, INRANGE_SRAM(psUBuf)) ;
+	IF_myASSERT(debugPARAM, (pcBuf == NULL) || INRANGE_SRAM(pcBuf)) ;
 	IF_myASSERT(debugPARAM, INRANGE(ubufSIZE_MINIMUM, BufSize, ubufSIZE_MAXIMUM, size_t) && Used <= BufSize) ;
 	psUBuf->Size	= BufSize ;
 	if (pcBuf != NULL) {
