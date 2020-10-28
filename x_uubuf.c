@@ -3,7 +3,7 @@
  */
 
 #include	"x_uubuf.h"
-#include	"printfx.h"
+#include 	"printfx.h"
 #include	"x_errors_events.h"
 
 #include	"hal_config.h"

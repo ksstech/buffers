@@ -3,6 +3,5 @@ idf_component_register(
 	INCLUDE_DIRS "."
 	PRIV_INCLUDE_DIRS
 	REQUIRES common
-	PRIV_REQUIRES rtos-support printf
+	PRIV_REQUIRES rtos-support printfx
 )
-# common hal_esp32  syslog

@@ -29,9 +29,9 @@
 #include	"FreeRTOS_Support.h"
 
 #include	"x_buffers.h"
-#include	"printfx.h"
 #include	"x_stdio.h"
 #include	"x_errors_events.h"
+#include 	"printfx.h"
 #include	"syslog.h"
 
 #include	"hal_config.h"
@@ -641,7 +641,7 @@ int32_t	xBufPrintClose(buf_t * psBuf) {
 }
 
 /**
- * xBufSyslogClose() - output buffer contents to syslog  hosts and close the buffer
+ * xBufSyslogClose() - output buffer contents to syslog host and close the buffer
  * @param psBuf		pointer to the managed buffer to be printed
  * @param Prio		Syslog priority to be used
  * @return			status of the buffer close event
