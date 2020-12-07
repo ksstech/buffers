@@ -165,7 +165,7 @@ int32_t	Index ;
 		}
 	}
 /* If we ASSERT() here something might be recursing hence eating up all structures.
- * Common cause is if we use an SL_ or IF_SL_ in the x_sockets module,
+ * Common cause is if we use an SL_ or IF_SL_ in the socketsX module,
  * since this will call syslog() which will want to allocate a buffer,
  * which will call back here, and so we recurse to a crash...... */
 	myASSERT(0) ;
