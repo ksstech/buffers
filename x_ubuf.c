@@ -88,8 +88,8 @@ size_t	xUBufSetDefaultSize(size_t NewSize) {
 }
 
 int32_t	xUBufCreate(ubuf_t * psUBuf, char * pcBuf, size_t BufSize, size_t Used) {
-	IF_myASSERT(debugPARAM, INRANGE_SRAM(psUBuf)) ;
-	IF_myASSERT(debugPARAM, (pcBuf == NULL) || INRANGE_SRAM(pcBuf)) ;
+	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(psUBuf)) ;
+	IF_myASSERT(debugPARAM, (pcBuf == NULL) || halCONFIG_inSRAM(pcBuf)) ;
 	IF_myASSERT(debugPARAM, INRANGE(ubufSIZE_MINIMUM, BufSize, ubufSIZE_MAXIMUM, size_t) && Used <= BufSize) ;
 	psUBuf->Size	= BufSize ;
 	if (pcBuf != NULL) {
@@ -115,7 +115,7 @@ int32_t	xUBufCreate(ubuf_t * psUBuf, char * pcBuf, size_t BufSize, size_t Used) 
 }
 
 void	vUBufDestroy(ubuf_t * psUBuf) {
-	IF_myASSERT(debugPARAM, INRANGE_SRAM(psUBuf)) ;
+	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(psUBuf)) ;
 	if (psUBuf->f_alloc == 1) {
 		free(psUBuf->pBuf) ;
 		psUBuf->pBuf 	= NULL ;
@@ -126,7 +126,7 @@ void	vUBufDestroy(ubuf_t * psUBuf) {
 }
 
 void	vUBufReset(ubuf_t * psUBuf) {
-	IF_myASSERT(debugPARAM, INRANGE_SRAM(psUBuf)) ;
+	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(psUBuf)) ;
 	psUBuf->IdxRD = psUBuf->IdxWR = psUBuf->Used = 0 ;
 }
 
@@ -150,7 +150,7 @@ int32_t	xUBufGetC(ubuf_t * psUBuf) {
 }
 
 int32_t	xUBufPutC(ubuf_t * psUBuf, int32_t cChr) {
-	IF_myASSERT(debugPARAM, INRANGE_SRAM(psUBuf) && INRANGE_SRAM(psUBuf->pBuf) && (psUBuf->Size > 0)) ;
+	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(psUBuf) && halCONFIG_inSRAM(psUBuf->pBuf) && (psUBuf->Size > 0)) ;
 	if (xUBufBlockSpace(psUBuf, sizeof(char)) != erSUCCESS) {
 		return EOF ;
 	}
@@ -166,7 +166,7 @@ int32_t	xUBufPutC(ubuf_t * psUBuf, int32_t cChr) {
 }
 
 char *	pcUBufGetS(char * pBuf, int32_t Number, ubuf_t * psUBuf) {
-	IF_myASSERT(debugPARAM, INRANGE_SRAM(pBuf))
+	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pBuf))
 	char *	pTmp = pBuf ;
 	while (Number > 1) {
 		int32_t cChr = xUBufGetC(psUBuf) ;

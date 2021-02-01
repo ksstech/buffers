@@ -107,8 +107,8 @@ int32_t	xBufGive(void * pvBuf) {
  * @param psBuf
  */
 void	xBufCheck(buf_t * psBuf) {
-	myASSERT(INRANGE_SRAM(psBuf)) ;
-	myASSERT(INRANGE_SRAM(psBuf->pBeg)) ;
+	myASSERT(halCONFIG_inSRAM(psBuf)) ;
+	myASSERT(halCONFIG_inSRAM(psBuf->pBeg)) ;
 	myASSERT(INRANGE(configBUFFERS_SIZE_MIN, psBuf->xSize, configBUFFERS_SIZE_MAX, size_t)) ;
 	myASSERT((psBuf->pEnd - psBuf->pBeg) == psBuf->xSize) ;
 	myASSERT(psBuf->xUsed <= psBuf->xSize) ;
@@ -246,7 +246,7 @@ void	vBufReset(buf_t * psBuf, size_t Used) {
  * @return			erSUCCESS
  */
 static int32_t	xBufReuse(buf_t * psBuf, char * pBuf, size_t Size, uint32_t flags, size_t Used) {
-	IF_myASSERT(debugPARAM, INRANGE_SRAM(psBuf) && pBuf != 0 && Used <= Size)
+	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(psBuf) && pBuf != 0 && Used <= Size)
 	vBufIsrEntry(psBuf) ;
 	psBuf->pBeg		= pBuf ;
 	psBuf->pEnd		= pBuf + Size ;						// calculate & save end
@@ -415,7 +415,7 @@ int32_t xBufPeek(buf_t * psBuf) {
  * @return
  */
 char *	pcBufGetS(char * pBuf, int32_t Number, buf_t * psBuf) {
-	IF_myASSERT(debugPARAM, INRANGE_SRAM(pBuf))
+	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pBuf))
 	char *	pTmp = pBuf ;
 	while (Number > 1) {
 		int32_t	cChr = xBufGetC(psBuf) ;
@@ -450,7 +450,7 @@ char *	pcBufGetS(char * pBuf, int32_t Number, buf_t * psBuf) {
  */
 size_t	xBufWrite(void * pvBuf, size_t Size, size_t Count, buf_t * psBuf) {
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
-	IF_myASSERT(debugPARAM, INRANGE_SRAM(pvBuf))
+	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pvBuf))
 	if (FF_STCHK(psBuf, FF_CIRCULAR)) {
 		IF_myASSERT(debugRESULT, 0)
 		return 0 ;										// indicate nothing written
@@ -479,7 +479,7 @@ size_t	xBufWrite(void * pvBuf, size_t Size, size_t Count, buf_t * psBuf) {
  */
 size_t	xBufRead(void * pvBuf, size_t Size, size_t Count, buf_t * psBuf) {
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
-	IF_myASSERT(debugPARAM, INRANGE_SRAM(pvBuf))
+	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pvBuf))
 	if (FF_STCHK(psBuf, FF_CIRCULAR)) {
 		IF_myASSERT(debugRESULT, 0)
 		return 0 ;										// indicate nothing read
@@ -609,7 +609,7 @@ char * pcRetVal = (char *) erFAILURE ;
 	} else if (flags & FF_MODEW) {
 		pcRetVal = psBuf->pWrite ;
 	}
-	IF_myASSERT(debugRESULT, INRANGE_SRAM(pcRetVal))
+	IF_myASSERT(debugRESULT, halCONFIG_inSRAM(pcRetVal))
 	return pcRetVal ;
 }
 

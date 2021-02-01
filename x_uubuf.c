@@ -39,7 +39,7 @@ int32_t	xUUBufGetC(uubuf_t * psUUBuf) {
 }
 
 char *	pcUUBufGetS(char * pBuf, int32_t Number, uubuf_t * psUUBuf) {
-	IF_myASSERT(debugPARAM, INRANGE_SRAM(pBuf))
+	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pBuf))
 	int32_t	cChr ;
 	char *	pTmp = pBuf ;
 	while (Number > 1) {
@@ -65,7 +65,7 @@ char *	pcUUBufGetS(char * pBuf, int32_t Number, uubuf_t * psUUBuf) {
 }
 
 int32_t	xUUBufCreate(uubuf_t * psUUBuf, char * pcBuf, size_t BufSize, size_t Used) {
-	IF_myASSERT(debugPARAM, INRANGE_SRAM(psUUBuf) && INRANGE(pbufSIZE_MINIMUM, BufSize, pbufSIZE_MAXIMUM, size_t) && (Used <= BufSize)) ;
+	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(psUUBuf) && INRANGE(pbufSIZE_MINIMUM, BufSize, pbufSIZE_MAXIMUM, size_t) && (Used <= BufSize)) ;
 	psUUBuf->Size	= BufSize ;
 	psUUBuf->Idx	= 0 ;
 	if (pcBuf) {
@@ -84,7 +84,7 @@ int32_t	xUUBufCreate(uubuf_t * psUUBuf, char * pcBuf, size_t BufSize, size_t Use
 }
 
 void	vUUBufDestroy(uubuf_t * psUUBuf) {
-	IF_myASSERT(debugPARAM, INRANGE_SRAM(psUUBuf)) ;
+	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(psUUBuf)) ;
 	if (psUUBuf->Alloc) {
 		free(psUUBuf->pBuf) ;
 	}
