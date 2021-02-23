@@ -36,7 +36,6 @@
 
 #include	"hal_config.h"
 #include	"hal_nvic.h"
-#include	"hal_debug.h"
 
 #include	<string.h>
 

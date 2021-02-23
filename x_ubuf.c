@@ -9,7 +9,6 @@
 #include	"x_errors_events.h"
 #include 	"printfx.h"
 #include	"syslog.h"
-#include	"hal_debug.h"
 
 #include	"esp_vfs.h"
 
