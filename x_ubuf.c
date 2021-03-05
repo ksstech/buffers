@@ -94,10 +94,11 @@ int32_t	xUBufCreate(ubuf_t * psUBuf, char * pcBuf, size_t BufSize, size_t Used) 
 	if (pcBuf != NULL) {
 		psUBuf->pBuf	= pcBuf ;
 		psUBuf->f_alloc = 0 ;
-	} else {
-		IF_myASSERT(debugPARAM, Used == 0) ;
+	} else if (Used == 0){
 		psUBuf->pBuf	= malloc(BufSize) ;
 		psUBuf->f_alloc = 1 ;
+	} else {
+		return 0 ;
 	}
 	psUBuf->mux		= xSemaphoreCreateMutex() ;
 	IF_myASSERT(debugRESULT, psUBuf->mux) ;

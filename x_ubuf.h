@@ -72,7 +72,15 @@ void	vUBufStepWrite(ubuf_t * psUBuf, int32_t Step) ;
 void	vUBufStepRead(ubuf_t * psUBuf, int32_t Step) ;
 
 size_t	xUBufSetDefaultSize(size_t) ;
-int32_t	xUBufCreate(ubuf_t *, char *, size_t, size_t)  ;
+/**
+ * Using the supplied uBUf structure, initialises the members as required
+ * @param	psUBuf		structure to initialise
+ * @param	pcBuf		preallocated buffer, if NULL will malloc
+ * @param	BufSize		size of preallocated buffer, or size to be allocated
+ * @param	Used		If preallocated buffer, portion already used
+ * @return	Buffer size if successful, 0 if not.
+ */
+int32_t	xUBufCreate(ubuf_t * psUBuf, char * pcBuf, size_t BufSize, size_t Used)  ;
 void	vUBufDestroy(ubuf_t *) ;
 void	vUBufReset(ubuf_t *) ;
 int32_t	xUBufGetC(ubuf_t *) ;
