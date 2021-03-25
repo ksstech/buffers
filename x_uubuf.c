@@ -44,7 +44,7 @@ char *	pcUUBufGetS(char * pBuf, int32_t Number, uubuf_t * psUUBuf) {
 	while (Number > 1) {
 		cChr = xUUBufGetC(psUUBuf) ;
 		if (cChr == EOF) {								// EOF reached?
-			*pTmp = CHR_NUL ;							// terminate buffer
+			*pTmp = 0 ;									// terminate buffer
 			return NULL ;								// indicate EOF before NEWLINE
 		}
 		if (cChr == CHR_LF) {							// end of string reached ?
@@ -59,7 +59,7 @@ char *	pcUUBufGetS(char * pBuf, int32_t Number, uubuf_t * psUUBuf) {
 		Number-- ;										// and update remaining chars to read
 	}
 // If we get here we have read (Number - 1) characters and still no NEWLINE
-	*pTmp = CHR_NUL ;									// terminate buffer
+	*pTmp = 0 ;											// terminate buffer
 	return pBuf ;										// and return a valid state
 }
 
@@ -95,10 +95,10 @@ void	vUUBufAdjust(uubuf_t * psUUBuf, ssize_t Adj)	{
 }
 
 void	vUUBufReport(uubuf_t * psUUBuf) {
-	PRINT("P=%p  B=%p  I=%d  S=%d  U=%d  A=%d\n",
+	printfx("P=%p  B=%p  I=%d  S=%d  U=%d  A=%d\n",
 			psUUBuf, psUUBuf->pBuf, psUUBuf->Idx, psUUBuf->Size, psUUBuf->Used, psUUBuf->Alloc) ;
 	if (psUUBuf->Used) {
-		PRINT("%!'+b", psUUBuf->Used, psUUBuf->pBuf) ;
+		printfx("%!'+b", psUUBuf->Used, psUUBuf->pBuf) ;
 	}
 }
 
