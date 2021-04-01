@@ -98,7 +98,7 @@ void	vUUBufReport(uubuf_t * psUUBuf) {
 	printfx("P=%p  B=%p  I=%d  S=%d  U=%d  A=%d\n",
 			psUUBuf, psUUBuf->pBuf, psUUBuf->Idx, psUUBuf->Size, psUUBuf->Used, psUUBuf->Alloc) ;
 	if (psUUBuf->Used) {
-		printfx("%!'+b", psUUBuf->Used, psUUBuf->pBuf) ;
+		printfx("%!'+B", psUUBuf->Used, psUUBuf->pBuf) ;
 	}
 }
 

@@ -303,7 +303,7 @@ int32_t	xUBufIoctl(int fd, int request, va_list vArgs) {
 void	vUBufReport(ubuf_t * psUBuf) {
 	printfx("p=%p  s=%d  u=%d  i=%d  o=%d  f=0x%x\n", psUBuf->pBuf, psUBuf->Size, psUBuf->Used, psUBuf->IdxWR, psUBuf->IdxRD, psUBuf->flags) ;
 	if (psUBuf->Used) {
-		printfx("%'!+b", psUBuf->Used, psUBuf->pBuf) ;
+		printfx("%'!+B", psUBuf->Used, psUBuf->pBuf) ;
 	}
 }
 
