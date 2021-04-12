@@ -25,7 +25,7 @@ extern "C" {
 
 // ####################################### structures  #############################################
 
-typedef	struct uubuf_s {
+typedef	struct uubuf_t {
 	char *				pBuf ;
 	uint16_t			Idx ;
 	uint16_t			Size ;

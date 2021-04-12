@@ -36,7 +36,7 @@ enum {
 
 // ####################################### structures  #############################################
 
-typedef	struct __attribute__((packed)) ubuf_s {
+typedef	struct __attribute__((packed)) ubuf_t {
 	char *				pBuf ;
 	SemaphoreHandle_t	mux ;
 	uint16_t			flags ;							// stdlib related flags
