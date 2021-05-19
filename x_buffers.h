@@ -35,10 +35,6 @@ extern "C" {
 
 // ############################## Heap and memory de/allocation related ############################
 
-#define	configBUFSIZE_256						256
-#define	configBUFSIZE_512						512
-#define	configBUFSIZE_1K						1024
-
 #define	configBUFFERS_SIZE_MIN					64
 #define	configBUFFERS_SIZE_MAX					32768
 #define	configBUFFERS_MAX_OPEN					10

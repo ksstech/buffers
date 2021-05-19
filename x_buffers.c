@@ -62,23 +62,23 @@ buf_t		bufTable[configBUFFERS_MAX_OPEN] ;
 
 // ############################## Heap and memory de/allocation related ############################
 
-SemaphoreHandle_t	Buf256Lock , Buf512Lock, Buf1KLock ;
-uint8_t	Buffer256[configBUFSIZE_256], Buffer512[configBUFSIZE_512], Buffer1K[configBUFSIZE_1K] ;
+SemaphoreHandle_t	BufSmlLock , BufMedLock, BufLrgLock ;
+uint8_t	BufSmall[64], BufMedium[128], BufLarge[256] ;
 
 /**
  * pvBufTake()
  * @param BufSize
  */
 void *	pvBufTake(size_t BufSize) {
-	if (BufSize <= configBUFSIZE_256) {
-		xRtosSemaphoreTake(&Buf256Lock, portMAX_DELAY) ;
-		return &Buffer256[0] ;
-	} else if (BufSize <= configBUFSIZE_512) {
-		xRtosSemaphoreTake(&Buf512Lock, portMAX_DELAY) ;
-		return &Buffer512[0] ;
-	} else 	if (BufSize <= configBUFSIZE_1K) {
-		xRtosSemaphoreTake(&Buf1KLock, portMAX_DELAY) ;
-		return &Buffer1K[0] ;
+	if (BufSize <= sizeof(BufSmall)) {
+		xRtosSemaphoreTake(&BufSmlLock, portMAX_DELAY) ;
+		return BufSmall ;
+	} else if (BufSize <= sizeof(BufMedium)) {
+		xRtosSemaphoreTake(&BufMedLock, portMAX_DELAY) ;
+		return BufMedium ;
+	} else 	if (BufSize <= sizeof(BufLarge)) {
+		xRtosSemaphoreTake(&BufLrgLock, portMAX_DELAY) ;
+		return BufLarge ;
 	}
 	return (void *) pdFAIL ;
 }
@@ -89,12 +89,12 @@ void *	pvBufTake(size_t BufSize) {
  * @return
  */
 int32_t	xBufGive(void * pvBuf) {
-	if (pvBuf == &Buffer256[0]) {
-		return xRtosSemaphoreGive(&Buf256Lock) ;
-	} else if (pvBuf == &Buffer512[0]) {
-		return xRtosSemaphoreGive(&Buf512Lock) ;
-	} else 	if (pvBuf == &Buffer1K[0]) {
-		return xRtosSemaphoreGive(&Buf1KLock) ;
+	if (pvBuf == BufSmall) {
+		return xRtosSemaphoreGive(&BufSmlLock) ;
+	} else if (pvBuf == BufMedium) {
+		return xRtosSemaphoreGive(&BufMedLock) ;
+	} else 	if (pvBuf == BufLarge) {
+		return xRtosSemaphoreGive(&BufLrgLock) ;
 	}
 	return (BaseType_t) pdFAIL ;
 }
@@ -614,27 +614,17 @@ char * pcRetVal = (char *) erFAILURE ;
 
 /**
  * xBufPrintClose() - output buffer contents to the console and close the buffer
- * @param psBuf		pointer to the managed buffer to be printed
- * @return			number of characters printed
+ * @brief	Treat the buffer contents as a string and do not try to interpret it.
+ * 			All embedded modifier and specifier characters will be ignored.
+ * 			Any embedded NUL characters will be interpreted as string terminators
+ * 			hence possibly causing premature termination of the buffer output
+ * @param 	psBuf	pointer to the managed buffer to be printed
+ * @return	number of characters printed
  */
 int32_t	xBufPrintClose(buf_t * psBuf) {
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
 	IF_myASSERT(debugPARAM, psBuf->xUsed > 0) ;
-#if 0
-	/* This option will output the buffer contents as if it is a format string.
-	 * The contents will thus be interpreted as if consisting of format specifiers
-	 * and modifiers and hence could try to access non-existing variables and pointers
-	 * from the stack, causing garbage and possibly application crashes.
-	 */
-	int32_t iRV = nprintfx(psBuf->xUsed, psBuf->pRead) ;
-#else
-	/* This option will treat the buffer contents as a string and will not try to
-	 * interpret it. All embedded modifier and specifier characters will be ignored.
-	 * Any embedded NUL characters will however be interpreted as string terminators
-	 * hence possibly causing premature termination of the buffer output.
-	 */
 	int32_t iRV = nprintfx(psBuf->xUsed, "%s", psBuf->pRead) ;
-#endif
 	xBufClose(psBuf) ;
 	return iRV ;
 }
@@ -647,7 +637,7 @@ int32_t	xBufPrintClose(buf_t * psBuf) {
  */
 int32_t	xBufSyslogClose(buf_t * psBuf, uint32_t Prio) {
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
-	IF_myASSERT(debugPARAM, psBuf->xUsed > 0)
+	IF_myASSERT(debugPARAM, psBuf->xUsed > 0) ;
 	SL_LOG(Prio, "%.*s", psBuf->xUsed, psBuf->pRead) ;
 	return xBufClose(psBuf) ;
 }
