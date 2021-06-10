@@ -195,7 +195,7 @@ char *	pcUBufGetS(char * pBuf, int32_t Number, ubuf_t * psUBuf) {
 void	vUBufInit(void) { ESP_ERROR_CHECK(esp_vfs_register(ubufDEV_PATH, &dev_ubuf, NULL)) ; }
 
 int32_t	xUBufOpen(const char * pccPath, int flags, int Size) {
-	IF_TRACK(debugTRACK, "path='%s'  flags=0x%x  Size=%d", pccPath, flags, Size) ;
+	IF_PRINT(debugTRACK, "path='%s'  flags=0x%x  Size=%d", pccPath, flags, Size) ;
 	IF_myASSERT(debugPARAM, (*pccPath == CHR_FWDSLASH) && INRANGE(ubufSIZE_MINIMUM, Size, ubufSIZE_MAXIMUM, size_t)) ;
 	int32_t fd = 0 ;
 	do {
