@@ -280,7 +280,15 @@ ssize_t	xUBufWrite(int fd, const void * pBuf, size_t Size) {
 	return count ;
 }
 
-inline void	vUBufStepWrite(ubuf_t * psUBuf, int32_t Step)	{ psUBuf->IdxWR += Step ; psUBuf->Used += Step ; }
+int32_t	xUBufAvail(ubuf_t * psUBuf) { return psUBuf->Used ; }
+
+int32_t	xUBufSpace(ubuf_t * psUBuf) { return psUBuf->Size - psUBuf->Used ; }
+
+char * pcUBufTellWrite(ubuf_t * psUBuf)	{ return psUBuf->pBuf + psUBuf->IdxWR ; }
+
+char * pcUBufTellRead(ubuf_t * psUBuf) { return psUBuf->pBuf + psUBuf->IdxRD ; }
+
+void	vUBufStepWrite(ubuf_t * psUBuf, int32_t Step)	{ psUBuf->IdxWR += Step ; psUBuf->Used += Step ; }
 
 int32_t	xUBufIoctl(int fd, int request, va_list vArgs) {
 	ubuf_t ** ppsUBuf ;
@@ -301,9 +309,9 @@ int32_t	xUBufIoctl(int fd, int request, va_list vArgs) {
 }
 
 void	vUBufReport(ubuf_t * psUBuf) {
-	printfx("p=%p  s=%d  u=%d  i=%d  o=%d  f=0x%x\n", psUBuf->pBuf, psUBuf->Size, psUBuf->Used, psUBuf->IdxWR, psUBuf->IdxRD, psUBuf->flags) ;
+	cprintfx("p=%p  s=%d  u=%d  iW=%d  iR=%d  f=0x%x\n", psUBuf->pBuf, psUBuf->Size, psUBuf->Used, psUBuf->IdxWR, psUBuf->IdxRD, psUBuf->flags) ;
 	if (psUBuf->Used) {
-		printfx("%'!+B", psUBuf->Used, psUBuf->pBuf) ;
+		cprintfx("%'!+B", psUBuf->Used, psUBuf->pBuf) ;
 	}
 }
 

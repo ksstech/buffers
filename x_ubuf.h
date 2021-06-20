@@ -62,11 +62,11 @@ extern ubuf_t	sUBuf[ubufMAX_OPEN] ;
 void	xUBufLock(ubuf_t * psUBuf) ;
 void	xUBufUnLock(ubuf_t * psUBuf) ;
 
-inline int32_t	xUBufAvail(ubuf_t * psUBuf)		{ return psUBuf->Used ; }
-inline int32_t	xUBufSpace(ubuf_t * psUBuf)		{ return psUBuf->Size - psUBuf->Used ; }
+int32_t	xUBufAvail(ubuf_t * psUBuf) ;
+int32_t	xUBufSpace(ubuf_t * psUBuf) ;
 
-inline char * pcUBufTellWrite(ubuf_t * psUBuf)	{ return psUBuf->pBuf + psUBuf->IdxWR ; }
-inline char * pcUBufTellRead(ubuf_t * psUBuf)	{ return psUBuf->pBuf + psUBuf->IdxRD ; }
+char *	pcUBufTellWrite(ubuf_t * psUBuf) ;
+char *	pcUBufTellRead(ubuf_t * psUBuf) ;
 
 void	vUBufStepWrite(ubuf_t * psUBuf, int32_t Step) ;
 void	vUBufStepRead(ubuf_t * psUBuf, int32_t Step) ;
