@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include	"x_definitions.h"
+#include	"definitions.h"
 
 #include	<stdint.h>
 #include	<stdlib.h>

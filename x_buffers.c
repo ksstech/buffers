@@ -26,6 +26,7 @@
  * Enforce RO & WO modes for different files (circular/linear buffer) streams.
  */
 
+#include	"hal_config.h"
 #include	"FreeRTOS_Support.h"
 
 #include	"x_buffers.h"
@@ -34,7 +35,6 @@
 #include 	"printfx.h"
 #include	"syslog.h"
 
-#include	"hal_config.h"
 #include	"hal_nvic.h"
 
 #include	<string.h>

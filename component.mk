@@ -1,1 +1,1 @@
-# "./z-components/?????" pseudo-component makefile.
+# pseudo-component makefile.

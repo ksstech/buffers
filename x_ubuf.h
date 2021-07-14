@@ -6,7 +6,7 @@
 
 #include	"freertos/FreeRTOS.h"
 #include	"freertos/semphr.h"
-#include	"x_definitions.h"
+//#include	"definitions.h"
 
 #include	<stdint.h>
 #include	<stdarg.h>
@@ -59,19 +59,19 @@ extern ubuf_t	sUBuf[ubufMAX_OPEN] ;
 
 // ################################### EXTERNAL FUNCTIONS ##########################################
 
-void	xUBufLock(ubuf_t * psUBuf) ;
-void	xUBufUnLock(ubuf_t * psUBuf) ;
+void xUBufLock(ubuf_t * psUBuf) ;
+void xUBufUnLock(ubuf_t * psUBuf) ;
 
-int32_t	xUBufAvail(ubuf_t * psUBuf) ;
-int32_t	xUBufSpace(ubuf_t * psUBuf) ;
+int	xUBufAvail(ubuf_t * psUBuf) ;
+int	xUBufSpace(ubuf_t * psUBuf) ;
 
-char *	pcUBufTellWrite(ubuf_t * psUBuf) ;
-char *	pcUBufTellRead(ubuf_t * psUBuf) ;
+char * pcUBufTellWrite(ubuf_t * psUBuf) ;
+char * pcUBufTellRead(ubuf_t * psUBuf) ;
 
-void	vUBufStepWrite(ubuf_t * psUBuf, int32_t Step) ;
-void	vUBufStepRead(ubuf_t * psUBuf, int32_t Step) ;
+void vUBufStepWrite(ubuf_t * psUBuf, int Step) ;
+void vUBufStepRead(ubuf_t * psUBuf, int Step) ;
 
-size_t	xUBufSetDefaultSize(size_t) ;
+size_t xUBufSetDefaultSize(size_t) ;
 /**
  * Using the supplied uBUf structure, initialises the members as required
  * @param	psUBuf		structure to initialise
@@ -80,20 +80,20 @@ size_t	xUBufSetDefaultSize(size_t) ;
  * @param	Used		If preallocated buffer, portion already used
  * @return	Buffer size if successful, 0 if not.
  */
-int32_t	xUBufCreate(ubuf_t * psUBuf, char * pcBuf, size_t BufSize, size_t Used)  ;
-void	vUBufDestroy(ubuf_t *) ;
-void	vUBufReset(ubuf_t *) ;
-int32_t	xUBufGetC(ubuf_t *) ;
-int32_t	xUBufPutC(ubuf_t *, int32_t) ;
-char *	pcUBufGetS(char *, int32_t, ubuf_t *) ;
+int	xUBufCreate(ubuf_t * psUBuf, char * pcBuf, size_t BufSize, size_t Used)  ;
+void vUBufDestroy(ubuf_t *) ;
+void vUBufReset(ubuf_t *) ;
+int	xUBufGetC(ubuf_t *) ;
+int	xUBufPutC(ubuf_t *, int) ;
+char * pcUBufGetS(char *, int, ubuf_t *) ;
 
 // VFS support functions
-void	vUBufInit(void) ;
-int32_t	xUBufOpen(const char *, int, int) ;
-int32_t	xUBufClose(int) ;
+void vUBufInit(void) ;
+int	xUBufOpen(const char *, int, int) ;
+int	xUBufClose(int) ;
 ssize_t	xUBufRead(int, void *, size_t) ;
 ssize_t	xUBufWrite(int, const void *, size_t) ;
-int32_t	xUBufIoctl(int, int, va_list) ;
+int	xUBufIoctl(int, int, va_list) ;
 
 void	vUBufReport(ubuf_t *) ;
 
