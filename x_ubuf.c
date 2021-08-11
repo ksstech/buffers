@@ -3,12 +3,10 @@
  */
 
 #include	"hal_config.h"
-#include	"FreeRTOS_Support.h"
-
 #include	"x_ubuf.h"
-#include	"x_errors_events.h"
 #include 	"printfx.h"
 #include	"syslog.h"
+#include	"x_errors_events.h"
 
 #include	"esp_vfs.h"
 
@@ -40,21 +38,17 @@ static size_t	uBufSize	= ubufSIZE_DEFAULT ;
 
 // ################################# Local/static functions ########################################
 
-static int32_t	xUBufBlockAvail(ubuf_t * psUBuf) {
+static int xUBufBlockAvail(ubuf_t * psUBuf) {
 	if (psUBuf->Used == 0) {
 		if (psUBuf->flags & O_NONBLOCK) {
 			errno = EAGAIN ;
 			return EOF ;
-		} else {
-			while (psUBuf->Used == 0) {
-				vTaskDelay(10) ;
-			}
-		}
+		} else while (psUBuf->Used == 0) vTaskDelay(10);
 	}
 	return erSUCCESS ;
 }
 
-static int32_t	xUBufBlockSpace(ubuf_t * psUBuf, size_t Size) {
+static int xUBufBlockSpace(ubuf_t * psUBuf, size_t Size) {
 	IF_myASSERT(debugPARAM, psUBuf->Size > Size) ;
 	if ((psUBuf->Size - psUBuf->Used) < Size &&			// insufficient space ?
 		(psUBuf->flags & O_TRUNC)) {					// yes, supposed to TRUNCate ?
@@ -77,16 +71,16 @@ static int32_t	xUBufBlockSpace(ubuf_t * psUBuf, size_t Size) {
 
 // ################################### Global/public functions #####################################
 
-void	xUBufLock(ubuf_t * psUBuf) { xRtosSemaphoreTake(&psUBuf->mux, portMAX_DELAY) ; }
+void xUBufLock(ubuf_t * psUBuf) { xRtosSemaphoreTake(&psUBuf->mux, portMAX_DELAY) ; }
 
-void	xUBufUnLock(ubuf_t * psUBuf) { xRtosSemaphoreGive(&psUBuf->mux) ; }
+void xUBufUnLock(ubuf_t * psUBuf) { xRtosSemaphoreGive(&psUBuf->mux) ; }
 
-size_t	xUBufSetDefaultSize(size_t NewSize) {
+size_t xUBufSetDefaultSize(size_t NewSize) {
 	IF_myASSERT(debugPARAM, INRANGE(ubufSIZE_MINIMUM, NewSize, ubufSIZE_MAXIMUM, size_t)) ;
 	return uBufSize = NewSize ;
 }
 
-int32_t	xUBufCreate(ubuf_t * psUBuf, char * pcBuf, size_t BufSize, size_t Used) {
+int	xUBufCreate(ubuf_t * psUBuf, char * pcBuf, size_t BufSize, size_t Used) {
 	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(psUBuf)) ;
 	IF_myASSERT(debugPARAM, (pcBuf == NULL) || halCONFIG_inSRAM(pcBuf)) ;
 	IF_myASSERT(debugPARAM, INRANGE(ubufSIZE_MINIMUM, BufSize, ubufSIZE_MAXIMUM, size_t) && Used <= BufSize) ;
@@ -114,7 +108,7 @@ int32_t	xUBufCreate(ubuf_t * psUBuf, char * pcBuf, size_t BufSize, size_t Used) 
 	return psUBuf->Size ;
 }
 
-void	vUBufDestroy(ubuf_t * psUBuf) {
+void vUBufDestroy(ubuf_t * psUBuf) {
 	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(psUBuf)) ;
 	if (psUBuf->f_alloc == 1) {
 		free(psUBuf->pBuf) ;
@@ -125,79 +119,69 @@ void	vUBufDestroy(ubuf_t * psUBuf) {
 	vSemaphoreDelete(psUBuf->mux) ;
 }
 
-void	vUBufReset(ubuf_t * psUBuf) {
+void vUBufReset(ubuf_t * psUBuf) {
 	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(psUBuf)) ;
 	psUBuf->IdxRD = psUBuf->IdxWR = psUBuf->Used = 0 ;
 }
 
-int32_t	xUBufGetC(ubuf_t * psUBuf) {
+int	xUBufGetC(ubuf_t * psUBuf) {
 	if ((psUBuf->pBuf == NULL) || (psUBuf->Size == 0)) {
 		errno = ENOMEM ;
 		return erFAILURE ;
 	}
-	if (xUBufBlockAvail(psUBuf) != erSUCCESS) {
-		return EOF ;
-	}
+	if (xUBufBlockAvail(psUBuf) != erSUCCESS) return EOF;
 	xUBufLock(psUBuf) ;
 	int32_t cChr = *(psUBuf->pBuf + psUBuf->IdxRD++) ;
 	psUBuf->IdxRD %= psUBuf->Size ;						// handle wrap
-	if (--psUBuf->Used == 0) {							// buffer now empty
-		psUBuf->IdxRD = psUBuf->IdxWR = 0 ;				// reset both In & Out indexes to start
-	}
+	if (--psUBuf->Used == 0) psUBuf->IdxRD = psUBuf->IdxWR = 0;	// reset In/Out indexes
 	IF_PRINT(debugTRACK, "s=%d  i=%d  o=%d  cChr=%d", psUBuf->Size, psUBuf->IdxWR, psUBuf->IdxRD, cChr) ;
 	xUBufUnLock(psUBuf) ;
 	return cChr ;
 }
 
-int32_t	xUBufPutC(ubuf_t * psUBuf, int32_t cChr) {
+int	xUBufPutC(ubuf_t * psUBuf, int cChr) {
 	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(psUBuf) && halCONFIG_inSRAM(psUBuf->pBuf) && (psUBuf->Size > 0)) ;
-	if (xUBufBlockSpace(psUBuf, sizeof(char)) != erSUCCESS) {
-		return EOF ;
-	}
+	if (xUBufBlockSpace(psUBuf, sizeof(char)) != erSUCCESS) return EOF;
 	xUBufLock(psUBuf) ;
 	*(psUBuf->pBuf + psUBuf->IdxWR++) = cChr ;			// store character in buffer, adjust pointer
-	if (psUBuf->IdxWR == psUBuf->Size) {				// and handle wrap
-		psUBuf->IdxWR = 0 ;
-	}
+	if (psUBuf->IdxWR == psUBuf->Size) psUBuf->IdxWR = 0;
 	++psUBuf->Used ;
 	IF_PRINT(debugTRACK, "s=%d  i=%d  o=%d  cChr=%d", psUBuf->Size, psUBuf->IdxWR, psUBuf->IdxRD, cChr) ;
 	xUBufUnLock(psUBuf) ;
 	return cChr ;
 }
 
-char *	pcUBufGetS(char * pBuf, int32_t Number, ubuf_t * psUBuf) {
-	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pBuf))
+char * pcUBufGetS(char * pBuf, int Number, ubuf_t * psUBuf) {
+	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pBuf)) ;
 	char *	pTmp = pBuf ;
 	while (Number > 1) {
-		int32_t cChr = xUBufGetC(psUBuf) ;
+		int cChr = xUBufGetC(psUBuf) ;
 		if (cChr == EOF) {								// EOF reached?
-			*pTmp = CHR_NUL ;							// terminate buffer
+			*pTmp = 0 ;
 			return NULL ;								// indicate EOF before NEWLINE
 		}
-		if (cChr == CHR_LF) {							// end of string reached ?
+		if (cChr == '\n') {							// end of string reached ?
 			*pTmp = cChr ;								// store the NEWLINE
-			*pTmp = CHR_NUL ;							// terminate buffer
+			*pTmp = 0 ;
 			return pBuf ;								// and return a valid state
 		}
-		if (cChr == CHR_CR) {
-			continue ;
-		}
+		if (cChr == '\r') continue ;
 		*pTmp++ = cChr ;								// store the character, adjust the pointer
 		Number-- ;										// and update remaining chars to read
 	}
 // If we get here we have read (Number - 1) characters and still no NEWLINE
-	*pTmp = CHR_NUL ;									// terminate buffer
+	*pTmp = 0;
 	return pBuf ;										// and return a valid state
 }
 
 // ################################# ESP-IDF VFS compatible functions ##############################
 
-void	vUBufInit(void) { ESP_ERROR_CHECK(esp_vfs_register(ubufDEV_PATH, &dev_ubuf, NULL)) ; }
+void vUBufInit(void) { ESP_ERROR_CHECK(esp_vfs_register(ubufDEV_PATH, &dev_ubuf, NULL)) ; }
 
-int32_t	xUBufOpen(const char * pccPath, int flags, int Size) {
+int	xUBufOpen(const char * pccPath, int flags, int Size) {
 	IF_PRINT(debugTRACK, "path='%s'  flags=0x%x  Size=%d", pccPath, flags, Size) ;
 	IF_myASSERT(debugPARAM, (*pccPath == CHR_FWDSLASH) && INRANGE(ubufSIZE_MINIMUM, Size, ubufSIZE_MAXIMUM, size_t)) ;
-	int32_t fd = 0 ;
+	int fd = 0 ;
 	do {
 		if (sUBuf[fd].pBuf == NULL) {
 			sUBuf[fd].pBuf	= malloc(Size) ;
@@ -214,8 +198,8 @@ int32_t	xUBufOpen(const char * pccPath, int flags, int Size) {
 	return erFAILURE ;
 }
 
-int32_t	xUBufClose(int32_t fd) {
-	if (INRANGE(0, fd, ubufMAX_OPEN-1, int32_t)) {
+int	xUBufClose(int32_t fd) {
+	if (INRANGE(0, fd, ubufMAX_OPEN-1, int)) {
 		ubuf_t * psUBuf = &sUBuf[fd] ;
 		free(psUBuf->pBuf) ;
 		vSemaphoreDelete(psUBuf->mux) ;
@@ -252,7 +236,7 @@ ssize_t	xUBufRead(int fd, void * pBuf, size_t Size) {
 	return count ;
 }
 
-inline void	vUBufStepRead(ubuf_t * psUBuf, int32_t Step)	{ psUBuf->IdxRD += Step ; psUBuf->Used -= Step ; }
+inline void	vUBufStepRead(ubuf_t * psUBuf, int Step) { psUBuf->IdxRD+=Step; psUBuf->Used-=Step; }
 
 /**
  * xUBufWrite() -
@@ -280,19 +264,19 @@ ssize_t	xUBufWrite(int fd, const void * pBuf, size_t Size) {
 	return count ;
 }
 
-int32_t	xUBufAvail(ubuf_t * psUBuf) { return psUBuf->Used ; }
+int	xUBufAvail(ubuf_t * psUBuf) { return psUBuf->Used ; }
 
-int32_t	xUBufSpace(ubuf_t * psUBuf) { return psUBuf->Size - psUBuf->Used ; }
+int	xUBufSpace(ubuf_t * psUBuf) { return psUBuf->Size - psUBuf->Used ; }
 
 char * pcUBufTellWrite(ubuf_t * psUBuf)	{ return psUBuf->pBuf + psUBuf->IdxWR ; }
 
 char * pcUBufTellRead(ubuf_t * psUBuf) { return psUBuf->pBuf + psUBuf->IdxRD ; }
 
-void	vUBufStepWrite(ubuf_t * psUBuf, int32_t Step)	{ psUBuf->IdxWR += Step ; psUBuf->Used += Step ; }
+void vUBufStepWrite(ubuf_t * psUBuf, int Step)	{ psUBuf->IdxWR += Step ; psUBuf->Used += Step ; }
 
-int32_t	xUBufIoctl(int fd, int request, va_list vArgs) {
+int	xUBufIoctl(int fd, int request, va_list vArgs) {
 	ubuf_t ** ppsUBuf ;
-	if (OUTSIDE(0, fd, ubufMAX_OPEN-1, int32_t)) {
+	if (OUTSIDE(0, fd, ubufMAX_OPEN-1, int)) {
 		errno = EBADF ;
 		return erFAILURE ;
 	}
@@ -308,18 +292,16 @@ int32_t	xUBufIoctl(int fd, int request, va_list vArgs) {
 	return 1 ;
 }
 
-void	vUBufReport(ubuf_t * psUBuf) {
+void vUBufReport(ubuf_t * psUBuf) {
 	cprintfx("p=%p  s=%d  u=%d  iW=%d  iR=%d  f=0x%x\n", psUBuf->pBuf, psUBuf->Size, psUBuf->Used, psUBuf->IdxWR, psUBuf->IdxRD, psUBuf->flags) ;
-	if (psUBuf->Used) {
-		cprintfx("%'!+B", psUBuf->Used, psUBuf->pBuf) ;
-	}
+	if (psUBuf->Used) cprintfx("%'!+B", psUBuf->Used, psUBuf->pBuf) ;
 }
 
 // ################################## Diagnostic and testing functions #############################
 
 #define	ubufTEST_SIZE	256
 
-void	vUBufTest(void) {
+void vUBufTest(void) {
 	vUBufInit() ;
 	int32_t Count, Result ;
 	int32_t fd = open("/ubuf", O_RDWR | O_NONBLOCK) ;

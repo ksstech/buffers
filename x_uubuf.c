@@ -4,57 +4,41 @@
 
 #include	"x_uubuf.h"
 #include 	"printfx.h"
-#include	"x_errors_events.h"
-
-#include	"hal_config.h"
 
 #include	<string.h>
-
-#define	debugFLAG					0xC000
-
-#define	debugTIMING					(debugFLAG_GLOBAL & debugFLAG & 0x1000)
-#define	debugTRACK					(debugFLAG_GLOBAL & debugFLAG & 0x2000)
-#define	debugPARAM					(debugFLAG_GLOBAL & debugFLAG & 0x4000)
-#define	debugRESULT					(debugFLAG_GLOBAL & debugFLAG & 0x8000)
+#include	<stdlib.h>
+#include	<stdio.h>
 
 // ################################### Global/public functions #####################################
 
-int32_t	xUUBufPutC(uubuf_t * psUUBuf, int32_t cChr) {
-	if (psUUBuf->Used == psUUBuf->Size) {				// if full,
-		return EOF ;									// return an error
-	}
+int	xUUBufPutC(uubuf_t * psUUBuf, int cChr) {
+	if (psUUBuf->Used == psUUBuf->Size) return EOF ;	// full, return error
 	*(psUUBuf->pBuf + psUUBuf->Idx)	= cChr ;			// store character in buffer, adjust pointer
 	++psUUBuf->Idx ;
 	++psUUBuf->Used ;
 	return cChr ;
 }
 
-int32_t	xUUBufGetC(uubuf_t * psUUBuf) {
-	if (xUUBufAvail(psUUBuf) == 0) {						// if nothing there
-		return EOF ;									// return an error
-	}
+int	xUUBufGetC(uubuf_t * psUUBuf) {
+	if (xUUBufAvail(psUUBuf) == 0) return EOF ;
 	--psUUBuf->Used ;									// adjust the Used counter
 	return *(psUUBuf->pBuf + psUUBuf->Idx++) ;			// read character & adjust pointer
 }
 
-char *	pcUUBufGetS(char * pBuf, int32_t Number, uubuf_t * psUUBuf) {
-	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pBuf))
-	int32_t	cChr ;
+char * pcUUBufGetS(char * pBuf, int Number, uubuf_t * psUUBuf) {
 	char *	pTmp = pBuf ;
 	while (Number > 1) {
-		cChr = xUUBufGetC(psUUBuf) ;
+		int cChr = xUUBufGetC(psUUBuf) ;
 		if (cChr == EOF) {								// EOF reached?
 			*pTmp = 0 ;									// terminate buffer
 			return NULL ;								// indicate EOF before NEWLINE
 		}
-		if (cChr == CHR_LF) {							// end of string reached ?
+		if (cChr == '\n') {								// end of string reached ?
 			*pTmp = cChr ;								// store the NEWLINE
-			*pTmp = CHR_NUL ;							// terminate buffer
+			*pTmp = 0 ;									// terminate buffer
 			return pBuf ;								// and return a valid state
 		}
-		if (cChr == CHR_CR) {
-			continue ;
-		}
+		if (cChr == '\r') continue;
 		*pTmp++ = cChr ;								// store the character, adjust the pointer
 		Number-- ;										// and update remaining chars to read
 	}
@@ -63,8 +47,7 @@ char *	pcUUBufGetS(char * pBuf, int32_t Number, uubuf_t * psUUBuf) {
 	return pBuf ;										// and return a valid state
 }
 
-int32_t	xUUBufCreate(uubuf_t * psUUBuf, char * pcBuf, size_t BufSize, size_t Used) {
-	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(psUUBuf) && INRANGE(pbufSIZE_MINIMUM, BufSize, pbufSIZE_MAXIMUM, size_t) && (Used <= BufSize)) ;
+int	xUUBufCreate(uubuf_t * psUUBuf, char * pcBuf, size_t BufSize, size_t Used) {
 	psUUBuf->Size	= BufSize ;
 	psUUBuf->Idx	= 0 ;
 	if (pcBuf) {
@@ -76,30 +59,20 @@ int32_t	xUUBufCreate(uubuf_t * psUUBuf, char * pcBuf, size_t BufSize, size_t Use
 		psUUBuf->Used	= 0 ;
 		psUUBuf->Alloc	= psUUBuf->Size ;				// show memory as ALLOCATED
 	}
-	if (psUUBuf->Used == 0) {
-		memset(psUUBuf->pBuf, 0, psUUBuf->Size) ;		// clear buffer ONLY if nothing to be used
-	}
+	if (psUUBuf->Used == 0) memset(psUUBuf->pBuf, 0, psUUBuf->Size);	// clear buffer ONLY if nothing to be used
 	return psUUBuf->Size ;
 }
 
-void	vUUBufDestroy(uubuf_t * psUUBuf) {
-	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(psUUBuf)) ;
-	if (psUUBuf->Alloc) {
-		free(psUUBuf->pBuf) ;
-	}
-}
+void vUUBufDestroy(uubuf_t * psUUBuf) { if (psUUBuf->Alloc) free(psUUBuf->pBuf); }
 
-void	vUUBufAdjust(uubuf_t * psUUBuf, ssize_t Adj)	{
-	if (Adj < 0) { psUUBuf->Idx -= Adj ; } else { psUUBuf->Idx += Adj ; }
+void vUUBufAdjust(uubuf_t * psUUBuf, ssize_t Adj)	{
+	if (Adj < 0) psUUBuf->Idx -= Adj;
+	else psUUBuf->Idx += Adj;
 	psUUBuf->Used += Adj;
 }
 
-void	vUUBufReport(uubuf_t * psUUBuf) {
+void vUUBufReport(uubuf_t * psUUBuf) {
 	printfx("P=%p  B=%p  I=%d  S=%d  U=%d  A=%d\n",
 			psUUBuf, psUUBuf->pBuf, psUUBuf->Idx, psUUBuf->Size, psUUBuf->Used, psUUBuf->Alloc) ;
-	if (psUUBuf->Used) {
-		printfx("%!'+B", psUUBuf->Used, psUUBuf->pBuf) ;
-	}
+	if (psUUBuf->Used) printfx("%!'+B", psUUBuf->Used, psUUBuf->pBuf);
 }
-
-// ################################## Diagnostic and testing functions #############################

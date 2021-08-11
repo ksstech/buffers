@@ -4,9 +4,7 @@
 
 #pragma	once
 
-#include	"freertos/FreeRTOS.h"
-#include	"freertos/semphr.h"
-//#include	"definitions.h"
+#include	"FreeRTOS_Support.h"
 
 #include	<stdint.h>
 #include	<stdarg.h>
@@ -55,7 +53,7 @@ typedef	struct __attribute__((packed)) ubuf_t {
 } ubuf_t ;
 DUMB_STATIC_ASSERT(sizeof(ubuf_t) == 20) ;
 
-extern ubuf_t	sUBuf[ubufMAX_OPEN] ;
+extern ubuf_t sUBuf[ubufMAX_OPEN] ;
 
 // ################################### EXTERNAL FUNCTIONS ##########################################
 
@@ -95,7 +93,7 @@ ssize_t	xUBufRead(int, void *, size_t) ;
 ssize_t	xUBufWrite(int, const void *, size_t) ;
 int	xUBufIoctl(int, int, va_list) ;
 
-void	vUBufReport(ubuf_t *) ;
+void vUBufReport(ubuf_t *) ;
 
 #ifdef __cplusplus
 }

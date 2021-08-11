@@ -1,24 +1,5 @@
 /*
- * Copyright 2014-18 AM Maree/KSS Technologies (Pty) Ltd.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
- * and associated documentation files (the "Software"), to deal in the Software without restriction,
- * including without limitation the rights to use, copy, modify, merge, publish, distribute,
- * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all copies or
- * substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
- * BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
- * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- */
-
-/*
+ * Copyright 2014-21 Andre M. Maree/KSS Technologies (Pty) Ltd.
  * x_buffers.h
  */
 
@@ -27,7 +8,6 @@
 #include	"definitions.h"
 
 #include	<stdint.h>
-#include	<stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -70,36 +50,33 @@ typedef struct buf_s {
 #endif
     size_t			xUsed ;
     size_t			xSize ;
-	int32_t			handle ;
+	int				handle ;
 } buf_t ;
-
 DUMB_STATIC_ASSERT(sizeof(buf_t) == 32) ;
 
 // #################################################################################################
 
-void *	pvBufTake(size_t ) ;
-int32_t	xBufGive(void * pvBuf) ;
-
-int32_t	xBufReport(buf_t * psBuf) ;
-void	vBufReset( buf_t * psBuf, size_t Used) ;
+void * pvBufTake(size_t ) ;
+int	xBufGive(void * pvBuf) ;
+int	xBufReport(buf_t * psBuf) ;
+void vBufReset( buf_t * psBuf, size_t Used) ;
 buf_t *	psBufOpen(void * pBuf, size_t Size, uint32_t flags, size_t Used) ;
-int32_t	xBufClose(buf_t * psBuf) ;
+int	xBufClose(buf_t * psBuf) ;
 
-size_t	xBufAvail(buf_t * psBuf) ;
-size_t	xBufSpace(buf_t * psBuf) ;
-int32_t	xBufPutC(int32_t cChr, buf_t * psBuf) ;
-int32_t	xBufGetC(buf_t * psBuf) ;
-int32_t xBufPeek(buf_t * psBuf) ;
-char *	pcBufGetS(char * pcBuf, int32_t , buf_t * psBuf) ;
+size_t xBufAvail(buf_t * psBuf) ;
+size_t xBufSpace(buf_t * psBuf) ;
+int	xBufPutC(int cChr, buf_t * psBuf) ;
+int	xBufGetC(buf_t * psBuf) ;
+int xBufPeek(buf_t * psBuf) ;
+char * pcBufGetS(char * pcBuf, int , buf_t * psBuf) ;
 
-size_t	xBufWrite(void * pvBuf, size_t , size_t , buf_t * psBuf) ;
-size_t	xBufRead(void * pvBuf, size_t , size_t , buf_t * psBuf) ;
-int32_t	xBufSeek(buf_t * psBuf, int32_t , int32_t , int32_t ) ;
-int32_t	xBufTell(buf_t * psBuf, int32_t ) ;
-char *	pcBufTellPointer(buf_t * psBuf, int32_t flags) ;
-
-int32_t	xBufPrintClose(buf_t * psBuf) ;
-int32_t	xBufSyslogClose(buf_t * psBuf, uint32_t Prio) ;
+size_t xBufWrite(void * pvBuf, size_t , size_t , buf_t * psBuf) ;
+size_t xBufRead(void * pvBuf, size_t , size_t , buf_t * psBuf) ;
+int	xBufSeek(buf_t * psBuf, int , int , int ) ;
+int	xBufTell(buf_t * psBuf, int ) ;
+char * pcBufTellPointer(buf_t * psBuf, int flags) ;
+int	xBufPrintClose(buf_t * psBuf) ;
+int	xBufSyslogClose(buf_t * psBuf, uint32_t Prio) ;
 
 #ifdef __cplusplus
 }
