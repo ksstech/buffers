@@ -89,7 +89,7 @@ int	xUBufCreate(ubuf_t * psUBuf, char * pcBuf, size_t BufSize, size_t Used) {
 		psUBuf->pBuf	= pcBuf ;
 		psUBuf->f_alloc = 0 ;
 	} else if (Used == 0){
-		psUBuf->pBuf	= malloc(BufSize) ;
+		psUBuf->pBuf	= pvRtosMalloc(BufSize) ;
 		psUBuf->f_alloc = 1 ;
 	} else {
 		return 0 ;
@@ -184,7 +184,7 @@ int	xUBufOpen(const char * pccPath, int flags, int Size) {
 	int fd = 0 ;
 	do {
 		if (sUBuf[fd].pBuf == NULL) {
-			sUBuf[fd].pBuf	= malloc(Size) ;
+			sUBuf[fd].pBuf	= pvRtosMalloc(Size) ;
 			sUBuf[fd].mux	= xSemaphoreCreateMutex() ;
 			sUBuf[fd].flags	= flags ;
 			sUBuf[fd].Size	= Size ;
@@ -201,7 +201,7 @@ int	xUBufOpen(const char * pccPath, int flags, int Size) {
 int	xUBufClose(int32_t fd) {
 	if (INRANGE(0, fd, ubufMAX_OPEN-1, int)) {
 		ubuf_t * psUBuf = &sUBuf[fd] ;
-		free(psUBuf->pBuf) ;
+		vRtosFree(psUBuf->pBuf) ;
 		vSemaphoreDelete(psUBuf->mux) ;
 		memset(psUBuf, 0, sizeof(ubuf_t)) ;
 		return erSUCCESS ;

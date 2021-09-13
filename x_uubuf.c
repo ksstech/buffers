@@ -3,6 +3,7 @@
  */
 
 #include	"x_uubuf.h"
+#include	"FreeRTOS_Support.h"
 #include 	"printfx.h"
 
 #include	<string.h>
@@ -55,7 +56,7 @@ int	xUUBufCreate(uubuf_t * psUUBuf, char * pcBuf, size_t BufSize, size_t Used) {
 		psUUBuf->Used	= Used ;
 		psUUBuf->Alloc	= 0 ;							// show memory as provided, NOT allocated
 	} else {
-		psUUBuf->pBuf	= malloc(psUUBuf->Size) ;
+		psUUBuf->pBuf	= pvRtosMalloc(psUUBuf->Size) ;
 		psUUBuf->Used	= 0 ;
 		psUUBuf->Alloc	= psUUBuf->Size ;				// show memory as ALLOCATED
 	}
@@ -63,7 +64,7 @@ int	xUUBufCreate(uubuf_t * psUUBuf, char * pcBuf, size_t BufSize, size_t Used) {
 	return psUUBuf->Size ;
 }
 
-void vUUBufDestroy(uubuf_t * psUUBuf) { if (psUUBuf->Alloc) free(psUUBuf->pBuf); }
+void vUUBufDestroy(uubuf_t * psUUBuf) { if (psUUBuf->Alloc) vRtosFree(psUUBuf->pBuf); }
 
 void vUUBufAdjust(uubuf_t * psUUBuf, ssize_t Adj)	{
 	if (Adj < 0) psUUBuf->Idx -= Adj;

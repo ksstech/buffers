@@ -73,7 +73,7 @@ size_t xUBufSetDefaultSize(size_t) ;
 /**
  * Using the supplied uBUf structure, initialises the members as required
  * @param	psUBuf		structure to initialise
- * @param	pcBuf		preallocated buffer, if NULL will malloc
+ * @param	pcBuf		preallocated buffer, if NULL will pvRtosMalloc
  * @param	BufSize		size of preallocated buffer, or size to be allocated
  * @param	Used		If preallocated buffer, portion already used
  * @return	Buffer size if successful, 0 if not.
