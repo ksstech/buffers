@@ -37,7 +37,7 @@
 buf_t bufTable[configBUFFERS_MAX_OPEN] ;
 
 #ifdef ESP_PLATFORM
-	portMUX_TYPE	muxBuffers = { 0 } ;
+	portMUX_TYPE	muxBuffers = { 0 };
 //	#include	"soc/spinlock.h"
 //	portMUX_TYPE	muxBuffers = { .owner = SPINLOCK_FREE, .count = 0 } ;
 #endif
@@ -58,7 +58,7 @@ void *	pvBufTake(size_t BufSize) {
 	} else if (BufSize <= sizeof(BufMedium)) {
 		xRtosSemaphoreTake(&BufMedLock, portMAX_DELAY) ;
 		return BufMedium ;
-	} else 	if (BufSize <= sizeof(BufLarge)) {
+	} else if (BufSize <= sizeof(BufLarge)) {
 		xRtosSemaphoreTake(&BufLrgLock, portMAX_DELAY) ;
 		return BufLarge ;
 	}
@@ -158,10 +158,10 @@ int32_t	Index ;
  * @param psBuf
  * @return
  */
-static	int32_t	vBufGivePointer(buf_t * psBuf) {
 int32_t	Index ;
 	for (Index = 0; Index < configBUFFERS_MAX_OPEN; Index++) {
 		if (psBuf == &bufTable[Index]) {
+static int vBufGivePointer(buf_t * psBuf) {
 			psBuf->pBeg = 0 ;							/* Mark as closed/unused */
 			return erSUCCESS ;
 		}
