@@ -134,15 +134,14 @@ static	void	vBufIsrExit(buf_t * psBuf) {
  * @return
  */
 static	buf_t * vBufTakePointer( void ) {
-int32_t	Index ;
 	#if	defined(ESP_PLATFORM)
 //	if ((muxBuffers.count == 0) && (muxBuffers.owner == 0)) {
 		vPortCPUInitializeMutex(&muxBuffers) ;
 //	}
 	#endif
-	for (Index = 0; Index < configBUFFERS_MAX_OPEN; Index++) {
-		if (bufTable[Index].pBeg == 0) {
-			return &bufTable[Index] ;
+	for (int i = 0; i < configBUFFERS_MAX_OPEN; i++) {
+		if (bufTable[i].pBeg == 0) {
+			return &bufTable[i] ;
 		}
 	}
 /* If we ASSERT() here something might be recursing hence eating up all structures.
@@ -158,10 +157,9 @@ int32_t	Index ;
  * @param psBuf
  * @return
  */
-int32_t	Index ;
-	for (Index = 0; Index < configBUFFERS_MAX_OPEN; Index++) {
-		if (psBuf == &bufTable[Index]) {
 static int vBufGivePointer(buf_t * psBuf) {
+	for (int i = 0; i < configBUFFERS_MAX_OPEN; i++) {
+		if (psBuf == &bufTable[i]) {
 			psBuf->pBeg = 0 ;							/* Mark as closed/unused */
 			return erSUCCESS ;
 		}
