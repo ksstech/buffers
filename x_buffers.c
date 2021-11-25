@@ -138,9 +138,8 @@ static	buf_t * vBufTakePointer( void ) {
 	spinlock_initialize(&muxBuffers);
 	#endif
 	for (int i = 0; i < configBUFFERS_MAX_OPEN; i++) {
-		if (bufTable[i].pBeg == 0) {
-			return &bufTable[i] ;
-		}
+		if (bufTable[i].pBeg == 0)
+			return &bufTable[i];
 	}
 /* If we ASSERT() here something might be recursing hence eating up all structures.
  * Common cause is if we use an SL_ or IF_SL_ in the socketsX module,
