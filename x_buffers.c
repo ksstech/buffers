@@ -135,9 +135,7 @@ static	void	vBufIsrExit(buf_t * psBuf) {
  */
 static	buf_t * vBufTakePointer( void ) {
 	#if	defined(ESP_PLATFORM)
-//	if ((muxBuffers.count == 0) && (muxBuffers.owner == 0)) {
-		vPortCPUInitializeMutex(&muxBuffers) ;
-//	}
+	spinlock_initialize(&muxBuffers);
 	#endif
 	for (int i = 0; i < configBUFFERS_MAX_OPEN; i++) {
 		if (bufTable[i].pBeg == 0) {
