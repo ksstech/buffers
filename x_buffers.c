@@ -133,11 +133,11 @@ static	void	vBufIsrExit(buf_t * psBuf) {
  * vBufTakePointer()
  * @return
  */
-static	buf_t * vBufTakePointer( void ) {
+static buf_t * vBufTakePointer(void) {
 	#if	defined(ESP_PLATFORM)
 	spinlock_initialize(&muxBuffers);
 	#endif
-	for (int i = 0; i < configBUFFERS_MAX_OPEN; i++) {
+	for (int i = 0; i < configBUFFERS_MAX_OPEN; ++i) {
 		if (bufTable[i].pBeg == 0)
 			return &bufTable[i];
 	}
