@@ -4,10 +4,11 @@
 
 #pragma	once
 
-#include	"FreeRTOS_Support.h"
-
+#include	<fcntl.h>
 #include	<stdint.h>
 #include	<stdarg.h>
+
+#include	"FreeRTOS_Support.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -15,43 +16,37 @@ extern "C" {
 
 // ##################################### MACRO definitions #########################################
 
-#define	ubufMAX_OPEN				3
-#define	ubufDEV_PATH				"/ubuf"
-
-// ###################################### BUILD : CONFIG definitions ###############################
-
 #define	ubufSIZE_MINIMUM			32
 #define	ubufSIZE_DEFAULT			1024
 #define	ubufSIZE_MAXIMUM			16384
+#define	ubufMAX_OPEN				3
+#define	ubufDEV_PATH				"/ubuf"
 
 // ####################################### enumerations ############################################
 
-enum {
-	ioctlUBUF_UNDEFINED,
-	ioctlUBUF_I_PTR_CNTL,
-	ioctlUBUF_NUMBER,
-} ;
+enum { ioctlUBUF_UNDEFINED, ioctlUBUF_I_PTR_CNTL, ioctlUBUF_NUMBER };
 
 // ####################################### structures  #############################################
 
-typedef	struct __attribute__((packed)) ubuf_t {
-	char *				pBuf ;
-	SemaphoreHandle_t	mux ;
-	uint16_t			flags ;							// stdlib related flags
+typedef	struct ubuf_t {
+	char * pBuf;
+	SemaphoreHandle_t mux;
+	u16_t flags;					// stdlib related flags
 	union {
-		struct {
-			uint8_t		f_init	: 1 ;					// LSB
-			uint8_t		f_alloc	: 1 ;
-			uint16_t	_spare : 14 ;					// MSB
+		struct  __attribute__((packed)) {
+			u8_t	f_init	: 1;	// LSB
+			u8_t	f_alloc	: 1;
+			u8_t	f_nolock: 1;
+			u16_t	_spare	: 13;	// MSB
 		} ;
-		uint16_t		_flags ;						// module flags
-	} ;
-	uint16_t			Size ;
-	volatile uint16_t	IdxWR ;							// index to next space to WRITE to
-	volatile uint16_t	IdxRD ;							// index to next char to be READ from
-	volatile uint16_t	Used ;
+		u16_t	_flags;				// module flags
+	};
+	u16_t			Size;
+	volatile u16_t	IdxWR;			// index to next space to WRITE to
+	volatile u16_t	IdxRD;			// index to next char to be READ from
+	volatile u16_t	Used;
 } ubuf_t ;
-DUMB_STATIC_ASSERT(sizeof(ubuf_t) == 20) ;
+DUMB_STATIC_ASSERT(sizeof(ubuf_t) == 20);
 
 extern ubuf_t sUBuf[ubufMAX_OPEN] ;
 
