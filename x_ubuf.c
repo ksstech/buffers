@@ -133,6 +133,7 @@ int	xUBufSpace(ubuf_t * psUBuf) { return psUBuf->Size - psUBuf->Used ; }
 
 int	xUBufGetC(ubuf_t * psUBuf) {
 	if ((psUBuf->pBuf == NULL) || (psUBuf->Size == 0)) {
+		IF_myASSERT(debugTRACK, 0);
 		errno = ENOMEM ;
 		return erFAILURE ;
 	}
