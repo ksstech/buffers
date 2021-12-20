@@ -42,11 +42,9 @@ static int xUBufBlockAvail(ubuf_t * psUBuf) {
 		if (psUBuf->flags & O_NONBLOCK) {
 			errno = EAGAIN ;
 			return EOF ;
-		} else {
-			while (psUBuf->Used == 0) {
-				vTaskDelay(10);
-			}
 		}
+		while (psUBuf->Used == 0)
+			vTaskDelay(2);
 	}
 	return erSUCCESS ;
 }
@@ -77,15 +75,13 @@ static int xUBufBlockSpace(ubuf_t * psUBuf, size_t Size) {
 // ################################### Global/public functions #####################################
 
 void xUBufLock(ubuf_t * psUBuf) {
-	if (!psUBuf->f_nolock) {
+	if (psUBuf->f_nolock == 0)
 		xRtosSemaphoreTake(&psUBuf->mux, portMAX_DELAY);
-	}
 }
 
 void xUBufUnLock(ubuf_t * psUBuf) {
-	if (!psUBuf->f_nolock) {
+	if (psUBuf->f_nolock == 0)
 		xRtosSemaphoreGive(&psUBuf->mux);
-	}
 }
 
 size_t xUBufSetDefaultSize(size_t NewSize) {
@@ -256,7 +252,7 @@ int	xUBufClose(int32_t fd) {
  * xUBufRead() -
  */
 ssize_t	xUBufRead(int fd, void * pBuf, size_t Size) {
-	if (OUTSIDE(0, fd, ubufMAX_OPEN-1, int32_t) || (sUBuf[fd].pBuf == NULL) || (Size == 0)) {
+	if (OUTSIDE(0, fd, ubufMAX_OPEN-1, int) || (sUBuf[fd].pBuf == NULL) || (Size == 0)) {
 		errno = EBADF ;
 		return erFAILURE ;
 	}
@@ -264,14 +260,14 @@ ssize_t	xUBufRead(int fd, void * pBuf, size_t Size) {
 	int iRV = xUBufBlockAvail(psUBuf);
 	if (iRV != erSUCCESS)
 		return iRV;
-	ssize_t	count	= 0 ;
+	ssize_t	count = 0;
 	xUBufLock(psUBuf) ;
 	while((psUBuf->Used > 0) && (count < Size)) {
 		*(char *)pBuf++ = *(psUBuf->pBuf + psUBuf->IdxRD++) ;
 		--psUBuf->Used ;
 		++count ;
 		if (psUBuf->IdxRD == psUBuf->Size) {			// past the end?
-			psUBuf->IdxRD = 0 ;						// yes, reset to start
+			psUBuf->IdxRD = 0 ;							// yes, reset to start
 		}
 	}
 	xUBufUnLock(psUBuf) ;
