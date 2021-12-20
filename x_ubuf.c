@@ -50,24 +50,22 @@ static int xUBufBlockAvail(ubuf_t * psUBuf) {
 }
 
 static int xUBufBlockSpace(ubuf_t * psUBuf, size_t Size) {
-	IF_myASSERT(debugPARAM, psUBuf->Size > Size) ;
-	if ((psUBuf->Size - psUBuf->Used) < Size &&			// insufficient space ?
-		(psUBuf->flags & O_TRUNC)) {					// yes, supposed to TRUNCate ?
+	IF_myASSERT(debugPARAM, psUBuf->Size > Size);
+	if ((psUBuf->Size - psUBuf->Used) >= Size)			// sufficient space ?
+		return erSUCCESS;
+	if (psUBuf->flags & O_NONBLOCK) {					// non-blocking mode ?
+		errno = EAGAIN ;								// yes, set error code
+		return EOF ;									// and return
+	} else if (psUBuf->flags & O_TRUNC) {				// yes, supposed to TRUNCate ?
 		xUBufLock(psUBuf);
-		Size -= psUBuf->Size - psUBuf->Used ;			// yes, calculate space required
+		Size -= (psUBuf->Size - psUBuf->Used);			// yes, calculate space required
 		psUBuf->IdxRD += Size;							// adjust output/read index accordingly
 		psUBuf->IdxRD %= psUBuf->Size;					// correct for wrap
 		psUBuf->Used -= Size;							// adjust remaining character count
 		xUBufUnLock(psUBuf);
-	} else if (psUBuf->Size == psUBuf->Used) {			// not even 1 slot spare in buffer
-		if (psUBuf->flags & O_NONBLOCK) {				// supposed to block ?
-			errno = EAGAIN ;							// no, set the error code
-			return EOF ;								// and return
-		} else {
-			while (psUBuf->Size == psUBuf->Used) {		// wait for a single spot to open...
-				vTaskDelay(10) ;						// loop waiting for sufficient space
-			}
-		}
+	} else {
+		while ((psUBuf->Size - psUBuf->Used) < Size)	// wait for space to open...
+			vTaskDelay(2);								// loop waiting for sufficient space
 	}
 	return erSUCCESS ;
 }
