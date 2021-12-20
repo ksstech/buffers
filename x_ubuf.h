@@ -42,9 +42,9 @@ typedef	struct ubuf_t {
 		u16_t	_flags;				// module flags
 	};
 	u16_t			Size;
+	volatile u16_t	Used;
 	volatile u16_t	IdxWR;			// index to next space to WRITE to
 	volatile u16_t	IdxRD;			// index to next char to be READ from
-	volatile u16_t	Used;
 } ubuf_t ;
 DUMB_STATIC_ASSERT(sizeof(ubuf_t) == 20);
 
