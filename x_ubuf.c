@@ -49,25 +49,35 @@ static int xUBufBlockAvail(ubuf_t * psUBuf) {
 	return erSUCCESS ;
 }
 
-static int xUBufBlockSpace(ubuf_t * psUBuf, size_t Size) {
+/**
+ * MUST still check logic if Size requested is equal to of bigger than buffer size.
+ * Also must do with a) empty and b) partial full buffers
+ */
+static ssize_t xUBufBlockSpace(ubuf_t * psUBuf, size_t Size) {
 	IF_myASSERT(debugPARAM, psUBuf->Size > Size);
-	if ((psUBuf->Size - psUBuf->Used) >= Size)			// sufficient space ?
-		return erSUCCESS;
-	if (psUBuf->flags & O_NONBLOCK) {					// non-blocking mode ?
-		errno = EAGAIN ;								// yes, set error code
-		return EOF ;									// and return
-	} else if (psUBuf->flags & O_TRUNC) {				// yes, supposed to TRUNCate ?
+	ssize_t Avail = psUBuf->Size - psUBuf->Used;
+	if (Avail >= Size)									// sufficient space ?
+		return Size;
+
+	if (psUBuf->flags & O_TRUNC) {						// yes, supposed to TRUNCate ?
+		if (Size > psUBuf->Size)						// incase Size GT buffer size
+			Size = psUBuf->Size;
 		xUBufLock(psUBuf);
 		Size -= (psUBuf->Size - psUBuf->Used);			// yes, calculate space required
 		psUBuf->IdxRD += Size;							// adjust output/read index accordingly
 		psUBuf->IdxRD %= psUBuf->Size;					// correct for wrap
 		psUBuf->Used -= Size;							// adjust remaining character count
 		xUBufUnLock(psUBuf);
+	} else if (psUBuf->flags & O_NONBLOCK) {			// non-blocking mode ?
+		errno = EAGAIN ;								// yes, set error code
+		return Avail;									// and return actual space available
 	} else {
-		while ((psUBuf->Size - psUBuf->Used) < Size)	// wait for space to open...
+		do {
 			vTaskDelay(2);								// loop waiting for sufficient space
+			Avail = psUBuf->Size - psUBuf->Used;
+		} while (Avail < Size);							// wait for space to open...
 	}
-	return erSUCCESS ;
+	return Size;
 }
 
 // ################################### Global/public functions #####################################
@@ -150,7 +160,7 @@ int	xUBufGetC(ubuf_t * psUBuf) {
 
 int	xUBufPutC(ubuf_t * psUBuf, int cChr) {
 	int iRV = xUBufBlockSpace(psUBuf, sizeof(char));
-	if (iRV != erSUCCESS) {
+	if (iRV != sizeof(char)) {
 		return iRV;
 	}
 	xUBufLock(psUBuf);
@@ -279,21 +289,23 @@ ssize_t	xUBufWrite(int fd, const void * pBuf, size_t Size) {
 		return erFAILURE ;
 	}
 	ubuf_t * psUBuf = &sUBuf[fd] ;
-	if (xUBufBlockSpace(psUBuf, Size) != erSUCCESS) {
+
+	Size = xUBufBlockSpace(psUBuf, Size);
+	if (Size < 1) {
 		return EOF ;
 	}
-	ssize_t	count	= 0 ;
-	xUBufLock(psUBuf) ;
-	while((psUBuf->Used < psUBuf->Size) && (count < Size)) {
+	ssize_t	Count = 0;
+	xUBufLock(psUBuf);
+	while((psUBuf->Used < psUBuf->Size) && (Count < Size)) {
 		*(psUBuf->pBuf + psUBuf->IdxWR++) = *(const char *)pBuf++ ;
 		++psUBuf->Used ;
-		++count ;
+		++Count ;
 		if (psUBuf->IdxWR == psUBuf->Size) {			// past the end?
 			psUBuf->IdxWR = 0 ;							// yes, reset to start
 		}
 	}
 	xUBufUnLock(psUBuf) ;
-	return count ;
+	return Count ;
 }
 
 int	xUBufIoctl(int fd, int request, va_list vArgs) {
