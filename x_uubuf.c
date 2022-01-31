@@ -13,7 +13,8 @@
 // ################################### Global/public functions #####################################
 
 int	xUUBufPutC(uubuf_t * psUUBuf, int cChr) {
-	if (psUUBuf->Used == psUUBuf->Size) return EOF ;	// full, return error
+	if (psUUBuf->Used == psUUBuf->Size)
+		return EOF ;	// full, return error
 	*(psUUBuf->pBuf + psUUBuf->Idx)	= cChr ;			// store character in buffer, adjust pointer
 	++psUUBuf->Idx ;
 	++psUUBuf->Used ;
@@ -21,7 +22,8 @@ int	xUUBufPutC(uubuf_t * psUUBuf, int cChr) {
 }
 
 int	xUUBufGetC(uubuf_t * psUUBuf) {
-	if (xUUBufAvail(psUUBuf) == 0) return EOF ;
+	if (xUUBufAvail(psUUBuf) == 0)
+		return EOF ;
 	--psUUBuf->Used ;									// adjust the Used counter
 	return *(psUUBuf->pBuf + psUUBuf->Idx++) ;			// read character & adjust pointer
 }
@@ -39,11 +41,12 @@ char * pcUUBufGetS(char * pBuf, int Number, uubuf_t * psUUBuf) {
 			*pTmp = 0 ;									// terminate buffer
 			return pBuf ;								// and return a valid state
 		}
-		if (cChr == '\r') continue;
+		if (cChr == '\r')
+			continue;
 		*pTmp++ = cChr ;								// store the character, adjust the pointer
 		Number-- ;										// and update remaining chars to read
 	}
-// If we get here we have read (Number - 1) characters and still no NEWLINE
+	// If we get here we have read (Number - 1) characters and still no NEWLINE
 	*pTmp = 0 ;											// terminate buffer
 	return pBuf ;										// and return a valid state
 }
@@ -60,15 +63,22 @@ int	xUUBufCreate(uubuf_t * psUUBuf, char * pcBuf, size_t BufSize, size_t Used) {
 		psUUBuf->Used	= 0 ;
 		psUUBuf->Alloc	= psUUBuf->Size ;				// show memory as ALLOCATED
 	}
-	if (psUUBuf->Used == 0) memset(psUUBuf->pBuf, 0, psUUBuf->Size);	// clear buffer ONLY if nothing to be used
+	if (psUUBuf->Used == 0)
+		memset(psUUBuf->pBuf, 0, psUUBuf->Size);	// clear buffer ONLY if nothing to be used
 	return psUUBuf->Size ;
 }
 
-void vUUBufDestroy(uubuf_t * psUUBuf) { if (psUUBuf->Alloc) vRtosFree(psUUBuf->pBuf); }
+void vUUBufDestroy(uubuf_t * psUUBuf) {
+	if (psUUBuf->Alloc)
+		vRtosFree(psUUBuf->pBuf);
+}
 
 void vUUBufAdjust(uubuf_t * psUUBuf, ssize_t Adj)	{
-	if (Adj < 0) psUUBuf->Idx -= Adj;
-	else psUUBuf->Idx += Adj;
+	if (Adj < 0) {
+		psUUBuf->Idx -= Adj;
+	} else {
+		psUUBuf->Idx += Adj;
+	}
 	psUUBuf->Used += Adj;
 }
 
