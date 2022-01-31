@@ -1,10 +1,5 @@
 /*
- * Copyright 2014-21 Andre M. Maree/KSS Technologies (Pty) Ltd.
- * x_buffers.c - linear & circular buffer support routines
- *
- * Notes:
- * Change buffer support into simple file I/O
- * Enforce RO & WO modes for different files (circular/linear buffer) streams.
+ * x_buffers.c - Copyright 2014-22 Andre M. Maree/KSS Technologies (Pty) Ltd.
  */
 
 #include	"hal_config.h"
