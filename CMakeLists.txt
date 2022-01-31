@@ -1,5 +1,5 @@
 # BUFFERS
-set( srcs "x_buffers.c" "x_ubuf.c" "x_uubuf.c" )
+set( srcs "x_buffers.c" "x_ubuf.c" "x_uubuf.c" "hbuf.c")
 set( include_dirs "." )
 set( requires common rtos-support )
 set( priv_requires hal_esp32 printfx syslog vfs )
