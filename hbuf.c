@@ -56,19 +56,28 @@ void vHBufAddCmd(hbuf_t * psHB, uint8_t * pu8Buf, size_t Size) {
  * @brief
  */
 void vHBufReport(hbuf_t * psHB) {
+	if (psHB->Count == 0) {
+		printfx("CLI buffer empty\n");
+		return;
+	}
 	printfx_lock();
 	printfx_nolock("No1=%d  Cur=%d  Free=%d Cnt=%d\n", psHB->iNo1, psHB->iCur, psHB->iFree, psHB->Count);
 	uint8_t * pNow = &psHB->Buf[psHB->iNo1];
+	uint8_t u8Len;
 	while (true) {
-		printfx_nolock("'");
+		u8Len = 0;
 		while (*pNow) {
+			if (u8Len == 0)
+				printfx_nolock("'");
 			printfx_nolock("%c", *pNow);
 			++pNow;
 			if (pNow == &psHB->Buf[cliSIZE_HBUF]) {
 				pNow = psHB->Buf;
 			}
+			++u8Len;
 		}
-		printfx_nolock("'\n");
+		if (u8Len > 0)
+			printfx_nolock("'\n");
 		++pNow;											// step over terminating '0'
 		if (pNow == &psHB->Buf[psHB->iFree]) {
 			break;
