@@ -46,7 +46,7 @@ typedef	struct ubuf_t {
 	volatile u16_t	IdxWR;			// index to next space to WRITE to
 	volatile u16_t	IdxRD;			// index to next char to be READ from
 } ubuf_t ;
-DUMB_STATIC_ASSERT(sizeof(ubuf_t) == 20);
+DUMB_STATIC_ASSERT(sizeof(ubuf_t) == (12 + sizeof(char *) + sizeof(SemaphoreHandle_t)));
 
 extern ubuf_t sUBuf[ubufMAX_OPEN] ;
 
@@ -55,8 +55,10 @@ extern ubuf_t sUBuf[ubufMAX_OPEN] ;
 void xUBufLock(ubuf_t * psUBuf) ;
 void xUBufUnLock(ubuf_t * psUBuf) ;
 
-int	xUBufAvail(ubuf_t * psUBuf) ;
-int	xUBufSpace(ubuf_t * psUBuf) ;
+int	xUBufAvail(ubuf_t * psUBuf);
+int xUBufBlock(ubuf_t * psUBuf);
+int	xUBufSpace(ubuf_t * psUBuf);
+int xUBufEmptyBlock(ubuf_t * psUBuf, int (*hdlr)(char *, ssize_t));
 
 char * pcUBufTellWrite(ubuf_t * psUBuf) ;
 char * pcUBufTellRead(ubuf_t * psUBuf) ;
