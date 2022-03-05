@@ -197,7 +197,7 @@ int	xUBufGetC(ubuf_t * psUBuf) {
 		psUBuf->IdxRD = psUBuf->IdxWR = 0;				// reset In/Out indexes
 
 	xUBufUnLock(psUBuf);
-	IF_P(debugTRACK, "s=%d  i=%d  o=%d  cChr=%d", psUBuf->Size, psUBuf->IdxWR, psUBuf->IdxRD, iRV);
+	IF_RP(debugTRACK, "s=%d  i=%d  o=%d  cChr=%d", psUBuf->Size, psUBuf->IdxWR, psUBuf->IdxRD, iRV);
 	return iRV;
 }
 
