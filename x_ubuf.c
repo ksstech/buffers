@@ -170,6 +170,7 @@ int xUBufEmptyBlock(ubuf_t * psUBuf, int (*hdlr)(char *, ssize_t)) {
 			psUBuf->Used -= Size;							// decrease total available
 			psUBuf->IdxRD = 0;								// reset read index
 		}
+		IF_myASSERT(debugTRACK, iRV == Size);
 	}
 	if ((iRV >= 0) && psUBuf->Used) {
 		iRV = hdlr(psUBuf->pBuf, psUBuf->Used);
@@ -179,6 +180,7 @@ int xUBufEmptyBlock(ubuf_t * psUBuf, int (*hdlr)(char *, ssize_t)) {
 			psUBuf->IdxWR = 0;								// reset write index
 		}
 	}
+	IF_myASSERT(debugTRACK, !psUBuf->Used && !psUBuf->IdxRD && !psUBuf->IdxWR == 0);
 	xUBufUnLock(psUBuf);
 	return (iRV > 0 ) ? Total : iRV;
 }
