@@ -38,6 +38,11 @@ static size_t uBufSize = ubufSIZE_DEFAULT ;
 // ################################# Local/static functions ########################################
 
 static int xUBufBlockAvail(ubuf_t * psUBuf) {
+	if ((psUBuf->pBuf == NULL) || (psUBuf->Size == 0)) {
+		IF_myASSERT(debugTRACK, 0);
+		errno = ENOMEM ;
+		return erFAILURE ;
+	}
 	if (psUBuf->Used == 0) {
 		if (psUBuf->flags & O_NONBLOCK) {
 			errno = EAGAIN ;
@@ -179,11 +184,6 @@ int xUBufEmptyBlock(ubuf_t * psUBuf, int (*hdlr)(char *, ssize_t)) {
 }
 
 int	xUBufGetC(ubuf_t * psUBuf) {
-	if ((psUBuf->pBuf == NULL) || (psUBuf->Size == 0)) {
-		IF_myASSERT(debugTRACK, 0);
-		errno = ENOMEM ;
-		return erFAILURE ;
-	}
 	int iRV = xUBufBlockAvail(psUBuf);
 	if (iRV != erSUCCESS)
 		return iRV;
