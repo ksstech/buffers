@@ -59,6 +59,11 @@ static ssize_t xUBufBlockSpace(ubuf_t * psUBuf, size_t Size) {
 	if (Avail >= Size)									// sufficient space ?
 		return Size;
 
+	if (psUBuf->flags & O_NONBLOCK) {					// non-blocking mode ?
+			errno = EAGAIN ;							// yes, set error code
+			return Avail;								// and return actual space available
+	}
+
 	if (Size > psUBuf->Size)							// in case size GT buffer size
 		Size = psUBuf->Size;							// limit requested size to buffer size
 
@@ -69,10 +74,6 @@ static ssize_t xUBufBlockSpace(ubuf_t * psUBuf, size_t Size) {
 		psUBuf->IdxRD %= psUBuf->Size;					// correct for wrap
 		psUBuf->Used -= Req;							// adjust remaining character count
 		xUBufUnLock(psUBuf);
-
-	} else if (psUBuf->flags & O_NONBLOCK) {			// non-blocking mode ?
-		errno = EAGAIN ;								// yes, set error code
-		return Avail;									// and return actual space available
 
 	} else {
 		do {
