@@ -65,7 +65,7 @@ void *	pvBufTake(size_t BufSize) {
  * @param pvBuf
  * @return
  */
-int32_t	xBufGive(void * pvBuf) {
+int	xBufGive(void * pvBuf) {
 	if (pvBuf == BufSmall) {
 		return xRtosSemaphoreGive(&BufSmlLock) ;
 	} else if (pvBuf == BufMedium) {
@@ -160,7 +160,7 @@ static int vBufGivePointer(buf_t * psBuf) {
 	return erFAILURE ;
 }
 
-int32_t	xBufCompact(buf_t * psBuf) {
+int	xBufCompact(buf_t * psBuf) {
 	if (FF_STCHK(psBuf, FF_CIRCULAR) == 1 || FF_STCHK(psBuf, FF_MODEPACK) == 0) {
 		return erFAILURE ;
 	}
@@ -183,7 +183,7 @@ int32_t	xBufCompact(buf_t * psBuf) {
  * @param psBuf
  * @return
  */
-int32_t	xBufReport(buf_t * psBuf) {
+int	xBufReport(buf_t * psBuf) {
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
 	return P("B=%p  E=%p  R=%p  W=%p  S=%d  U=%d",
 								psBuf->pBeg,	psBuf->pEnd,
@@ -216,7 +216,7 @@ void	vBufReset(buf_t * psBuf, size_t Used) {
  * @param Used		data in buffer, available to be read
  * @return			erSUCCESS
  */
-static int32_t	xBufReuse(buf_t * psBuf, char * pBuf, size_t Size, uint32_t flags, size_t Used) {
+static int	xBufReuse(buf_t * psBuf, char * pBuf, size_t Size, uint32_t flags, size_t Used) {
 	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(psBuf) && pBuf != 0 && Used <= Size)
 	vBufIsrEntry(psBuf) ;
 	psBuf->pBeg		= pBuf ;
@@ -267,11 +267,11 @@ buf_t * psBufOpen(void * pBuf, size_t Size, uint32_t flags, size_t Used) {
  * @param	psBuf	pointer to the buffer control structure
  * @return	SUCCESS if deleted with error, FAILURE otherwise
  */
-int32_t	xBufClose(buf_t * psBuf) {
+int	xBufClose(buf_t * psBuf) {
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
 	vBufIsrEntry(psBuf) ;
 	char *	pTmp = psBuf->pBeg ;								// save pointer for later use..
-	int32_t iRV = vBufGivePointer(psBuf) ;
+	int iRV = vBufGivePointer(psBuf) ;
 	if ((iRV == erSUCCESS) && FF_STCHK(psBuf, FF_BUFFALOC)) {
 #if 	defined( __GNUC__ )
 		psBuf->_flags = 0 ;
@@ -315,9 +315,9 @@ size_t	xBufSpace(buf_t * psBuf) {
  * @param cChr	the char to be written
  * @return		cChr if the char was written or EOF if discarded/overwritten
  */
-int32_t	xBufPutC(int32_t cChr, buf_t * psBuf) {
+int	xBufPutC(int cChr, buf_t * psBuf) {
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
-	int32_t	iRV ;
+	int	iRV ;
 	if ((cChr == CHR_LF) && (FF_STCHK(psBuf, FF_MODEBIN) == 0)) {
 		iRV = xBufPutC(CHR_CR, psBuf) ;
 		if (iRV == EOF) {
@@ -345,12 +345,12 @@ int32_t	xBufPutC(int32_t cChr, buf_t * psBuf) {
  * @param psBuf	pointer to buffer control structure
  * @return		if successful the character read else EOF
  */
-int32_t	xBufGetC(buf_t * psBuf) {
+int	xBufGetC(buf_t * psBuf) {
 	if (xBufAvail(psBuf) == 0) {
 		return EOF ;
 	}
 	vBufIsrEntry(psBuf) ;
-	int32_t cChr = *psBuf->pRead++ ;							// read character & adjust pointer
+	int cChr = *psBuf->pRead++ ;							// read character & adjust pointer
 	psBuf->xUsed-- ;									// & adjust the Used counter
 	if (FF_STCHK(psBuf, FF_CIRCULAR)) {					// Circular buffer ...
 		if (psBuf->pRead == psBuf->pEnd) {				// and at end of buffer?
@@ -371,7 +371,7 @@ int32_t	xBufGetC(buf_t * psBuf) {
  * @param psBuf
  * @return
  */
-int32_t xBufPeek(buf_t * psBuf) {
+int xBufPeek(buf_t * psBuf) {
 	if (xBufAvail(psBuf) == 0) {
 		return EOF ;
 	}
@@ -385,11 +385,11 @@ int32_t xBufPeek(buf_t * psBuf) {
  * @param psBuf
  * @return
  */
-char *	pcBufGetS(char * pBuf, int32_t Number, buf_t * psBuf) {
+char *	pcBufGetS(char * pBuf, int Number, buf_t * psBuf) {
 	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pBuf))
 	char *	pTmp = pBuf ;
 	while (Number > 1) {
-		int32_t	cChr = xBufGetC(psBuf) ;
+		int	cChr = xBufGetC(psBuf) ;
 		if (cChr == EOF) {								// EOF reached?
 			*pTmp = CHR_NUL ;							// terminate buffer
 			return NULL ;								// indicate EOF before NEWLINE
@@ -483,7 +483,7 @@ size_t	xBufRead(void * pvBuf, size_t Size, size_t Count, buf_t * psBuf) {
  * @param flags
  * @return
  */
-int32_t	xBufSeek(buf_t * psBuf, int32_t Offset, int32_t whence, int32_t flags) {
+int	xBufSeek(buf_t * psBuf, int Offset, int whence, int flags) {
 char * pTmp ;
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
 	if (FF_STCHK(psBuf, FF_CIRCULAR)) {					// working on CIRCULAR buffer
@@ -533,8 +533,8 @@ char * pTmp ;
  * @param flags
  * @return
  */
-int32_t	xBufTell(buf_t * psBuf, int32_t flags) {
-	int32_t	iRV = erFAILURE;
+int	xBufTell(buf_t * psBuf, int flags) {
+	int	iRV = erFAILURE;
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
 	if (FF_STCHK(psBuf, FF_CIRCULAR)) {				// working on circular buffer
 		IF_myASSERT(debugRESULT, 0)
@@ -562,7 +562,7 @@ int32_t	xBufTell(buf_t * psBuf, int32_t flags) {
  * @param flags
  * @return
  */
-char *	pcBufTellPointer(buf_t * psBuf, int32_t flags) {
+char *	pcBufTellPointer(buf_t * psBuf, int flags) {
 char * pcRetVal = (char *) erFAILURE ;
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
 	if (FF_STCHK(psBuf, FF_CIRCULAR)) {				// working on circular buffer
@@ -593,21 +593,21 @@ char * pcRetVal = (char *) erFAILURE ;
  * @param 	psBuf	pointer to the managed buffer to be printed
  * @return	number of characters printed
  */
-int32_t	xBufPrintClose(buf_t * psBuf) {
+int	xBufPrintClose(buf_t * psBuf) {
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
 	IF_myASSERT(debugPARAM, psBuf->xUsed > 0) ;
-	int32_t iRV = nprintfx(psBuf->xUsed, "%s", psBuf->pRead) ;
+	int iRV = nprintfx(psBuf->xUsed, "%s", psBuf->pRead) ;
 	xBufClose(psBuf) ;
 	return iRV ;
 }
 
 /**
- * xBufSyslogClose() - output buffer contents to syslog host and close the buffer
- * @param psBuf		pointer to the managed buffer to be printed
- * @param Prio		Syslog priority to be used
- * @return			status of the buffer close event
+ * @brief	output buffer contents to syslog host and close the buffer
+ * @param	pointer to the managed buffer to be printed
+ * @param	Syslog priority to be used
+ * @return	status of the buffer close event
  */
-int32_t	xBufSyslogClose(buf_t * psBuf, uint32_t Prio) {
+int	xBufSyslogClose(buf_t * psBuf, uint32_t Prio) {
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
 	IF_myASSERT(debugPARAM, psBuf->xUsed > 0) ;
 	SL_LOG(Prio, "%.*s", psBuf->xUsed, psBuf->pRead) ;
@@ -618,10 +618,10 @@ int32_t	xBufSyslogClose(buf_t * psBuf, uint32_t Prio) {
 #define	bufSTEP		10
 
 void	vBufUnitTest(void) {
-	int32_t	iRV ;
+	int	iRV ;
 	buf_t * psBuf = psBufOpen(0, bufSIZE, FF_MODER|FF_MODEW, 0) ;
-	for(int32_t a = 0; a < bufSIZE; a += bufSTEP) {
-		for(int32_t b = 0; b < bufSTEP; b++) {
+	for(int a = 0; a < bufSIZE; a += bufSTEP) {
+		for(int b = 0; b < bufSTEP; b++) {
 			iRV = xBufPutC(b + '0', psBuf) ;
 			if (iRV != (b + '0')) 	P("Failed")  ;
 		}
@@ -637,7 +637,7 @@ void	vBufUnitTest(void) {
 	if (xBufPutC('Z', psBuf) != EOF) 											P("Failed")  ;
 
 	// now read the buffer empty and verify the contents
-	for(int32_t a = 0; a < bufSIZE; a++) {
+	for(int a = 0; a < bufSIZE; a++) {
 		if (xBufGetC(psBuf) != ('0' + (a % bufSTEP)))							P("Failed")  ;
 	}
 
