@@ -154,6 +154,12 @@ int xUBufBlock(ubuf_t * psUBuf) {
 
 int	xUBufSpace(ubuf_t * psUBuf) { return psUBuf->Size - psUBuf->Used ; }
 
+/**
+ * @brief	Empty the specified buffer using the handler supplied
+ * 			Buffer will be emptied in 1 or 2 calls depending on state of pointers.
+ * @return	0+ represent the number of bytes written
+ * 			<0 representing an error code
+ */
 int xUBufEmptyBlock(ubuf_t * psUBuf, int (*hdlr)(char *, ssize_t)) {
 	if (psUBuf->Used == 0)
 		return 0;
@@ -180,7 +186,7 @@ int xUBufEmptyBlock(ubuf_t * psUBuf, int (*hdlr)(char *, ssize_t)) {
 			psUBuf->IdxWR = 0;								// reset write index
 		}
 	}
-	IF_myASSERT(debugTRACK, !psUBuf->Used && !psUBuf->IdxRD && !psUBuf->IdxWR == 0);
+	IF_myASSERT(debugTRACK, psUBuf->Used==0 && psUBuf->IdxRD==0 && psUBuf->IdxWR==0);
 	xUBufUnLock(psUBuf);
 	return (iRV > 0 ) ? Total : iRV;
 }
