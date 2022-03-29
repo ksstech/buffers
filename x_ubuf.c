@@ -1,5 +1,5 @@
 /*
- * x_ubuf.c
+ * Copyright (c) 2016-22 Andre M. Maree / KSS Technologies (Pty) Ltd.
  */
 
 #include <errno.h>
