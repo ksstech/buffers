@@ -82,7 +82,11 @@ static ssize_t xUBufBlockSpace(ubuf_t * psUBuf, size_t Size) {
 
 	} else {
 		do {
-			vTaskDelay(2);								// loop waiting for sufficient space
+			if (xTaskGetSchedulerState() == taskSCHEDULER_RUNNING) {
+				vTaskDelay(2);							// loop waiting for sufficient space
+			} else {
+				xClockDelayMsec(2);
+			}
 			Avail = psUBuf->Size - psUBuf->Used;
 		} while (Avail < Size);							// wait for space to open...
 	}
