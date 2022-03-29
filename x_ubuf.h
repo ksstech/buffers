@@ -29,22 +29,22 @@ enum { ioctlUBUF_UNDEFINED, ioctlUBUF_I_PTR_CNTL, ioctlUBUF_NUMBER };
 // ####################################### structures  #############################################
 
 typedef	struct ubuf_t {
-	char * pBuf;
 	SemaphoreHandle_t mux;
-	u16_t flags;					// stdlib related flags
+	char * pBuf;
+	u16_t			Size;
+	volatile u16_t	Used;
+	volatile u16_t	IdxWR;			// index to next space to WRITE to
+	volatile u16_t	IdxRD;			// index to next char to be READ from
+	u16_t	flags;					// stdlib related flags
 	union {
 		struct  __attribute__((packed)) {
 			u8_t	f_init	: 1;	// LSB
 			u8_t	f_alloc	: 1;
 			u8_t	f_nolock: 1;
-			u16_t	_spare	: 13;	// MSB
-		} ;
-		u16_t	_flags;				// module flags
+			u16_t	f_spare: 13;	// MSB
+		};
+		u16_t	_flags;			// module flags
 	};
-	u16_t			Size;
-	volatile u16_t	Used;
-	volatile u16_t	IdxWR;			// index to next space to WRITE to
-	volatile u16_t	IdxRD;			// index to next char to be READ from
 } ubuf_t ;
 DUMB_STATIC_ASSERT(sizeof(ubuf_t) == (12 + sizeof(char *) + sizeof(SemaphoreHandle_t)));
 
