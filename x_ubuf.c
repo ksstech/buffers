@@ -380,7 +380,7 @@ void vUBufReport(ubuf_t * psUBuf) {
 	cprintfx("p=%p  s=%d  u=%d  iW=%d  iR=%d", psUBuf->pBuf, psUBuf->Size, psUBuf->Used, psUBuf->IdxWR, psUBuf->IdxRD);
 	cprintfx("  mux=%p  f=0x%X  f_init=%d  f_alloc=%d  f_nolock=%d\n", psUBuf->mux, psUBuf->flags, psUBuf->f_init, psUBuf->f_alloc, psUBuf->f_nolock);
 	if (psUBuf->Used)
-		cprintfx("%'!+B", psUBuf->Used, psUBuf->pBuf) ;
+		CP("%!`+B", psUBuf->Used, psUBuf->pBuf) ;
 }
 
 // ################################## Diagnostic and testing functions #############################
