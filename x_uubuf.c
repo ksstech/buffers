@@ -36,12 +36,12 @@ char * pcUUBufGetS(char * pBuf, int Number, uubuf_t * psUUBuf) {
 			*pTmp = 0 ;									// terminate buffer
 			return NULL ;								// indicate EOF before NEWLINE
 		}
-		if (cChr == '\n') {								// end of string reached ?
+		if (cChr == CHR_LF) {							// end of string reached ?
 			*pTmp = cChr ;								// store the NEWLINE
 			*pTmp = 0 ;									// terminate buffer
 			return pBuf ;								// and return a valid state
 		}
-		if (cChr == '\r')
+		if (cChr == CHR_CR)
 			continue;
 		*pTmp++ = cChr ;								// store the character, adjust the pointer
 		Number-- ;										// and update remaining chars to read
