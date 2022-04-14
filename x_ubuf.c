@@ -233,10 +233,10 @@ char * pcUBufGetS(char * pBuf, int Number, ubuf_t * psUBuf) {
 			*pTmp = 0;
 			return NULL;								// indicate EOF before NEWLINE
 		}
-		if (cChr != '\r')								// all except CR
+		if (cChr != CHR_CR)								// all except CR
 			*pTmp++ = cChr;								// store character, adjust pointer
 		--Number;										// update remaining chars to read
-		if (cChr == '\n')								// end of string reached ?
+		if (cChr == CHR_LF)								// end of string reached ?
 			break;
 	}
 	*pTmp = 0;
@@ -377,8 +377,8 @@ int	xUBufIoctl(int fd, int request, va_list vArgs) {
 }
 
 void vUBufReport(ubuf_t * psUBuf) {
-	cprintfx("p=%p  s=%d  u=%d  iW=%d  iR=%d", psUBuf->pBuf, psUBuf->Size, psUBuf->Used, psUBuf->IdxWR, psUBuf->IdxRD);
-	cprintfx("  mux=%p  f=0x%X  f_init=%d  f_alloc=%d  f_nolock=%d\n", psUBuf->mux, psUBuf->flags, psUBuf->f_init, psUBuf->f_alloc, psUBuf->f_nolock);
+	CP("p=%p  s=%d  u=%d  iW=%d  iR=%d", psUBuf->pBuf, psUBuf->Size, psUBuf->Used, psUBuf->IdxWR, psUBuf->IdxRD);
+	CP("  mux=%p  f=0x%X  f_init=%d  f_alloc=%d  f_nolock=%d\n", psUBuf->mux, psUBuf->flags, psUBuf->f_init, psUBuf->f_alloc, psUBuf->f_nolock);
 	if (psUBuf->Used)
 		CP("%!`+B", psUBuf->Used, psUBuf->pBuf) ;
 }
@@ -411,8 +411,8 @@ void vUBufTest(void) {
 	char cBuf[4] = { 0 } ;
 	for (Count = 0; Count < ubufSIZE_DEFAULT; ++Count) {
 		Result = read(fd, cBuf, 1) ;
-		if ((Result != 1) || (cBuf[0] != 'a')) {
-			printfx("read() FAILED with %d & '%c\n", Result, cBuf[0]) ;
+		if ((Result != 1) || (cBuf[0] != CHR_a)) {
+			printfx("read() FAILED with %d & '%c'\n", Result, cBuf[0]) ;
 		}
 	}
 
