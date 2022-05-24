@@ -2,28 +2,26 @@
  * hbuf.c - Copyright 2022 Andre M. Maree/KSS Technologies (Pty) Ltd.
  */
 
+#include	<string.h>
+
 #include	"hbuf.h"
 #include	"hal_variables.h"
 #include	"FreeRTOS_Support.h"
 #include 	"printfx.h"
-
-#include	<string.h>
-#include	<stdlib.h>
-#include	<stdio.h>
 
 // ################################### Global/public functions #####################################
 
 /**
  * @brief
  */
-int xHBufAvail(hbuf_t * psHB) {
+static int xHBufAvail(hbuf_t * psHB) {
 	return (psHB->iFree<psHB->iCur) ? (psHB->iCur-psHB->iFree) : (cliSIZE_HBUF-psHB->iFree+psHB->iCur);
 }
 
 /**
  * @brief
  */
-void vHBufFree(hbuf_t * psHB, size_t Size) {
+static void vHBufFree(hbuf_t * psHB, size_t Size) {
 	while (xHBufAvail(psHB) < Size) {
 		while (psHB->Buf[psHB->iNo1]) {
 			++psHB->iNo1;
@@ -40,7 +38,7 @@ void vHBufFree(hbuf_t * psHB, size_t Size) {
  * @brief	Add characters from buffer supplied to end of buffer
  * 			If insufficient free space, delete complete entries starting with oldest
  */
-void vHBufAddCmd(hbuf_t * psHB, uint8_t * pu8Buf, size_t Size) {
+void vHBufAddCmd(hbuf_t * psHB, u8_t * pu8Buf, size_t Size) {
 	if (xHBufAvail(psHB) < Size) {		// insufficient space for current command?
 		vHBufFree(psHB, Size);			// drop oldest command[s]
 	}
@@ -53,6 +51,21 @@ void vHBufAddCmd(hbuf_t * psHB, uint8_t * pu8Buf, size_t Size) {
 }
 
 /**
+ * @brief	Copy the selected entry from history to buffer supplied
+ * @return	number of characters copied
+ */
+static int vHBufCopyCmd(hbuf_t * psHB, int iStart, u8_t * pu8Buf, size_t Size) {
+	int iNow = 0;
+	while(iNow < Size) {
+		u8_t U8 = psHB->Buf[iStart + iNow];
+		if (U8 == 0)
+			break;
+		pu8Buf[iNow++] = U8;
+	}
+	return iNow;
+}
+
+/**
  * @brief
  */
 void vHBufReport(hbuf_t * psHB) {
@@ -62,8 +75,8 @@ void vHBufReport(hbuf_t * psHB) {
 	}
 	printfx_lock();
 	printfx_nolock("# HBuf #: No1=%d  Cur=%d  Free=%d  Cnt=%d", psHB->iNo1, psHB->iCur, psHB->iFree, psHB->Count);
-	uint8_t * pNow = &psHB->Buf[psHB->iNo1];
-	uint8_t u8Len;
+	u8_t * pNow = &psHB->Buf[psHB->iNo1];
+	u8_t u8Len;
 	while (true) {
 		u8Len = 0;
 		while (*pNow) {
@@ -90,25 +103,10 @@ void vHBufReport(hbuf_t * psHB) {
 // ########################### Commands to support looping through history #########################
 
 /**
- * @brief	Copy the selected entry from history to buffer supplied
- * @return	number of characters copied
- */
-static int vHBufCopyCmd(hbuf_t * psHB, int iStart, uint8_t * pu8Buf, size_t Size) {
-	int iNow = 0;
-	while(iNow < Size) {
-		uint8_t U8 = psHB->Buf[iStart + iNow];
-		if (U8 == 0)
-			break;
-		pu8Buf[iNow++] = U8;
-	}
-	return iNow;
-}
-
-/**
  * @brief	copy previous (older) command added to buffer supplied
  * @return	number of characters copied
  */
-int vHBufPrvCmd(hbuf_t * psHB, uint8_t * pu8Buf, size_t Size) {
+int vHBufPrvCmd(hbuf_t * psHB, u8_t * pu8Buf, size_t Size) {
 	if (psHB->Count == 1) {
 		return vHBufCopyCmd(psHB, psHB->iNo1, pu8Buf, Size);
 	}
@@ -132,7 +130,7 @@ int vHBufPrvCmd(hbuf_t * psHB, uint8_t * pu8Buf, size_t Size) {
  * @brief	copy next (newer) command to buffer supplied
  * @return	number of characters copied
  */
-int vHBufNxtCmd(hbuf_t * psHB, uint8_t * pu8Buf, size_t Size) {
+int vHBufNxtCmd(hbuf_t * psHB, u8_t * pu8Buf, size_t Size) {
 	if (psHB->Count == 1) {
 		return vHBufCopyCmd(psHB, psHB->iNo1, pu8Buf, Size);
 	}
