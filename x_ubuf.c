@@ -481,38 +481,40 @@ int	xUBufIoctl(int fd, int request, va_list vArgs) {
 // ######################################## Reporting ##############################################
 
 void vUBufReport(ubuf_t * psUB) {
-	printfx_lock();
-	printfx_nolock("p=%p  s=%d  u=%d  Iw=%d  Ir=%d  mux=%p  f=0x%X",
-		psUB->pBuf, psUB->Size, psUB->Used, psUB->IdxWR, psUB->IdxRD, psUB->mux, psUB->flags);
-	printfx_nolock("  f_init=%d  f_alloc=%d  f_struct=%d  f_nolock=%d  f_history=%d\n",
-		psUB->f_init, psUB->f_alloc, psUB->f_struct, psUB->f_nolock, psUB->f_history);
-	if (psUB->Used) {
-		if (psUB->f_history) {
-			u8_t * pNow = psUB->pBuf;
-			u8_t u8Len;
-			while (true) {
-				u8Len = 0;
-				while (*pNow) {
-					if (u8Len == 0)
-						printfx_nolock(" '");
-					printfx_nolock("%c", *pNow);
-					++pNow;
-					if (pNow == psUB->pBuf + psUB->Size)
-						pNow = psUB->pBuf;
-					++u8Len;
+	if (halCONFIG_inSRAM(psUB)) {
+		printfx_lock();
+		printfx_nolock("p=%p  s=%d  u=%d  Iw=%d  Ir=%d  mux=%p  f=0x%X",
+			psUB->pBuf, psUB->Size, psUB->Used, psUB->IdxWR, psUB->IdxRD, psUB->mux, psUB->flags);
+		printfx_nolock(" fI=%d fA=%d fS=%d fNL=%d fH=%d\r\n",
+			psUB->f_init, psUB->f_alloc, psUB->f_struct, psUB->f_nolock, psUB->f_history);
+		if (psUB->Used) {
+			if (psUB->f_history) {
+				u8_t * pNow = psUB->pBuf;
+				u8_t u8Len;
+				while (true) {
+					u8Len = 0;
+					while (*pNow) {
+						if (u8Len == 0)
+							printfx_nolock(" '");
+						printfx_nolock("%c", *pNow);
+						++pNow;
+						if (pNow == psUB->pBuf + psUB->Size)
+							pNow = psUB->pBuf;
+						++u8Len;
+					}
+					if (u8Len > 0)
+						printfx_nolock("'");
+					++pNow;											// step over terminating '0'
+					if (pNow == (psUB->pBuf + psUB->IdxWR))
+						break;
 				}
-				if (u8Len > 0)
-					printfx_nolock("'");
-				++pNow;											// step over terminating '0'
-				if (pNow == (psUB->pBuf + psUB->IdxWR))
-					break;
+			} else {
+				printfx_nolock("%!`+B\r\n", psUB->Used, psUB->pBuf) ;
 			}
-		} else {
-			printfx_nolock("%!`+B\n", psUB->Used, psUB->pBuf) ;
 		}
+		printfx_nolock("\r\n");
+		printfx_unlock();
 	}
-	printfx_nolock("\n");
-	printfx_unlock();
 }
 
 // ################################## Diagnostic and testing functions #############################
