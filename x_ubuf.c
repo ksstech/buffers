@@ -295,13 +295,12 @@ void vUBufStepWrite(ubuf_t * psUB, int Step)	{
  *			  IdxRD left ....
  */
 
-int xUBufStringCopy(ubuf_t * psUB, u8_t * pu8Buf, int Size) {
-	int xLen = Size;
-	while (xLen--) {
-		*pu8Buf++ = *(psUB->pBuf + psUB->IdxRD++);
+int xUBufStringCopy(ubuf_t * psUB, u8_t * pu8Buf, int xLen) {
+	for (int xNow = 0; xNow < xLen; ++xNow) {
+		*pu8Buf++ = psUB->pBuf[psUB->IdxRD++];
 		psUB->IdxRD %= psUB->Size;
 	}
-	return Size;
+	return xLen;
 }
 
 /**
