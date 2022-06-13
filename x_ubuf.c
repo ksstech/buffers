@@ -351,9 +351,9 @@ int xUBufStringPrv(ubuf_t * psUB, u8_t * pu8Buf, int Size) {
  */
 void vUBufStringAdd(ubuf_t * psUB, u8_t * pu8Buf, int Size) {
 	IF_myASSERT(debugPARAM, psUB->f_history);
+	int cChr;
 	for(int i = 0; i <= Size; ++i) {					// include terminating '0' in copy...
-		int cChr = *(pu8Buf + i);
-		xUBufPutC(psUB, cChr);
+		xUBufPutC(psUB, cChr = pu8Buf[i]);
 		if (cChr == CHR_NUL)
 			psUB->IdxRD = psUB->IdxWR;					// update IdxRD = IdxWR
 	}
