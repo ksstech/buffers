@@ -70,7 +70,7 @@ static int vHBufCopyCmd(hbuf_t * psHB, int iStart, u8_t * pu8Buf, size_t Size) {
  */
 void vHBufReport(hbuf_t * psHB) {
 	if (psHB->Count == 0) {
-		printfx("CLI buffer empty\n");
+		printfx("CLI buffer empty\r\n");
 		return;
 	}
 	printfx_lock();
@@ -96,7 +96,7 @@ void vHBufReport(hbuf_t * psHB) {
 			break;
 		}
 	}
-	printfx_nolock("\n\n");
+	printfx_nolock("\r\n\n");
 	printfx_unlock();
 }
 

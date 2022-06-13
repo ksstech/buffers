@@ -83,7 +83,7 @@ void vUUBufAdjust(uubuf_t * psUUBuf, ssize_t Adj)	{
 }
 
 void vUUBufReport(uubuf_t * psUUBuf) {
-	printfx("P=%p  B=%p  I=%d  S=%d  U=%d  A=%d\n",
+	printfx("P=%p  B=%p  I=%d  S=%d  U=%d  A=%d\r\n",
 			psUUBuf, psUUBuf->pBuf, psUUBuf->Idx, psUUBuf->Size, psUUBuf->Used, psUUBuf->Alloc) ;
 	if (psUUBuf->Used)
 		printfx("%!`+B", psUUBuf->Used, psUUBuf->pBuf);

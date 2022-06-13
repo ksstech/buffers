@@ -490,7 +490,7 @@ char * pTmp ;
 		IF_myASSERT(debugRESULT, 0) ;
 		return erFAILURE ;								// yes, abort
 	}
-	IF_P(debugSTRUCTURE, "[Seek 1] B=%p R=%p W=%p S=%d U=%d\n", psBuf->pBeg, psBuf->pRead, psBuf->pWrite, psBuf->xSize, psBuf->xUsed) ;
+	IF_P(debugSTRUCTURE, "[Seek 1] B=%p R=%p W=%p S=%d U=%d\r\n", psBuf->pBeg, psBuf->pRead, psBuf->pWrite, psBuf->xSize, psBuf->xUsed) ;
 
 	vBufIsrEntry(psBuf) ;
 	if (flags & FF_MODER) {
@@ -523,7 +523,7 @@ char * pTmp ;
 	vBufIsrExit(psBuf) ;
 
 	IF_myASSERT(debugRESULT, (psBuf->xUsed <= psBuf->xSize)) ;
-	IF_P(debugSTRUCTURE, "[Seek 2] B=%p R=%p W=%p S=%d U=%u\n", psBuf->pBeg, psBuf->pRead, psBuf->pWrite, psBuf->xSize, psBuf->xUsed) ;
+	IF_P(debugSTRUCTURE, "[Seek 2] B=%p R=%p W=%p S=%d U=%u\r\n", psBuf->pBeg, psBuf->pRead, psBuf->pWrite, psBuf->xSize, psBuf->xUsed) ;
 	return erSUCCESS ;
 }
 
@@ -669,11 +669,11 @@ void	vBufUnitTest(void) {
 	if ((xBufAvail(psBuf) != 0) || (xBufSpace(psBuf) != bufSIZE))				P("Failed")  ;
 
 	if (xBufSeek(psBuf, bufSIZE, SEEK_SET, FF_MODEW) != erSUCCESS)				P("Failed")  ;
-	P("Avail=100\n%!`+B", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER)) ;
+	P("Avail=100\r\n%!`+B", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER)) ;
 	xBufSeek(psBuf, bufSIZE / 2, SEEK_SET, FF_MODER) ;
-	P("Avail=50%\n%!`+B", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER)) ;
+	P("Avail=50%\r\n%!`+B", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER)) ;
 	xBufSeek(psBuf, -(bufSIZE / 4), SEEK_CUR, FF_MODER) ;
-	P("Avail=75%\n%!`+B", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER)) ;
+	P("Avail=75%\r\n%!`+B", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER)) ;
 
 	char cBuffer[50] ;
 	xBufSeek(psBuf, 0, SEEK_SET, FF_MODER) ;
@@ -683,19 +683,19 @@ void	vBufUnitTest(void) {
 
 	// read first 25 characters at start of buffer, no compacting should have happened
 	if (xBufRead(cBuffer, 5, 5, psBuf) != 25)									P("Failed")  ;
-	P("Avail=75\n%!`+B", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER)) ;
-	P("cBuffer=25\n%!`+B", 25, cBuffer) ;
+	P("Avail=75\r\n%!`+B", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER)) ;
+	P("cBuffer=25\r\n%!`+B", 25, cBuffer) ;
 	if ((xBufAvail(psBuf) != 75) || (xBufSpace(psBuf) != 25))					P("Failed")  ;
 
 	// try to write 25 chars just read, should fail since FF_MODEPACK not enabled
 	if (xBufWrite(cBuffer, 5, 5, psBuf) != 0)									P("Failed")  ;
 	if ((xBufAvail(psBuf) != 75) || (xBufSpace(psBuf) != 25))					P("Failed")  ;
-	P("Avail=75\n%!`+B", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER)) ;
+	P("Avail=75\r\n%!`+B", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER)) ;
 
 	FF_SET(psBuf, FF_MODEPACK) ;
 	// try to write 25 chars just read, should be placed at end after compacting...
 	if (xBufWrite(cBuffer, 5, 5, psBuf) != 25)									P("Failed")  ;
 	if ((xBufAvail(psBuf) != bufSIZE) || (xBufSpace(psBuf) != 0))				P("Failed")  ;
-	P("25 at End\n%!`+B", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER)) ;
+	P("25 at End\r\n%!`+B", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER)) ;
 	xBufClose(psBuf) ;
 }
