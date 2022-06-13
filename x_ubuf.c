@@ -188,7 +188,7 @@ int xUBufEmptyBlock(ubuf_t * psUB, int (*hdlr)(u8_t *, ssize_t)) {
 		if (iRV > 0) {
 			Total += Size;
 			psUB->Used -= Size;							// decrease total available
-			psUB->IdxRD = 0;								// reset read index
+			psUB->IdxRD = 0;							// reset read index
 		}
 		IF_myASSERT(debugTRACK, iRV == Size);
 	}
@@ -197,7 +197,7 @@ int xUBufEmptyBlock(ubuf_t * psUB, int (*hdlr)(u8_t *, ssize_t)) {
 		if (iRV > 0) {
 			Total += psUB->Used;
 			psUB->Used = 0;								// nothing left...
-			psUB->IdxWR = 0;								// reset write index
+			psUB->IdxWR = 0;							// reset write index
 		}
 	}
 	IF_myASSERT(debugTRACK, psUB->Used==0 && psUB->IdxRD==0 && psUB->IdxWR==0);
@@ -211,9 +211,9 @@ int	xUBufGetC(ubuf_t * psUB) {
 		return iRV;
 	xUBufLock(psUB);
 	iRV = *(psUB->pBuf + psUB->IdxRD++);
-	psUB->IdxRD %= psUB->Size;						// handle wrap
+	psUB->IdxRD %= psUB->Size;							// handle wrap
 	if (--psUB->Used == 0)
-		psUB->IdxRD = psUB->IdxWR = 0;				// reset In/Out indexes
+		psUB->IdxRD = psUB->IdxWR = 0;					// reset In/Out indexes
 	xUBufUnLock(psUB);
 	IF_RP(debugTRACK, "s=%d  i=%d  o=%d  cChr=%d", psUB->Size, psUB->IdxWR, psUB->IdxRD, iRV);
 	return iRV;
@@ -224,8 +224,8 @@ int	xUBufPutC(ubuf_t * psUB, int cChr) {
 	if (iRV != sizeof(char))
 		return iRV;
 	xUBufLock(psUB);
-	*(psUB->pBuf + psUB->IdxWR++) = cChr;			// store character in buffer, adjust pointer
-	psUB->IdxWR %= psUB->Size;						// handle wrap
+	*(psUB->pBuf + psUB->IdxWR++) = cChr;				// store character in buffer, adjust pointer
+	psUB->IdxWR %= psUB->Size;							// handle wrap
 	++psUB->Used;
 	// ensure that the indexes are same when buffer is full
 	IF_myASSERT(debugTRACK && (psUB->Used == psUB->Size), psUB->IdxRD == psUB->IdxWR);
@@ -410,25 +410,25 @@ int	xUBufClose(int fd) {
  */
 ssize_t	xUBufRead(int fd, void * pBuf, size_t Size) {
 	if (OUTSIDE(0, fd, ubufMAX_OPEN-1, int) || (sUBuf[fd].pBuf == NULL) || (Size == 0)) {
-		errno = EBADF ;
-		return erFAILURE ;
+		errno = EBADF;
+		return erFAILURE;
 	}
-	ubuf_t * psUB = &sUBuf[fd] ;
+	ubuf_t * psUB = &sUBuf[fd];
 	int iRV = xUBufBlockAvail(psUB);
 	if (iRV != erSUCCESS)
 		return iRV;
 	ssize_t	count = 0;
-	xUBufLock(psUB) ;
+	xUBufLock(psUB);
 	while((psUB->Used > 0) && (count < Size)) {
-		*(char *)pBuf++ = *(psUB->pBuf + psUB->IdxRD++) ;
-		--psUB->Used ;
-		++count ;
-		if (psUB->IdxRD == psUB->Size) {			// past the end?
-			psUB->IdxRD = 0 ;							// yes, reset to start
+		*(char *)pBuf++ = *(psUB->pBuf + psUB->IdxRD++);
+		--psUB->Used;
+		++count;
+		if (psUB->IdxRD == psUB->Size) {				// past the end?
+			psUB->IdxRD = 0;							// yes, reset to start
 		}
 	}
-	xUBufUnLock(psUB) ;
-	return count ;
+	xUBufUnLock(psUB);
+	return count;
 }
 
 ssize_t	xUBufWrite(int fd, const void * pBuf, size_t Size) {
@@ -448,7 +448,7 @@ ssize_t	xUBufWrite(int fd, const void * pBuf, size_t Size) {
 		*(psUB->pBuf + psUB->IdxWR++) = *(const char *)pBuf++ ;
 		++psUB->Used ;
 		++Count ;
-		if (psUB->IdxWR == psUB->Size) {			// past the end?
+		if (psUB->IdxWR == psUB->Size) {				// past the end?
 			psUB->IdxWR = 0 ;							// yes, reset to start
 		}
 	}
