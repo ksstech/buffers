@@ -332,15 +332,13 @@ int xUBufStringPrv(ubuf_t * psUB, u8_t * pu8Buf, int Size) {
 	IF_myASSERT(debugPARAM, psUB->f_history);
 	int xLen = 0;
 	if (psUB->Used == psUB->Size) {						// buffer is full then pointing at start of oldest/end
-		while (*(psUB->pBuf + psUB->IdxRD) == CHR_NUL)
-			psUB->IdxRD = (psUB->IdxRD == psUB->Size - 1) ? 0 : psUB->IdxRD + 1;	// skip NUL's
+		while (psUB->pBuf[psUB->IdxRD] == CHR_NUL)
+			psUB->IdxRD = (psUB->IdxRD == (psUB->Size - 1)) ? 0 : (psUB->IdxRD + 1);	// skip NUL's
 		while (*(psUB->pBuf + psUB->IdxRD + xLen++) != CHR_NUL); //
 	} else {											// buffer NOT full, no wrap yet
 		if (psUB->IdxRD == psUB->IdxWR)					// at end of buffer ?
 			psUB->IdxRD = 0;							// yes, set to start....
-//		else 											// no...
-//			while (*(psUB->pBuf + psUB->IdxRD++) != CHR_NUL); // skip over current string
-		while (*(psUB->pBuf + psUB->IdxRD + xLen++) != CHR_NUL); // calc length of string
+		while (psUB->pBuf[psUB->IdxRD + xLen++] != CHR_NUL); // calc length of string
 	}
 	return xUBufStringCopy(psUB, pu8Buf, xLen);
 }
