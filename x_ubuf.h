@@ -21,7 +21,7 @@ enum { ioctlUBUF_UNDEFINED, ioctlUBUF_I_PTR_CNTL, ioctlUBUF_NUMBER };
 
 // ####################################### structures  #############################################
 
-typedef	struct __attribute__((packed)) ubuf_t {
+typedef	struct ubuf_t {
 	u8_t * pBuf;
 	SemaphoreHandle_t mux;
 	volatile u16_t	IdxWR;			// index to next space to WRITE to
