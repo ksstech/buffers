@@ -315,12 +315,12 @@ int xUBufStringNxt(ubuf_t * psUB, u8_t * pu8Buf, int Size) {
 	int xLen = 0;
 	do {
 		psUB->IdxRD = (psUB->IdxRD == 0) ? psUB->Size - 1 : psUB->IdxRD - 1;
-		++xLen;
-		if (*(psUB->pBuf + psUB->IdxRD) == CHR_NUL && (xLen > 1)) {
-			psUB->IdxRD = (psUB->IdxRD == psUB->Size - 1) ? 0 : psUB->IdxRD + 1;
-			--xLen;
+		psUB->IdxRD = psUB->IdxRD ? (psUB->IdxRD - 1) : psUB->IdxWR;
+		if ((psUB->pBuf[psUB->IdxRD] == CHR_NUL) && (xLen > 0)) {
+			psUB->IdxRD = (psUB->IdxRD == (psUB->Size - 1)) ? 0 : (psUB->IdxRD + 1);
 			break;
 		}
+		++xLen;
 	} while (1);
 	u16_t iTmp = psUB->IdxRD;							// save for reuse
 	xLen = xUBufStringCopy(psUB, pu8Buf, xLen);
