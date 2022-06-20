@@ -314,7 +314,6 @@ int xUBufStringNxt(ubuf_t * psUB, u8_t * pu8Buf, int Size) {
 	// step back over NUL and then further back to chr before next NUL
 	int xLen = 0;
 	do {
-		psUB->IdxRD = (psUB->IdxRD == 0) ? psUB->Size - 1 : psUB->IdxRD - 1;
 		psUB->IdxRD = psUB->IdxRD ? (psUB->IdxRD - 1) : psUB->IdxWR;
 		if ((psUB->pBuf[psUB->IdxRD] == CHR_NUL) && (xLen > 0)) {
 			psUB->IdxRD = (psUB->IdxRD == (psUB->Size - 1)) ? 0 : (psUB->IdxRD + 1);
