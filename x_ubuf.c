@@ -322,7 +322,10 @@ int xUBufStringNxt(ubuf_t * psUB, u8_t * pu8Buf, int Size) {
 			break;
 		}
 	} while (1);
-	return xUBufStringCopy(psUB, pu8Buf, xLen);
+	u16_t iTmp = psUB->IdxRD;							// save for reuse
+	xLen = xUBufStringCopy(psUB, pu8Buf, xLen);
+	psUB->IdxRD = iTmp;
+	return xLen;
 }
 
 /**
