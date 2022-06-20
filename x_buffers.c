@@ -1,20 +1,18 @@
 /*
- * x_buffers.c - Copyright 2014-22 Andre M. Maree/KSS Technologies (Pty) Ltd.
+ * x_buffers.c
+ * Copyright (c) 2014-22 Andre M. Maree / KSS Technologies (Pty) Ltd.
  */
 
-#include	"hal_config.h"
-#include	"x_buffers.h"
+#include <string.h>
 
-#include	"FreeRTOS_Support.h"
-#include 	"printfx.h"
-#include	"syslog.h"
-
-#include	"x_stdio.h"
-#include	"x_errors_events.h"
-
-#include	"hal_nvic.h"
-
-#include	<string.h>
+#include "hal_config.h"
+#include "hal_nvic.h"
+#include "x_buffers.h"
+#include "FreeRTOS_Support.h"
+#include "printfx.h"
+#include "syslog.h"
+#include "x_stdio.h"
+#include "x_errors_events.h"
 
 // ############################### BUILD: debug configuration options ##############################
 
@@ -33,7 +31,7 @@ buf_t bufTable[configBUFFERS_MAX_OPEN] ;
 
 #ifdef ESP_PLATFORM
 	portMUX_TYPE	muxBuffers = { 0 };
-//	#include	"soc/spinlock.h"
+//	#include "soc/spinlock.h"
 //	portMUX_TYPE	muxBuffers = { .owner = SPINLOCK_FREE, .count = 0 } ;
 #endif
 
@@ -273,11 +271,11 @@ int	xBufClose(buf_t * psBuf) {
 	char *	pTmp = psBuf->pBeg ;								// save pointer for later use..
 	int iRV = vBufGivePointer(psBuf) ;
 	if ((iRV == erSUCCESS) && FF_STCHK(psBuf, FF_BUFFALOC)) {
-#if 	defined( __GNUC__ )
+	#if defined( __GNUC__ )
 		psBuf->_flags = 0 ;
-#elif 	defined( __TI_ARM__ )
+	#elif defined( __TI_ARM__ )
 		psBuf->flags = 0 ;
-#endif
+	#endif
 		vRtosFree(pTmp) ;									// return buffer
 	}
 	vBufIsrExit(psBuf) ;
@@ -302,9 +300,8 @@ size_t	xBufAvail(buf_t * psBuf) {
  */
 size_t	xBufSpace(buf_t * psBuf) {
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
-	if (FF_STCHK(psBuf, FF_MODEPACK)) {
-		xBufCompact(psBuf) ;
-	}
+	if (FF_STCHK(psBuf, FF_MODEPACK))
+		xBufCompact(psBuf);
 	return psBuf->xSize - psBuf->xUsed ;				// compacted space available
 }
 
@@ -320,17 +317,15 @@ int	xBufPutC(int cChr, buf_t * psBuf) {
 	int	iRV ;
 	if ((cChr == CHR_LF) && (FF_STCHK(psBuf, FF_MODEBIN) == 0)) {
 		iRV = xBufPutC(CHR_CR, psBuf) ;
-		if (iRV == EOF) {
-			return iRV ;
-		}
+		if (iRV == EOF)
+			return iRV;
 	}
 	if (psBuf->xSize > psBuf->xUsed) {
 		vBufIsrEntry(psBuf) ;
 		*psBuf->pWrite++ = cChr ;							// Firstly store char in buffer
 		psBuf->xUsed++ ;									// & adjust the Used counter
-		if (psBuf->pWrite == psBuf->pEnd) { 				// Last character written in last slot &
-			psBuf->pWrite = psBuf->pBeg ;					// yes, wrap write pointer to start
-		}
+		if (psBuf->pWrite == psBuf->pEnd)					// Last character written in last slot &
+			psBuf->pWrite = psBuf->pBeg;					// yes, wrap write pointer to start
 		vBufIsrExit(psBuf) ;
 		iRV = cChr ;
 	} else {
