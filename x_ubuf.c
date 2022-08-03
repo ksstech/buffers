@@ -99,7 +99,7 @@ void xUBufUnLock(ubuf_t * psUB) {
 }
 
 size_t xUBufSetDefaultSize(size_t NewSize) {
-	IF_myASSERT(debugPARAM, INRANGE(ubufSIZE_MINIMUM, NewSize, ubufSIZE_MAXIMUM, size_t)) ;
+	IF_myASSERT(debugPARAM, INRANGE(ubufSIZE_MINIMUM, NewSize, ubufSIZE_MAXIMUM));
 	return uBufSize = NewSize ;
 }
 
@@ -115,7 +115,7 @@ ubuf_t * psUBufCreate(ubuf_t * psUB, u8_t * pcBuf, size_t BufSize, size_t Used) 
 	IF_myASSERT(debugPARAM, (psUB == NULL) || halCONFIG_inSRAM(psUB));
 	IF_myASSERT(debugPARAM, (pcBuf == NULL) || halCONFIG_inSRAM(pcBuf));
 	IF_myASSERT(debugPARAM, !(pcBuf == NULL && Used > 0));
-	IF_myASSERT(debugPARAM, INRANGE(ubufSIZE_MINIMUM, BufSize, ubufSIZE_MAXIMUM, size_t) && Used <= BufSize);
+	IF_myASSERT(debugPARAM, INRANGE(ubufSIZE_MINIMUM, BufSize, ubufSIZE_MAXIMUM) && Used <= BufSize);
 	if (psUB != NULL) {
 		psUB->f_struct = 0;
 	} else {
@@ -377,7 +377,7 @@ void vUBufInit(void) { ESP_ERROR_CHECK(esp_vfs_register("/ubuf", &dev_ubuf, NULL
 
 int	xUBufOpen(const char * pccPath, int flags, int Size) {
 	IF_P(debugTRACK, "path='%s'  flags=0x%x  Size=%d", pccPath, flags, Size) ;
-	IF_myASSERT(debugPARAM, (*pccPath == CHR_FWDSLASH) && INRANGE(ubufSIZE_MINIMUM, Size, ubufSIZE_MAXIMUM, size_t)) ;
+	IF_myASSERT(debugPARAM, (*pccPath == CHR_FWDSLASH) && INRANGE(ubufSIZE_MINIMUM, Size, ubufSIZE_MAXIMUM)) ;
 	int fd = 0 ;
 	do {
 		if (sUBuf[fd].pBuf == NULL) {
@@ -395,7 +395,7 @@ int	xUBufOpen(const char * pccPath, int flags, int Size) {
 }
 
 int	xUBufClose(int fd) {
-	if (INRANGE(0, fd, ubufMAX_OPEN-1, int)) {
+	if (INRANGE(0, fd, ubufMAX_OPEN-1)) {
 		ubuf_t * psUB = &sUBuf[fd];
 		vRtosFree(psUB->pBuf);
 		vRtosSemaphoreDelete(&psUB->mux);
@@ -410,7 +410,7 @@ int	xUBufClose(int fd) {
  * xUBufRead() -
  */
 ssize_t	xUBufRead(int fd, void * pBuf, size_t Size) {
-	if (OUTSIDE(0, fd, ubufMAX_OPEN-1, int) || (sUBuf[fd].pBuf == NULL) || (Size == 0)) {
+	if (OUTSIDE(0, fd, ubufMAX_OPEN-1) || (sUBuf[fd].pBuf == NULL) || (Size == 0)) {
 		errno = EBADF;
 		return erFAILURE;
 	}
@@ -433,7 +433,7 @@ ssize_t	xUBufRead(int fd, void * pBuf, size_t Size) {
 }
 
 ssize_t	xUBufWrite(int fd, const void * pBuf, size_t Size) {
-	if (OUTSIDE(0, fd, ubufMAX_OPEN-1, int) || (sUBuf[fd].pBuf == NULL) || (Size == 0)) {
+	if (OUTSIDE(0, fd, ubufMAX_OPEN-1) || (sUBuf[fd].pBuf == NULL) || (Size == 0)) {
 		errno = EBADF ;
 		return erFAILURE ;
 	}
@@ -459,7 +459,7 @@ ssize_t	xUBufWrite(int fd, const void * pBuf, size_t Size) {
 
 int	xUBufIoctl(int fd, int request, va_list vArgs) {
 	ubuf_t ** ppsUBuf ;
-	if (OUTSIDE(0, fd, ubufMAX_OPEN-1, int)) {
+	if (OUTSIDE(0, fd, ubufMAX_OPEN-1)) {
 		errno = EBADF ;
 		return erFAILURE ;
 	}

@@ -83,11 +83,11 @@ int	xBufGive(void * pvBuf) {
 void	xBufCheck(buf_t * psBuf) {
 	myASSERT(halCONFIG_inSRAM(psBuf)) ;
 	myASSERT(halCONFIG_inSRAM(psBuf->pBeg)) ;
-	myASSERT(INRANGE(configBUFFERS_SIZE_MIN, psBuf->xSize, configBUFFERS_SIZE_MAX, size_t)) ;
+	myASSERT(INRANGE(configBUFFERS_SIZE_MIN, psBuf->xSize, configBUFFERS_SIZE_MAX)) ;
 	myASSERT((psBuf->pEnd - psBuf->pBeg) == psBuf->xSize) ;
 	myASSERT(psBuf->xUsed <= psBuf->xSize) ;
-	myASSERT(INRANGE(psBuf->pBeg, psBuf->pRead, psBuf->pEnd, char *)) ;
-	myASSERT(INRANGE(psBuf->pBeg, psBuf->pWrite, psBuf->pEnd, char *)) ;
+	myASSERT(INRANGE(psBuf->pBeg, psBuf->pRead, psBuf->pEnd)) ;
+	myASSERT(INRANGE(psBuf->pBeg, psBuf->pWrite, psBuf->pEnd)) ;
 }
 
 /**
@@ -237,8 +237,8 @@ static int	xBufReuse(buf_t * psBuf, char * pBuf, size_t Size, uint32_t flags, si
  * @return	pointer to the buffer handle or NULL if failed
  */
 buf_t * psBufOpen(void * pBuf, size_t Size, uint32_t flags, size_t Used) {
-	if ((pBuf == NULL) && (INRANGE(configBUFFERS_SIZE_MIN, Size, configBUFFERS_SIZE_MAX, size_t) == false)) {
-		myASSERT(0) ;
+	if ((pBuf == NULL) && (INRANGE(configBUFFERS_SIZE_MIN, Size, configBUFFERS_SIZE_MAX) == false)) {
+		myASSERT(0);
 		return pvFAILURE ;
 	}
 	IF_myASSERT(debugPARAM, Used <= Size) ;
