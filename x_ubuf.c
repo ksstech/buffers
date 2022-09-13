@@ -362,16 +362,22 @@ void vUBufStringAdd(ubuf_t * psUB, u8_t * pu8Buf, int Size) {
 
 // ##################################### ESP-IDF VFS support #######################################
 
-esp_vfs_t dev_ubuf = {
+static const esp_vfs_t dev_ubuf = {
 	.flags	= ESP_VFS_FLAG_DEFAULT,
 	.write	= xUBufWrite,
+	.lseek	= NULL,
 	.read	= xUBufRead,
+	.pread	= NULL,
+	.pwrite	= NULL,
 	.open	= xUBufOpen,
 	.close	= xUBufClose,
+	.fstat	= NULL,
+	.fcntl	= NULL,
 	.ioctl	= xUBufIoctl,
-} ;
+	.fsync	= NULL,
+};
 
-ubuf_t	sUBuf[ubufMAX_OPEN] = { 0 } ;
+ubuf_t sUBuf[ubufMAX_OPEN] = { 0 };
 
 void vUBufInit(void) { ESP_ERROR_CHECK(esp_vfs_register("/ubuf", &dev_ubuf, NULL)) ; }
 
