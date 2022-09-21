@@ -516,7 +516,7 @@ void vUBufReport(ubuf_t * psUB) {
 						break;
 				}
 			} else {
-				printfx_nolock("%!`+B\r\n", psUB->Used, psUB->pBuf) ;
+				printfx_nolock("%!'+B\r\n", psUB->Used, psUB->pBuf);
 			}
 		}
 		printfx_nolock(strCRLF);
