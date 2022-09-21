@@ -591,7 +591,7 @@ char * pcRetVal = (char *) erFAILURE ;
 int	xBufPrintClose(buf_t * psBuf) {
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
 	IF_myASSERT(debugPARAM, psBuf->xUsed > 0) ;
-	int iRV = nprintfx(psBuf->xUsed, "%s", psBuf->pRead) ;
+	int iRV = nprintfx(psBuf->xUsed, "%s", psBuf->pRead);
 	xBufClose(psBuf) ;
 	return iRV ;
 }
