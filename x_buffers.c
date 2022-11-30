@@ -81,13 +81,12 @@ int	xBufGive(void * pvBuf) {
  * @param psBuf
  */
 void	xBufCheck(buf_t * psBuf) {
-	myASSERT(halCONFIG_inSRAM(psBuf)) ;
-	myASSERT(halCONFIG_inSRAM(psBuf->pBeg)) ;
-	myASSERT(INRANGE(configBUFFERS_SIZE_MIN, psBuf->xSize, configBUFFERS_SIZE_MAX)) ;
-	myASSERT((psBuf->pEnd - psBuf->pBeg) == psBuf->xSize) ;
-	myASSERT(psBuf->xUsed <= psBuf->xSize) ;
-	myASSERT(INRANGE(psBuf->pBeg, psBuf->pRead, psBuf->pEnd)) ;
-	myASSERT(INRANGE(psBuf->pBeg, psBuf->pWrite, psBuf->pEnd)) ;
+	myASSERT(halCONFIG_inSRAM(psBuf) && halCONFIG_inSRAM(psBuf->pBeg));
+	myASSERT(INRANGE(configBUFFERS_SIZE_MIN, psBuf->xSize, configBUFFERS_SIZE_MAX));
+	myASSERT((psBuf->pEnd - psBuf->pBeg) == psBuf->xSize);
+	myASSERT(psBuf->xUsed <= psBuf->xSize);
+	myASSERT(INRANGE(psBuf->pBeg, psBuf->pRead, psBuf->pEnd));
+	myASSERT(INRANGE(psBuf->pBeg, psBuf->pWrite, psBuf->pEnd));
 }
 
 /**
