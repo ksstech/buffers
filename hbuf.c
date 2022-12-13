@@ -2,12 +2,12 @@
  * hbuf.c - Copyright 2022 Andre M. Maree/KSS Technologies (Pty) Ltd.
  */
 
-#include	<string.h>
+#include <string.h>
 
-#include	"hbuf.h"
-#include	"hal_variables.h"
-#include	"FreeRTOS_Support.h"
-#include 	"printfx.h"
+#include "hbuf.h"
+#include "hal_variables.h"
+#include "FreeRTOS_Support.h"
+#include "printfx.h"
 
 // ################################### Global/public functions #####################################
 

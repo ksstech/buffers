@@ -78,7 +78,7 @@ ssize_t	xUBufRead(int, void *, size_t);
 ssize_t	xUBufWrite(int, const void *, size_t);
 int	xUBufIoctl(int, int, va_list);
 
-//HISTORY support functions
+// HISTORY support functions
 int xUBufStringNxt(ubuf_t * psUB, u8_t * pu8Buf, int Size);
 int xUBufStringPrv(ubuf_t * psUB, u8_t * pu8Buf, int Size);
 void vUBufStringAdd(ubuf_t * psUB, u8_t * pu8Buf, int Size);

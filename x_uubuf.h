@@ -4,8 +4,10 @@
 
 #pragma	once
 
-#include	<stdint.h>
-#include	<sys/types.h>
+#include <stdint.h>
+#include <sys/types.h>
+
+#include "definitions.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,12 +28,12 @@ extern "C" {
 // ####################################### structures  #############################################
 
 typedef	struct __attribute__((packed)) uubuf_t {
-	char *				pBuf ;
-	uint16_t			Idx ;
-	uint16_t			Size ;
-	uint16_t			Used ;
-	uint16_t			Alloc ;
-} uubuf_t ;
+	char * pBuf;
+	u16_t Idx;
+	u16_t Size;
+	u16_t Used;
+	u16_t Alloc;
+} uubuf_t;
 
 // ################################### EXTERNAL FUNCTIONS ##########################################
 

@@ -2,13 +2,13 @@
  * x_uubuf.c
  */
 
-#include	"x_uubuf.h"
-#include	"FreeRTOS_Support.h"
-#include 	"printfx.h"
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 
-#include	<string.h>
-#include	<stdlib.h>
-#include	<stdio.h>
+#include "x_uubuf.h"
+#include "FreeRTOS_Support.h"
+#include "printfx.h"
 
 // ################################### Global/public functions #####################################
 
@@ -86,5 +86,5 @@ void vUUBufReport(uubuf_t * psUUBuf) {
 	printfx("P=%p  B=%p  I=%d  S=%d  U=%d  A=%d\r\n",
 			psUUBuf, psUUBuf->pBuf, psUUBuf->Idx, psUUBuf->Size, psUUBuf->Used, psUUBuf->Alloc) ;
 	if (psUUBuf->Used)
-		printfx("%!'+B", psUUBuf->Used, psUUBuf->pBuf);
+		printfx("%!'+hhY", psUUBuf->Used, psUUBuf->pBuf);
 }

@@ -663,11 +663,11 @@ void	vBufUnitTest(void) {
 	if ((xBufAvail(psBuf) != 0) || (xBufSpace(psBuf) != bufSIZE))				P("Failed")  ;
 
 	if (xBufSeek(psBuf, bufSIZE, SEEK_SET, FF_MODEW) != erSUCCESS)				P("Failed")  ;
-	printfx("Avail=100%%\r\n%!'+B", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER)) ;
+	printfx("Avail=100%%\r\n%!'+hhY", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER)) ;
 	xBufSeek(psBuf, bufSIZE / 2, SEEK_SET, FF_MODER) ;
-	printfx("Avail=50%%\r\n%!'+B", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER)) ;
+	printfx("Avail=50%%\r\n%!'+hhY", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER)) ;
 	xBufSeek(psBuf, -(bufSIZE / 4), SEEK_CUR, FF_MODER) ;
-	printfx("Avail=75%%\r\n%!'+B", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER)) ;
+	printfx("Avail=75%%\r\n%!'+hhY", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER)) ;
 
 	char cBuffer[50] ;
 	xBufSeek(psBuf, 0, SEEK_SET, FF_MODER) ;
@@ -677,19 +677,19 @@ void	vBufUnitTest(void) {
 
 	// read first 25 characters at start of buffer, no compacting should have happened
 	if (xBufRead(cBuffer, 5, 5, psBuf) != 25)									P("Failed")  ;
-	printfx("Avail=75\r\n%!'+B", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER)) ;
-	printfx("cBuffer=25\r\n%!'+B", 25, cBuffer) ;
+	printfx("Avail=75\r\n%!'+hhY", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER)) ;
+	printfx("cBuffer=25\r\n%!'+hhY", 25, cBuffer) ;
 	if ((xBufAvail(psBuf) != 75) || (xBufSpace(psBuf) != 25))					P("Failed")  ;
 
 	// try to write 25 chars just read, should fail since FF_MODEPACK not enabled
 	if (xBufWrite(cBuffer, 5, 5, psBuf) != 0)									P("Failed")  ;
 	if ((xBufAvail(psBuf) != 75) || (xBufSpace(psBuf) != 25))					P("Failed")  ;
-	printfx("Avail=75\r\n%!'+B", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER)) ;
+	printfx("Avail=75\r\n%!'+hhY", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER)) ;
 
 	FF_SET(psBuf, FF_MODEPACK) ;
 	// try to write 25 chars just read, should be placed at end after compacting...
 	if (xBufWrite(cBuffer, 5, 5, psBuf) != 25)									P("Failed")  ;
 	if ((xBufAvail(psBuf) != bufSIZE) || (xBufSpace(psBuf) != 0))				P("Failed")  ;
-	printfx("25 at End\r\n%!'+B", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER)) ;
+	printfx("25 at End\r\n%!'+hhY", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER)) ;
 	xBufClose(psBuf) ;
 }

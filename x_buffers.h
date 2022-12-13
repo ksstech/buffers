@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include	"definitions.h"
+#include "definitions.h"
 
-#include	<stdint.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
