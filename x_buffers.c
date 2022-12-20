@@ -31,8 +31,6 @@ buf_t bufTable[configBUFFERS_MAX_OPEN] ;
 
 #ifdef ESP_PLATFORM
 	portMUX_TYPE	muxBuffers = { 0 };
-//	#include "soc/spinlock.h"
-//	portMUX_TYPE	muxBuffers = { .owner = SPINLOCK_FREE, .count = 0 } ;
 #endif
 
 // ############################## Heap and memory de/allocation related ############################
