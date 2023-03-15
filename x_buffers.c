@@ -44,16 +44,16 @@ uint8_t	BufSmall[64], BufMedium[128], BufLarge[256] ;
  */
 void *	pvBufTake(size_t BufSize) {
 	if (BufSize <= sizeof(BufSmall)) {
-		xRtosSemaphoreTake(&BufSmlLock, portMAX_DELAY) ;
-		return BufSmall ;
+		xRtosSemaphoreTake(&BufSmlLock, portMAX_DELAY);
+		return BufSmall;
 	} else if (BufSize <= sizeof(BufMedium)) {
-		xRtosSemaphoreTake(&BufMedLock, portMAX_DELAY) ;
-		return BufMedium ;
+		xRtosSemaphoreTake(&BufMedLock, portMAX_DELAY);
+		return BufMedium;
 	} else if (BufSize <= sizeof(BufLarge)) {
-		xRtosSemaphoreTake(&BufLrgLock, portMAX_DELAY) ;
-		return BufLarge ;
+		xRtosSemaphoreTake(&BufLrgLock, portMAX_DELAY);
+		return BufLarge;
 	}
-	return (void *) pdFAIL ;
+	return (void *) pdFAIL;
 }
 
 /**
@@ -91,7 +91,7 @@ void	xBufCheck(buf_t * psBuf) {
  * vBufIsrEntry()
  * @param psBuf
  */
-static	void	vBufIsrEntry(buf_t * psBuf) {
+static void vBufIsrEntry(buf_t * psBuf) {
 	if (halNVIC_CalledFromISR() > 0) {					// if called from an ISR
 		FF_SET(psBuf, FF_FROMISR) ;						// just set the flag
 	} else {
@@ -114,7 +114,7 @@ static	void	vBufIsrExit(buf_t * psBuf) {
 	#if	defined(ESP_PLATFORM)
 		portEXIT_CRITICAL(&muxBuffers) ;				// else re-enable interrupts
 	#else
-		taskEXIT_CRITICAL() ;							// else re-enable interrupts
+		taskEXIT_CRITICAL();							// else re-enable interrupts
 	#endif
 	}
 }
