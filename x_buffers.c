@@ -30,7 +30,9 @@
 buf_t bufTable[configBUFFERS_MAX_OPEN] ;
 
 #ifdef ESP_PLATFORM
-	portMUX_TYPE	muxBuffers = { 0 };
+	spinlock_t muxBuffers = { 0 };
+#else
+	portMUX_TYPE muxBuffers = { 0 };
 #endif
 
 // ############################## Heap and memory de/allocation related ############################
