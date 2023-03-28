@@ -37,17 +37,17 @@ typedef	struct __attribute__((packed)) uubuf_t {
 
 // ################################### EXTERNAL FUNCTIONS ##########################################
 
-inline size_t xUUBufSpace(uubuf_t * psUUBuf) { return psUUBuf->Size - psUUBuf->Used ; }
-inline size_t xUUBufAvail(uubuf_t * psUUBuf) { return psUUBuf->Used ; }
-inline char * pcUUBufPos(uubuf_t * psUUBuf) { return psUUBuf->pBuf + psUUBuf->Idx ; }
+inline size_t xUUBufSpace(uubuf_t * psUUBuf) { return psUUBuf->Size - psUUBuf->Used; }
+inline size_t xUUBufAvail(uubuf_t * psUUBuf) { return psUUBuf->Used; }
+inline char * pcUUBufPos(uubuf_t * psUUBuf) { return psUUBuf->pBuf + psUUBuf->Idx; }
 
-int	xUUBufPutC(uubuf_t * psUUBuf, int cChr) ;
-int	xUUBufGetC(uubuf_t * psUUBuf) ;
-char * pcUUBufGetS(char * pBuf, int Number, uubuf_t * psUUBuf) ;
-int	xUUBufCreate(uubuf_t * psUUBuf, char * pBuf, size_t BufSize, size_t Used) ;
-void vUUBufDestroy(uubuf_t * psUUBuf) ;
-void vUUBufAdjust(uubuf_t * psUUBuf, ssize_t Adj) ;
-void vUUBufReport(uubuf_t * psUUBuf) ;
+int	xUUBufPutC(uubuf_t * psUUBuf, int cChr);
+int	xUUBufGetC(uubuf_t * psUUBuf);
+char * pcUUBufGetS(char * pBuf, int Number, uubuf_t * psUUBuf);
+int	xUUBufCreate(uubuf_t * psUUBuf, char * pBuf, size_t BufSize, size_t Used);
+void vUUBufDestroy(uubuf_t * psUUBuf);
+void vUUBufAdjust(uubuf_t * psUUBuf, ssize_t Adj);
+void vUUBufReport(uubuf_t * psUUBuf);
 
 #ifdef __cplusplus
 }
