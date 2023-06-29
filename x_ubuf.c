@@ -31,25 +31,25 @@
 // #################################### PRIVATE structures #########################################
 
 
-static size_t uBufSize = ubufSIZE_DEFAULT ;
+static size_t uBufSize = ubufSIZE_DEFAULT;
 
 // ################################# Local/static functions ########################################
 
 static int xUBufBlockAvail(ubuf_t * psUB) {
 	if ((psUB->pBuf == NULL) || (psUB->Size == 0)) {
 		IF_myASSERT(debugTRACK, 0);
-		errno = ENOMEM ;
-		return erFAILURE ;
+		errno = ENOMEM;
+		return erFAILURE;
 	}
 	if (psUB->Used == 0) {
 		if (psUB->flags & O_NONBLOCK) {
-			errno = EAGAIN ;
-			return EOF ;
+			errno = EAGAIN;
+			return EOF;
 		}
 		while (psUB->Used == 0)
 			vTaskDelay(2);
 	}
-	return erSUCCESS ;
+	return erSUCCESS;
 }
 
 /**
@@ -72,7 +72,7 @@ static ssize_t xUBufBlockSpace(ubuf_t * psUB, size_t Size) {
 		psUB->Used -= Req;								// adjust remaining character count
 		xUBufUnLock(psUB);
 	} else if (psUB->flags & O_NONBLOCK) {				// non-blocking mode ?
-		errno = EAGAIN ;								// yes, set error code
+		errno = EAGAIN;								// yes, set error code
 		return Avail;									// and return actual space available
 	} else {						// not truncating nor returning an error, WAIT !!!!
 		do {
@@ -100,7 +100,7 @@ void xUBufUnLock(ubuf_t * psUB) {
 
 size_t xUBufSetDefaultSize(size_t NewSize) {
 	IF_myASSERT(debugPARAM, INRANGE(ubufSIZE_MINIMUM, NewSize, ubufSIZE_MAXIMUM));
-	return uBufSize = NewSize ;
+	return uBufSize = NewSize;
 }
 
 /**
@@ -126,7 +126,7 @@ ubuf_t * psUBufCreate(ubuf_t * psUB, u8_t * pcBuf, size_t BufSize, size_t Used) 
 		psUB->pBuf = pcBuf;
 		psUB->f_alloc = 0;
 	} else {
-		psUB->pBuf = pvRtosMalloc(BufSize) ;
+		psUB->pBuf = pvRtosMalloc(BufSize);
 		psUB->f_alloc = 1;
 	}
 	psUB->mux = NULL;
@@ -143,7 +143,7 @@ ubuf_t * psUBufCreate(ubuf_t * psUB, u8_t * pcBuf, size_t BufSize, size_t Used) 
 }
 
 void vUBufDestroy(ubuf_t * psUB) {
-	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(psUB)) ;
+	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(psUB));
 	if (psUB->mux)
 		vRtosSemaphoreDelete(&psUB->mux);
 	if (psUB->f_alloc) {
@@ -158,7 +158,7 @@ void vUBufDestroy(ubuf_t * psUB) {
 
 void vUBufReset(ubuf_t * psUB) { psUB->IdxRD = psUB->IdxWR = psUB->Used = 0; }
 
-int	xUBufAvail(ubuf_t * psUB) { return psUB->Used ; }
+int	xUBufAvail(ubuf_t * psUB) { return psUB->Used; }
 
 int xUBufBlock(ubuf_t * psUB) {
 	if (psUB->Used == 0)
@@ -168,7 +168,7 @@ int xUBufBlock(ubuf_t * psUB) {
 	return psUB->Used;
 }
 
-int	xUBufSpace(ubuf_t * psUB) { return psUB->Size - psUB->Used ; }
+int	xUBufSpace(ubuf_t * psUB) { return psUB->Size - psUB->Used; }
 
 /**
  * @brief	Empty the specified buffer using the handler supplied
@@ -217,7 +217,7 @@ int	xUBufGetC(ubuf_t * psUB) {
 	if (--psUB->Used == 0)
 		psUB->IdxRD = psUB->IdxWR = 0;					// reset In/Out indexes
 	xUBufUnLock(psUB);
-	IF_RP(debugTRACK, "s=%d  i=%d  o=%d  cChr=%d", psUB->Size, psUB->IdxWR, psUB->IdxRD, iRV);
+	IF_CP(debugTRACK, "s=%d  i=%d  o=%d  cChr=%d", psUB->Size, psUB->IdxWR, psUB->IdxRD, iRV);
 	return iRV;
 }
 
@@ -237,9 +237,9 @@ int	xUBufPutC(ubuf_t * psUB, int cChr) {
 }
 
 char * pcUBufGetS(char * pBuf, int Number, ubuf_t * psUB) {
-	char *	pTmp = pBuf ;
+	char *	pTmp = pBuf;
 	while (Number > 1) {
-		int cChr = xUBufGetC(psUB) ;
+		int cChr = xUBufGetC(psUB);
 		if (cChr == EOF) {								// EOF reached?
 			*pTmp = 0;
 			return NULL;								// indicate EOF before NEWLINE
@@ -251,12 +251,12 @@ char * pcUBufGetS(char * pBuf, int Number, ubuf_t * psUB) {
 			break;
 	}
 	*pTmp = 0;
-	return pBuf ;										// and return a valid state
+	return pBuf;										// and return a valid state
 }
 
-u8_t * pcUBufTellRead(ubuf_t * psUB) { return psUB->pBuf + psUB->IdxRD ; }
+u8_t * pcUBufTellRead(ubuf_t * psUB) { return psUB->pBuf + psUB->IdxRD; }
 
-u8_t * pcUBufTellWrite(ubuf_t * psUB)	{ return psUB->pBuf + psUB->IdxWR ; }
+u8_t * pcUBufTellWrite(ubuf_t * psUB)	{ return psUB->pBuf + psUB->IdxWR; }
 
 void vUBufStepRead(ubuf_t * psUB, int Step) {
 	IF_myASSERT(debugTRACK, Step > 0);
@@ -379,25 +379,25 @@ static const esp_vfs_t dev_ubuf = {
 
 ubuf_t sUBuf[ubufMAX_OPEN] = { 0 };
 
-void vUBufInit(void) { ESP_ERROR_CHECK(esp_vfs_register("/ubuf", &dev_ubuf, NULL)) ; }
+void vUBufInit(void) { ESP_ERROR_CHECK(esp_vfs_register("/ubuf", &dev_ubuf, NULL)); }
 
 int	xUBufOpen(const char * pccPath, int flags, int Size) {
-	IF_P(debugTRACK, "path='%s'  flags=0x%x  Size=%d", pccPath, flags, Size) ;
-	IF_myASSERT(debugPARAM, (*pccPath == CHR_FWDSLASH) && INRANGE(ubufSIZE_MINIMUM, Size, ubufSIZE_MAXIMUM)) ;
-	int fd = 0 ;
+	IF_P(debugTRACK, "path='%s'  flags=0x%x  Size=%d", pccPath, flags, Size);
+	IF_myASSERT(debugPARAM, (*pccPath == CHR_FWDSLASH) && INRANGE(ubufSIZE_MINIMUM, Size, ubufSIZE_MAXIMUM));
+	int fd = 0;
 	do {
 		if (sUBuf[fd].pBuf == NULL) {
-			sUBuf[fd].pBuf	= pvRtosMalloc(Size) ;
-			sUBuf[fd].flags	= flags ;
-			sUBuf[fd].Size	= Size ;
-			sUBuf[fd].IdxWR	= sUBuf[fd].IdxRD	= sUBuf[fd].Used	= 0 ;
-			return fd ;
+			sUBuf[fd].pBuf	= pvRtosMalloc(Size);
+			sUBuf[fd].flags	= flags;
+			sUBuf[fd].Size	= Size;
+			sUBuf[fd].IdxWR	= sUBuf[fd].IdxRD	= sUBuf[fd].Used	= 0;
+			return fd;
 		} else {
-			fd++ ;
+			fd++;
 		}
-	} while(fd < ubufMAX_OPEN) ;
-	errno = ENFILE ;
-	return erFAILURE ;
+	} while(fd < ubufMAX_OPEN);
+	errno = ENFILE;
+	return erFAILURE;
 }
 
 int	xUBufClose(int fd) {
@@ -440,45 +440,45 @@ ssize_t	xUBufRead(int fd, void * pBuf, size_t Size) {
 
 ssize_t	xUBufWrite(int fd, const void * pBuf, size_t Size) {
 	if (OUTSIDE(0, fd, ubufMAX_OPEN-1) || (sUBuf[fd].pBuf == NULL) || (Size == 0)) {
-		errno = EBADF ;
-		return erFAILURE ;
+		errno = EBADF;
+		return erFAILURE;
 	}
-	ubuf_t * psUB = &sUBuf[fd] ;
+	ubuf_t * psUB = &sUBuf[fd];
 
 	Size = xUBufBlockSpace(psUB, Size);
 	if (Size < 1) {
-		return EOF ;
+		return EOF;
 	}
 	ssize_t	Count = 0;
 	xUBufLock(psUB);
 	while((psUB->Used < psUB->Size) && (Count < Size)) {
-		*(psUB->pBuf + psUB->IdxWR++) = *(const char *)pBuf++ ;
-		++psUB->Used ;
-		++Count ;
+		*(psUB->pBuf + psUB->IdxWR++) = *(const char *)pBuf++;
+		++psUB->Used;
+		++Count;
 		if (psUB->IdxWR == psUB->Size) {				// past the end?
-			psUB->IdxWR = 0 ;							// yes, reset to start
+			psUB->IdxWR = 0;							// yes, reset to start
 		}
 	}
-	xUBufUnLock(psUB) ;
-	return Count ;
+	xUBufUnLock(psUB);
+	return Count;
 }
 
 int	xUBufIoctl(int fd, int request, va_list vArgs) {
-	ubuf_t ** ppsUBuf ;
+	ubuf_t ** ppsUBuf;
 	if (OUTSIDE(0, fd, ubufMAX_OPEN-1)) {
-		errno = EBADF ;
-		return erFAILURE ;
+		errno = EBADF;
+		return erFAILURE;
 	}
 	switch(request) {
 	case ioctlUBUF_I_PTR_CNTL:
-		ppsUBuf = va_arg(vArgs, ubuf_t **) ;
-		*ppsUBuf = &sUBuf[fd] ;
-		break ;
+		ppsUBuf = va_arg(vArgs, ubuf_t **);
+		*ppsUBuf = &sUBuf[fd];
+		break;
 	default:
-		SL_ERR(debugAPPL_PLACE) ;
-		return erFAILURE ;
+		SL_ERR(debugAPPL_PLACE);
+		return erFAILURE;
 	}
-	return 1 ;
+	return 1;
 }
 
 // ##################################### HISTORY use support #######################################
@@ -529,73 +529,73 @@ void vUBufReport(ubuf_t * psUB) {
 #define	ubufTEST_SIZE				256
 
 void vUBufTest(void) {
-	vUBufInit() ;
-	int Count, Result ;
-	int fd = open("/ubuf", O_RDWR | O_NONBLOCK) ;
-	printfx("fd=%d\r\n", fd) ;
+	vUBufInit();
+	int Count, Result;
+	int fd = open("/ubuf", O_RDWR | O_NONBLOCK);
+	printfx("fd=%d\r\n", fd);
 	// fill the buffer
 	for (Count = 0; Count < ubufSIZE_DEFAULT; ++Count) {
-		Result = write(fd, "a", 1) ;
+		Result = write(fd, "a", 1);
 		if (Result != 1) {
-			printfx("write() FAILED with %d\r\n", Result) ;
+			printfx("write() FAILED with %d\r\n", Result);
 		}
 	}
 
 	// check that it is full
-	vUBufReport(&sUBuf[0]) ;
+	vUBufReport(&sUBuf[0]);
 
 	// Check that error is returned
-	Result = write(fd, "A", 1) ;
-	printfx("Result (%d) write() to FULL buffer =  %s\r\n", Result, (Result == 0) ? "Passed" : "Failed") ;
+	Result = write(fd, "A", 1);
+	printfx("Result (%d) write() to FULL buffer =  %s\r\n", Result, (Result == 0) ? "Passed" : "Failed");
 
 	// empty the buffer and check what is returned...
-	char cBuf[4] = { 0 } ;
+	char cBuf[4] = { 0 };
 	for (Count = 0; Count < ubufSIZE_DEFAULT; ++Count) {
-		Result = read(fd, cBuf, 1) ;
+		Result = read(fd, cBuf, 1);
 		if ((Result != 1) || (cBuf[0] != CHR_a)) {
-			printfx("read() FAILED with %d & '%c'\r\n", Result, cBuf[0]) ;
+			printfx("read() FAILED with %d & '%c'\r\n", Result, cBuf[0]);
 		}
 	}
 
 	// check that it is empty
-	vUBufReport(&sUBuf[0]) ;
+	vUBufReport(&sUBuf[0]);
 
 	// Check that error is returned
-	Result = read(fd, cBuf, 1) ;
-	printfx("Result (%d) read() from EMPTY buffer = %s\r\n", Result, (Result == erFAILURE) ? "Passed" : "Failed") ;
+	Result = read(fd, cBuf, 1);
+	printfx("Result (%d) read() from EMPTY buffer = %s\r\n", Result, (Result == erFAILURE) ? "Passed" : "Failed");
 
 	// Test printing to buffer
 	for (Count = 0, Result = 0; Count < ubufSIZE_DEFAULT; ++Count) {
-		Result += dprintfx(fd, "%c", (Count % 10) + CHR_0) ;
+		Result += dprintfx(fd, "%c", (Count % 10) + CHR_0);
 	}
-	printfx("dprintf() %s with %d expected %d\r\n", (Result == Count) ? "PASSED" : "FAILED" , Result, Count) ;
+	printfx("dprintf() %s with %d expected %d\r\n", (Result == Count) ? "PASSED" : "FAILED" , Result, Count);
 
 	// check that it is full
-	vUBufReport(&sUBuf[0]) ;
+	vUBufReport(&sUBuf[0]);
 
 	// Check that error is returned
-	Result = dprintfx(fd, "%c", CHR_A) ;
-	printfx("Result (%d) dprintf() to FULL buffer (without O_TRUNC) =  %s\r\n", Result, (Result == erFAILURE) ? "Passed" : "Failed") ;
+	Result = dprintfx(fd, "%c", CHR_A);
+	printfx("Result (%d) dprintf() to FULL buffer (without O_TRUNC) =  %s\r\n", Result, (Result == erFAILURE) ? "Passed" : "Failed");
 
-	Result = close(fd) ;
-	printfx("Result (%d) close() buffer =  %s\r\n", Result, (Result == erSUCCESS) ? "Passed" : "Failed") ;
+	Result = close(fd);
+	printfx("Result (%d) close() buffer =  %s\r\n", Result, (Result == erSUCCESS) ? "Passed" : "Failed");
 
 	// Now test the O_TRUNC functionality
-	size_t Size = xUBufSetDefaultSize(ubufTEST_SIZE) ;
-	printfx("xUBufSetDefaultSize(%d) %s with %d\r\n", ubufTEST_SIZE, (Size == ubufTEST_SIZE) ? "PASSED" : "FAILED", Size) ;
-	fd = open("/ubuf", O_RDWR | O_TRUNC) ;
-	printfx("fd=%d\r\n", fd) ;
+	size_t Size = xUBufSetDefaultSize(ubufTEST_SIZE);
+	printfx("xUBufSetDefaultSize(%d) %s with %d\r\n", ubufTEST_SIZE, (Size == ubufTEST_SIZE) ? "PASSED" : "FAILED", Size);
+	fd = open("/ubuf", O_RDWR | O_TRUNC);
+	printfx("fd=%d\r\n", fd);
 	// fill the buffer
 	for (Count = 0; Count < ubufTEST_SIZE; ++Count) {
-		Result = write(fd, "a", 1) ;
+		Result = write(fd, "a", 1);
 		if (Result != 1) {
-			printfx("write() FAILED with %d\r\n", Result) ;
+			printfx("write() FAILED with %d\r\n", Result);
 		}
 	}
-	Result = write(fd, "0123456789", 10) ;
+	Result = write(fd, "0123456789", 10);
 	// check that it is full but with overwrite
-	vUBufReport(&sUBuf[0]) ;
+	vUBufReport(&sUBuf[0]);
 
-	Result = close(fd) ;
-	printfx("Result (%d) close() buffer =  %s\r\n", Result, (Result == erSUCCESS) ? "Passed" : "Failed") ;
+	Result = close(fd);
+	printfx("Result (%d) close() buffer =  %s\r\n", Result, (Result == erSUCCESS) ? "Passed" : "Failed");
 }
