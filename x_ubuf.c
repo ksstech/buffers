@@ -14,7 +14,7 @@
 
 #include "esp_vfs.h"
 
-#define	debugFLAG					0xC000
+#define	debugFLAG					0xF000
 
 #define	debugTIMING					(debugFLAG_GLOBAL & debugFLAG & 0x1000)
 #define	debugTRACK					(debugFLAG_GLOBAL & debugFLAG & 0x2000)
@@ -217,7 +217,7 @@ int	xUBufGetC(ubuf_t * psUB) {
 	if (--psUB->Used == 0)
 		psUB->IdxRD = psUB->IdxWR = 0;					// reset In/Out indexes
 	xUBufUnLock(psUB);
-	IF_CP(debugTRACK, "s=%d  i=%d  o=%d  cChr=%d", psUB->Size, psUB->IdxWR, psUB->IdxRD, iRV);
+//	RP("s=%d  i=%d  o=%d  cChr=%d", psUB->Size, psUB->IdxWR, psUB->IdxRD, iRV);
 	return iRV;
 }
 
@@ -232,7 +232,7 @@ int	xUBufPutC(ubuf_t * psUB, int cChr) {
 	// ensure that the indexes are same when buffer is full
 	IF_myASSERT(debugTRACK && (psUB->Used == psUB->Size), psUB->IdxRD == psUB->IdxWR);
 	xUBufUnLock(psUB);
-	IF_P(debugTRACK, "s=%d  i=%d  o=%d  cChr=%d", psUB->Size, psUB->IdxWR, psUB->IdxRD, cChr);
+//	RP("s=%d  i=%d  o=%d  cChr=%d", psUB->Size, psUB->IdxWR, psUB->IdxRD, cChr);
 	return cChr;
 }
 
@@ -382,7 +382,7 @@ ubuf_t sUBuf[ubufMAX_OPEN] = { 0 };
 void vUBufInit(void) { ESP_ERROR_CHECK(esp_vfs_register("/ubuf", &dev_ubuf, NULL)); }
 
 int	xUBufOpen(const char * pccPath, int flags, int Size) {
-	IF_P(debugTRACK, "path='%s'  flags=0x%x  Size=%d", pccPath, flags, Size);
+//	RP("path='%s'  flags=0x%x  Size=%d", pccPath, flags, Size);
 	IF_myASSERT(debugPARAM, (*pccPath == CHR_FWDSLASH) && INRANGE(ubufSIZE_MINIMUM, Size, ubufSIZE_MAXIMUM));
 	int fd = 0;
 	do {
