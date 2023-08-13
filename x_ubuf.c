@@ -437,7 +437,7 @@ ssize_t	xUBufRead(int fd, void * pBuf, size_t Size) {
 }
 
 ssize_t	xUBufWrite(int fd, const void * pBuf, size_t Size) {
-	if (OUTSIDE(0, fd, ubufMAX_OPEN-1) || (sUBuf[fd].pBuf == NULL) || (Size == 0)) {
+	if (OUTSIDE(0, fd, ubufMAX_OPEN-1) || !sUBuf[fd].pBuf || !Size) {
 		errno = EBADF;
 		return erFAILURE;
 	}
