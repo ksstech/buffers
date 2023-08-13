@@ -57,9 +57,7 @@ static int xUBufBlockAvail(ubuf_t * psUB) {
  * Also must do with a) empty and b) partial full buffers
  */
 static ssize_t xUBufBlockSpace(ubuf_t * psUB, size_t Size) {
-	IF_myASSERT(debugPARAM, psUB->Size > Size);
-	if (Size > psUB->Size)								// in case requested size > buffer size
-		Size = psUB->Size;								// limit requested size to buffer size
+	IF_myASSERT(debugPARAM, Size <= psUB->Size);
 	ssize_t Avail = psUB->Size - psUB->Used;
 	if (Avail >= Size)									// sufficient space ?
 		return Size;
