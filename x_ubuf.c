@@ -70,9 +70,9 @@ static ssize_t xUBufBlockSpace(ubuf_t * psUB, size_t Size) {
 		psUB->Used -= Req;								// adjust remaining character count
 		xUBufUnLock(psUB);
 	} else if (psUB->flags & O_NONBLOCK) {				// non-blocking mode ?
-		errno = EAGAIN;								// yes, set error code
+		errno = EAGAIN;									// yes, set error code
 		return Avail;									// and return actual space available
-	} else {						// not truncating nor returning an error, WAIT !!!!
+	} else {											// block till available
 		do {
 			if (xTaskGetSchedulerState() == taskSCHEDULER_RUNNING)
 				vTaskDelay(2);							// loop waiting for sufficient space
@@ -453,9 +453,8 @@ ssize_t	xUBufWrite(int fd, const void * pBuf, size_t Size) {
 		*(psUB->pBuf + psUB->IdxWR++) = *(const char *)pBuf++;
 		++psUB->Used;
 		++Count;
-		if (psUB->IdxWR == psUB->Size) {				// past the end?
+		if (psUB->IdxWR == psUB->Size)					// past the end?
 			psUB->IdxWR = 0;							// yes, reset to start
-		}
 	}
 	xUBufUnLock(psUB);
 	return Count;
