@@ -443,13 +443,12 @@ ssize_t	xUBufWrite(int fd, const void * pBuf, size_t Size) {
 	}
 	ubuf_t * psUB = &sUBuf[fd];
 
-	Size = xUBufBlockSpace(psUB, Size);
-	if (Size < 1) {
+	ssize_t Avail = xUBufBlockSpace(psUB, Size);
+	if (Avail < 1)
 		return EOF;
-	}
 	ssize_t	Count = 0;
 	xUBufLock(psUB);
-	while((psUB->Used < psUB->Size) && (Count < Size)) {
+	while((psUB->Used < psUB->Size) && (Count < Avail)) {
 		*(psUB->pBuf + psUB->IdxWR++) = *(const char *)pBuf++;
 		++psUB->Used;
 		++Count;
