@@ -485,7 +485,7 @@ int	xUBufIoctl(int fd, int request, va_list vArgs) {
 
 void vUBufReport(ubuf_t * psUB) {
 	if (halCONFIG_inSRAM(psUB)) {
-		printfx_lock();
+		printfx_lock(NULL);
 		printfx_nolock("p=%p  s=%d  u=%d  Iw=%d  Ir=%d  mux=%p  f=0x%X",
 			psUB->pBuf, psUB->Size, psUB->Used, psUB->IdxWR, psUB->IdxRD, psUB->mux, psUB->flags);
 		printfx_nolock(" fI=%d fA=%d fS=%d fNL=%d fH=%d\r\n",
@@ -516,7 +516,7 @@ void vUBufReport(ubuf_t * psUB) {
 			}
 		}
 		printfx_nolock(strCRLF);
-		printfx_unlock();
+		printfx_unlock(NULL);
 	}
 }
 

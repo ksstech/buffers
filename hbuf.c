@@ -73,7 +73,7 @@ void vHBufReport(hbuf_t * psHB) {
 		printfx("CLI buffer empty\r\n");
 		return;
 	}
-	printfx_lock();
+	printfx_lock(NULL);
 	printfx_nolock("# HBuf #: No1=%d  Cur=%d  Free=%d  Cnt=%d", psHB->iNo1, psHB->iCur, psHB->iFree, psHB->Count);
 	u8_t * pNow = &psHB->Buf[psHB->iNo1];
 	u8_t u8Len;
@@ -97,7 +97,7 @@ void vHBufReport(hbuf_t * psHB) {
 		}
 	}
 	printfx_nolock("\r\n\n");
-	printfx_unlock();
+	printfx_unlock(NULL);
 }
 
 // ########################### Commands to support looping through history #########################
