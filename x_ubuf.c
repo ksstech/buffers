@@ -210,12 +210,11 @@ int	xUBufGetC(ubuf_t * psUB) {
 	if (iRV != erSUCCESS)
 		return iRV;
 	xUBufLock(psUB);
-	iRV = *(psUB->pBuf + psUB->IdxRD++);
+	iRV = psUB->pBuf[psUB->IdxRD++];
 	psUB->IdxRD %= psUB->Size;							// handle wrap
 	if (--psUB->Used == 0)
 		psUB->IdxRD = psUB->IdxWR = 0;					// reset In/Out indexes
 	xUBufUnLock(psUB);
-//	RP("s=%d  i=%d  o=%d  cChr=%d", psUB->Size, psUB->IdxWR, psUB->IdxRD, iRV);
 	return iRV;
 }
 
@@ -224,13 +223,13 @@ int	xUBufPutC(ubuf_t * psUB, int cChr) {
 	if (iRV != sizeof(char))
 		return iRV;
 	xUBufLock(psUB);
-	*(psUB->pBuf + psUB->IdxWR++) = cChr;				// store character in buffer, adjust pointer
+	psUB->pBuf[psUB->IdxWR++] = cChr;					// store character in buffer, adjust pointer
 	psUB->IdxWR %= psUB->Size;							// handle wrap
 	++psUB->Used;
-//	IF_RP (debugTRACK && (psUB->Used == psUB->Size), "s=%d u=%d i=%d o=%d cChr=%d", psUB->Size, psUB->Used, psUB->IdxWR, psUB->IdxRD, cChr);
-	// ensure that the indexes are same when buffer is full
-//	IF_myASSERT(debugTRACK && (psUB->Used == psUB->Size), psUB->IdxRD == psUB->IdxWR);
 	xUBufUnLock(psUB);
+	// ensure that the indexes are same when buffer is full
+	IF_CP (debugTRACK && (psUB->Used == psUB->Size) && (psUB->IdxRD != psUB->IdxWR), "ALERT!!! s=%d u=%d w=%d r=%d cChr=%d\r\n", psUB->Size, psUB->Used, psUB->IdxWR, psUB->IdxRD, cChr);
+//	IF_myASSERT(debugTRACK && (psUB->Used == psUB->Size), psUB->IdxRD == psUB->IdxWR);
 	return cChr;
 }
 
@@ -380,7 +379,7 @@ ubuf_t sUBuf[ubufMAX_OPEN] = { 0 };
 void vUBufInit(void) { ESP_ERROR_CHECK(esp_vfs_register("/ubuf", &dev_ubuf, NULL)); }
 
 int	xUBufOpen(const char * pccPath, int flags, int Size) {
-//	RP("path='%s'  flags=0x%x  Size=%d", pccPath, flags, Size);
+//	CP("path='%s'  flags=0x%x  Size=%d", pccPath, flags, Size);
 	IF_myASSERT(debugPARAM, (*pccPath == CHR_FWDSLASH) && INRANGE(ubufSIZE_MINIMUM, Size, ubufSIZE_MAXIMUM));
 	int fd = 0;
 	do {
