@@ -114,18 +114,18 @@ ubuf_t * psUBufCreate(ubuf_t * psUB, u8_t * pcBuf, size_t BufSize, size_t Used) 
 	IF_myASSERT(debugPARAM, (pcBuf == NULL) || halCONFIG_inSRAM(pcBuf));
 	IF_myASSERT(debugPARAM, !(pcBuf == NULL && Used > 0));
 	IF_myASSERT(debugPARAM, INRANGE(ubufSIZE_MINIMUM, BufSize, ubufSIZE_MAXIMUM) && Used <= BufSize);
-	if (psUB != NULL) {
-		psUB->f_struct = 0;
+	if (psUB != NULL) {									// control structure supplied
+		psUB->f_struct = 0;								// yes, flag as NOT allocated
 	} else {
-		psUB = pvRtosMalloc(sizeof(ubuf_t));
-		psUB->f_struct = 1;
+		psUB = pvRtosMalloc(sizeof(ubuf_t));			// no, allocate
+		psUB->f_struct = 1;								// and flag as such
 	}
-	if (pcBuf != NULL) {
-		psUB->pBuf = pcBuf;
-		psUB->f_alloc = 0;
+	if (pcBuf != NULL) {								// buffer itself allocated
+		psUB->pBuf = pcBuf;								// yes, save pointer into control structure
+		psUB->f_alloc = 0;								// and flag as NOT allocated
 	} else {
-		psUB->pBuf = pvRtosMalloc(BufSize);
-		psUB->f_alloc = 1;
+		psUB->pBuf = pvRtosMalloc(BufSize);				// no, allocate buffer of desired size
+		psUB->f_alloc = 1;								// and flag as allocated
 	}
 	psUB->mux = NULL;
 	psUB->IdxWR = psUB->Used  = Used;
@@ -134,24 +134,21 @@ ubuf_t * psUBufCreate(ubuf_t * psUB, u8_t * pcBuf, size_t BufSize, size_t Used) 
 	psUB->count = 0;
 	psUB->f_nolock = 0;
 	psUB->f_history = 0;
-	if (Used == 0)
-		memset(psUB->pBuf, 0, psUB->Size);			// clear buffer ONLY if nothing to be used
+	if (Used == 0) memset(psUB->pBuf, 0, psUB->Size);	// clear buffer ONLY if nothing to be used
 	psUB->f_init = 1;
 	return psUB;
 }
 
 void vUBufDestroy(ubuf_t * psUB) {
 	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(psUB));
-	if (psUB->mux)
-		vRtosSemaphoreDelete(&psUB->mux);
+	if (psUB->mux) vRtosSemaphoreDelete(&psUB->mux);
 	if (psUB->f_alloc) {
 		vRtosFree(psUB->pBuf);
 		psUB->pBuf = NULL;
 		psUB->Size = 0;
 		psUB->f_init = 0;
 	}
-	if (psUB->f_struct)
-		vRtosFree(psUB);
+	if (psUB->f_struct) vRtosFree(psUB);
 }
 
 void vUBufReset(ubuf_t * psUB) { psUB->IdxRD = psUB->IdxWR = psUB->Used = 0; }
@@ -175,10 +172,8 @@ int	xUBufSpace(ubuf_t * psUB) { return psUB->Size - psUB->Used; }
  * 			<0 representing an error code
  */
 int xUBufEmptyBlock(ubuf_t * psUB, int (*hdlr)(u8_t *, ssize_t)) {
-	if (psUB->Used == 0)
-		return 0;
-	if (hdlr == NULL)
-		return erINV_PARA;
+	if (psUB->Used == 0) return 0;
+	if (hdlr == NULL) return erINV_PARA;
 	xUBufLock(psUB);
 	int iRV = 0;
 	ssize_t Size, Total = 0;
