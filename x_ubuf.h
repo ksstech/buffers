@@ -51,9 +51,9 @@ extern ubuf_t sUBuf[] ;
 void xUBufLock(ubuf_t * psUBuf);
 void xUBufUnLock(ubuf_t * psUBuf);
 
-int	xUBufAvail(ubuf_t * psUBuf);
-int xUBufBlock(ubuf_t * psUBuf);
-int	xUBufSpace(ubuf_t * psUBuf);
+int	xUBufGetUsed(ubuf_t * psUBuf);
+int xUBufGetUsedBlock(ubuf_t * psUBuf);
+int	xUBufGetSpace(ubuf_t * psUBuf);
 int xUBufEmptyBlock(ubuf_t * psUBuf, int (*hdlr)(u8_t *, ssize_t));
 
 u8_t * pcUBufTellWrite(ubuf_t * psUBuf);

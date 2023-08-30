@@ -153,17 +153,15 @@ void vUBufDestroy(ubuf_t * psUB) {
 
 void vUBufReset(ubuf_t * psUB) { psUB->IdxRD = psUB->IdxWR = psUB->Used = 0; }
 
-int	xUBufAvail(ubuf_t * psUB) { return psUB->Used; }
+int	xUBufGetUsed(ubuf_t * psUB) { return psUB->Used; }
 
-int xUBufBlock(ubuf_t * psUB) {
-	if (psUB->Used == 0)
-		return 0;
-	if (psUB->IdxRD >= psUB->IdxWR)
-		return psUB->Size - psUB->IdxRD;
+int	xUBufGetSpace(ubuf_t * psUB) { return psUB->Size - psUB->Used; }
+
+int xUBufGetUsedBlock(ubuf_t * psUB) {
+	if (psUB->Used == 0) return 0;
+	if (psUB->IdxRD >= psUB->IdxWR) return psUB->Size - psUB->IdxRD;
 	return psUB->Used;
 }
-
-int	xUBufSpace(ubuf_t * psUB) { return psUB->Size - psUB->Used; }
 
 /**
  * @brief	Empty the specified buffer using the handler supplied
