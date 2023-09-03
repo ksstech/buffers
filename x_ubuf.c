@@ -42,12 +42,8 @@ static int xUBufBlockAvail(ubuf_t * psUB) {
 		return erFAILURE;
 	}
 	if (psUB->Used == 0) {
-		if (psUB->flags & O_NONBLOCK) {
-			errno = EAGAIN;
-			return EOF;
-		}
-		while (psUB->Used == 0)
-			vTaskDelay(2);
+		if (psUB->flags & O_NONBLOCK) { errno = EAGAIN; return EOF; }
+		while (psUB->Used == 0) vTaskDelay(2);
 	}
 	return erSUCCESS;
 }
@@ -59,8 +55,7 @@ static int xUBufBlockAvail(ubuf_t * psUB) {
 static ssize_t xUBufBlockSpace(ubuf_t * psUB, size_t Size) {
 	IF_myASSERT(debugPARAM, Size <= psUB->Size);
 	ssize_t Avail = psUB->Size - psUB->Used;
-	if (Avail >= Size)									// sufficient space ?
-		return Size;
+	if (Avail >= Size) return Size;						// sufficient space ?
 	// at this point, we do NOT have sufficient space available, must make space
 	if (psUB->f_history || (psUB->flags & O_TRUNC)) {	// yes, supposed to TRUNCate ?
 		xUBufLock(psUB);
@@ -69,9 +64,11 @@ static ssize_t xUBufBlockSpace(ubuf_t * psUB, size_t Size) {
 		psUB->IdxRD %= psUB->Size;						// correct for wrap
 		psUB->Used -= Req;								// adjust remaining character count
 		xUBufUnLock(psUB);
+
 	} else if (psUB->flags & O_NONBLOCK) {				// non-blocking mode ?
 		errno = EAGAIN;									// yes, set error code
 		return Avail;									// and return actual space available
+
 	} else {											// block till available
 		do {
 			if (xTaskGetSchedulerState() == taskSCHEDULER_RUNNING)
@@ -86,15 +83,9 @@ static ssize_t xUBufBlockSpace(ubuf_t * psUB, size_t Size) {
 
 // ################################### Global/public functions #####################################
 
-void xUBufLock(ubuf_t * psUB) {
-	if (psUB->f_nolock == 0)
-		xRtosSemaphoreTake(&psUB->mux, portMAX_DELAY);
-}
+void xUBufLock(ubuf_t * psUB) { if (!psUB->f_nolock) xRtosSemaphoreTake(&psUB->mux, portMAX_DELAY); }
 
-void xUBufUnLock(ubuf_t * psUB) {
-	if (psUB->f_nolock == 0)
-		xRtosSemaphoreGive(&psUB->mux);
-}
+void xUBufUnLock(ubuf_t * psUB) { if (!psUB->f_nolock) xRtosSemaphoreGive(&psUB->mux); }
 
 size_t xUBufSetDefaultSize(size_t NewSize) {
 	IF_myASSERT(debugPARAM, INRANGE(ubufSIZE_MINIMUM, NewSize, ubufSIZE_MAXIMUM));
