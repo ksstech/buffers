@@ -27,7 +27,7 @@
 
 // ################################### Private/local variables #####################################
 
-buf_t bufTable[configBUFFERS_MAX_OPEN] ;
+buf_t bufTable[configBUFFERS_MAX_OPEN];
 
 #ifdef ESP_PLATFORM
 	spinlock_t muxBuffers = { 0 };
@@ -37,8 +37,8 @@ buf_t bufTable[configBUFFERS_MAX_OPEN] ;
 
 // ############################## Heap and memory de/allocation related ############################
 
-SemaphoreHandle_t	BufSmlLock , BufMedLock, BufLrgLock ;
-uint8_t	BufSmall[64], BufMedium[128], BufLarge[256] ;
+SemaphoreHandle_t	BufSmlLock , BufMedLock, BufLrgLock;
+uint8_t	BufSmall[64], BufMedium[128], BufLarge[256];
 
 /**
  * pvBufTake()
@@ -65,13 +65,13 @@ void *	pvBufTake(size_t BufSize) {
  */
 int	xBufGive(void * pvBuf) {
 	if (pvBuf == BufSmall) {
-		return xRtosSemaphoreGive(&BufSmlLock) ;
+		return xRtosSemaphoreGive(&BufSmlLock);
 	} else if (pvBuf == BufMedium) {
-		return xRtosSemaphoreGive(&BufMedLock) ;
+		return xRtosSemaphoreGive(&BufMedLock);
 	} else 	if (pvBuf == BufLarge) {
-		return xRtosSemaphoreGive(&BufLrgLock) ;
+		return xRtosSemaphoreGive(&BufLrgLock);
 	}
-	return (BaseType_t) pdFAIL ;
+	return (BaseType_t) pdFAIL;
 }
 
 // ################################# Private/Local support functions ###############################
@@ -95,12 +95,12 @@ void	xBufCheck(buf_t * psBuf) {
  */
 static void vBufIsrEntry(buf_t * psBuf) {
 	if (halNVIC_CalledFromISR() > 0) {					// if called from an ISR
-		FF_SET(psBuf, FF_FROMISR) ;						// just set the flag
+		FF_SET(psBuf, FF_FROMISR);						// just set the flag
 	} else {
 	#if	defined(ESP_PLATFORM)
-		portENTER_CRITICAL(&muxBuffers) ;				// else disable interrupts
+		portENTER_CRITICAL(&muxBuffers);				// else disable interrupts
 	#else
-		taskENTER_CRITICAL() ;							// else disable interrupts
+		taskENTER_CRITICAL();							// else disable interrupts
 	#endif
 	}
 }
@@ -111,10 +111,10 @@ static void vBufIsrEntry(buf_t * psBuf) {
  */
 static	void	vBufIsrExit(buf_t * psBuf) {
 	if (FF_STCHK(psBuf, FF_FROMISR)) {					// if called from an ISR
-		FF_UNSET(psBuf, FF_FROMISR) ;					// just clear the flag
+		FF_UNSET(psBuf, FF_FROMISR);					// just clear the flag
 	} else {
 	#if	defined(ESP_PLATFORM)
-		portEXIT_CRITICAL(&muxBuffers) ;				// else re-enable interrupts
+		portEXIT_CRITICAL(&muxBuffers);				// else re-enable interrupts
 	#else
 		taskEXIT_CRITICAL();							// else re-enable interrupts
 	#endif
@@ -137,8 +137,8 @@ static buf_t * vBufTakePointer(void) {
  * Common cause is if we use an SL_ or IF_SL_ in the socketsX module,
  * since this will call syslog() which will want to allocate a buffer,
  * which will call back here, and so we recurse to a crash...... */
-	myASSERT(0) ;
-	return NULL ;
+	myASSERT(0);
+	return NULL;
 }
 
 /**
@@ -149,28 +149,28 @@ static buf_t * vBufTakePointer(void) {
 static int vBufGivePointer(buf_t * psBuf) {
 	for (int i = 0; i < configBUFFERS_MAX_OPEN; i++) {
 		if (psBuf == &bufTable[i]) {
-			psBuf->pBeg = 0 ;							/* Mark as closed/unused */
-			return erSUCCESS ;
+			psBuf->pBeg = 0;							/* Mark as closed/unused */
+			return erSUCCESS;
 		}
 	}
-	myASSERT(0) ;
-	return erFAILURE ;
+	myASSERT(0);
+	return erFAILURE;
 }
 
 int	xBufCompact(buf_t * psBuf) {
 	if (FF_STCHK(psBuf, FF_CIRCULAR) == 1 || FF_STCHK(psBuf, FF_MODEPACK) == 0) {
-		return erFAILURE ;
+		return erFAILURE;
 	}
 	if (psBuf->pRead > psBuf->pBeg) {					// yes, some empty space at start?
-//		P("Compacting") ;
-		vBufIsrEntry(psBuf) ;
-		memmove(psBuf->pBeg, psBuf->pRead, psBuf->xUsed) ;
-		psBuf->pRead	= psBuf->pBeg ;					// reset read pointer to beginning
-		psBuf->pWrite	= psBuf->pBeg + psBuf->xUsed ;	// recalc the write pointer
-		vBufIsrExit(psBuf) ;
-		memset(psBuf->pWrite, 0, psBuf->xSize - psBuf->xUsed) ;
+//		P("Compacting");
+		vBufIsrEntry(psBuf);
+		memmove(psBuf->pBeg, psBuf->pRead, psBuf->xUsed);
+		psBuf->pRead	= psBuf->pBeg;					// reset read pointer to beginning
+		psBuf->pWrite	= psBuf->pBeg + psBuf->xUsed;	// recalc the write pointer
+		vBufIsrExit(psBuf);
+		memset(psBuf->pWrite, 0, psBuf->xSize - psBuf->xUsed);
 	}
-	return psBuf->xSize - psBuf->xUsed ;
+	return psBuf->xSize - psBuf->xUsed;
 }
 
 // ################################### Public/Global functions #####################################
@@ -181,11 +181,11 @@ int	xBufCompact(buf_t * psBuf) {
  * @return
  */
 int	xBufReport(buf_t * psBuf) {
-	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
+	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf);
 	return P("B=%p  E=%p  R=%p  W=%p  S=%d  U=%d",
 								psBuf->pBeg,	psBuf->pEnd,
 								psBuf->pRead,	psBuf->pWrite,
-								psBuf->xSize,	psBuf->xUsed) ;
+								psBuf->xSize,	psBuf->xUsed);
 }
 
 /**
@@ -195,13 +195,13 @@ int	xBufReport(buf_t * psBuf) {
  * @return			None
  */
 void	vBufReset(buf_t * psBuf, size_t Used) {
-	vBufIsrEntry(psBuf) ;
-	psBuf->pRead	= psBuf->pBeg ;						// Setup READ pointers
-	psBuf->pWrite	= psBuf->pBeg ;						// setup WRITE pointers
-	psBuf->xUsed	= Used ;							// indicate (re)used space, if any
-	FF_UNSET(psBuf, FF_UNGETC) ;						// and no ungetc'd character..
-	vBufIsrExit(psBuf) ;
-	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
+	vBufIsrEntry(psBuf);
+	psBuf->pRead	= psBuf->pBeg;						// Setup READ pointers
+	psBuf->pWrite	= psBuf->pBeg;						// setup WRITE pointers
+	psBuf->xUsed	= Used;							// indicate (re)used space, if any
+	FF_UNSET(psBuf, FF_UNGETC);						// and no ungetc'd character..
+	vBufIsrExit(psBuf);
+	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf);
 }
 
 /**
@@ -215,15 +215,15 @@ void	vBufReset(buf_t * psBuf, size_t Used) {
  */
 static int	xBufReuse(buf_t * psBuf, char * pBuf, size_t Size, uint32_t flags, size_t Used) {
 	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(psBuf) && pBuf != 0 && Used <= Size)
-	vBufIsrEntry(psBuf) ;
-	psBuf->pBeg		= pBuf ;
-	psBuf->pEnd		= pBuf + Size ;						// calculate & save end
-	psBuf->xSize	= Size ;
+	vBufIsrEntry(psBuf);
+	psBuf->pBeg		= pBuf;
+	psBuf->pEnd		= pBuf + Size;						// calculate & save end
+	psBuf->xSize	= Size;
 // Only some flags to be carried forward...
-	FF_SET(psBuf, (flags & (FF_MODER | FF_MODEW | FF_MODERW | FF_MODEA | FF_MODEBIN | FF_CIRCULAR | FF_BUFFALOC))) ;
-	vBufIsrExit(psBuf) ;
-	vBufReset(psBuf, Used) ;
-	return erSUCCESS ;
+	FF_SET(psBuf, (flags & (FF_MODER | FF_MODEW | FF_MODERW | FF_MODEA | FF_MODEBIN | FF_CIRCULAR | FF_BUFFALOC)));
+	vBufIsrExit(psBuf);
+	vBufReset(psBuf, Used);
+	return erSUCCESS;
 }
 
 /**
@@ -238,24 +238,24 @@ static int	xBufReuse(buf_t * psBuf, char * pBuf, size_t Size, uint32_t flags, si
 buf_t * psBufOpen(void * pBuf, size_t Size, uint32_t flags, size_t Used) {
 	if ((pBuf == NULL) && (INRANGE(configBUFFERS_SIZE_MIN, Size, configBUFFERS_SIZE_MAX) == false)) {
 		myASSERT(0);
-		return pvFAILURE ;
+		return pvFAILURE;
 	}
-	IF_myASSERT(debugPARAM, Used <= Size) ;
-	buf_t *	psBuf = vBufTakePointer() ;					// get a free table entry
+	IF_myASSERT(debugPARAM, Used <= Size);
+	buf_t *	psBuf = vBufTakePointer();					// get a free table entry
 	if (psBuf != NULL) {								// unused entry found?
-		vBufIsrEntry(psBuf) ;
+		vBufIsrEntry(psBuf);
 		if (pBuf == 0) {
-			pBuf 	= pvRtosMalloc(Size) ;					// allocate memory for buffer
-			flags	|= FF_BUFFALOC ;					// make sure flag is SET !!
-			memset(pBuf, 0, Size) ;
-			Used	= 0 ;								// cannot have used something in a new buffer
+			pBuf 	= pvRtosMalloc(Size);					// allocate memory for buffer
+			flags	|= FF_BUFFALOC;					// make sure flag is SET !!
+			memset(pBuf, 0, Size);
+			Used	= 0;								// cannot have used something in a new buffer
 		} else {
-			flags	&= ~FF_BUFFALOC ;					// make sure flag is CLEAR !!
+			flags	&= ~FF_BUFFALOC;					// make sure flag is CLEAR !!
 		}
-		vBufIsrExit(psBuf) ;
+		vBufIsrExit(psBuf);
 		xBufReuse(psBuf, pBuf, Size, flags, Used)	;	// setup
 	}
-	return psBuf ;
+	return psBuf;
 }
 
 /**
@@ -265,20 +265,20 @@ buf_t * psBufOpen(void * pBuf, size_t Size, uint32_t flags, size_t Used) {
  * @return	SUCCESS if deleted with error, FAILURE otherwise
  */
 int	xBufClose(buf_t * psBuf) {
-	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
-	vBufIsrEntry(psBuf) ;
-	char *	pTmp = psBuf->pBeg ;								// save pointer for later use..
-	int iRV = vBufGivePointer(psBuf) ;
+	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf);
+	vBufIsrEntry(psBuf);
+	char *	pTmp = psBuf->pBeg;								// save pointer for later use..
+	int iRV = vBufGivePointer(psBuf);
 	if ((iRV == erSUCCESS) && FF_STCHK(psBuf, FF_BUFFALOC)) {
 	#if defined( __GNUC__ )
-		psBuf->_flags = 0 ;
+		psBuf->_flags = 0;
 	#elif defined( __TI_ARM__ )
-		psBuf->flags = 0 ;
+		psBuf->flags = 0;
 	#endif
-		vRtosFree(pTmp) ;									// return buffer
+		vRtosFree(pTmp);									// return buffer
 	}
-	vBufIsrExit(psBuf) ;
-	return iRV ;
+	vBufIsrExit(psBuf);
+	return iRV;
 }
 
 /**
@@ -287,8 +287,8 @@ int	xBufClose(buf_t * psBuf) {
  * @return		Number of characters
  */
 size_t	xBufAvail(buf_t * psBuf) {
-	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
-	return psBuf->xUsed ;
+	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf);
+	return psBuf->xUsed;
 }
 
 /**
@@ -298,10 +298,10 @@ size_t	xBufAvail(buf_t * psBuf) {
  * @return		Number of empty slots
  */
 size_t	xBufSpace(buf_t * psBuf) {
-	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
+	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf);
 	if (FF_STCHK(psBuf, FF_MODEPACK))
 		xBufCompact(psBuf);
-	return psBuf->xSize - psBuf->xUsed ;				// compacted space available
+	return psBuf->xSize - psBuf->xUsed;				// compacted space available
 }
 
 /**
@@ -312,25 +312,25 @@ size_t	xBufSpace(buf_t * psBuf) {
  * @return		cChr if the char was written or EOF if discarded/overwritten
  */
 int	xBufPutC(int cChr, buf_t * psBuf) {
-	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
-	int	iRV ;
+	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf);
+	int	iRV;
 	if ((cChr == CHR_LF) && (FF_STCHK(psBuf, FF_MODEBIN) == 0)) {
-		iRV = xBufPutC(CHR_CR, psBuf) ;
+		iRV = xBufPutC(CHR_CR, psBuf);
 		if (iRV == EOF)
 			return iRV;
 	}
 	if (psBuf->xSize > psBuf->xUsed) {
-		vBufIsrEntry(psBuf) ;
-		*psBuf->pWrite++ = cChr ;							// Firstly store char in buffer
-		psBuf->xUsed++ ;									// & adjust the Used counter
+		vBufIsrEntry(psBuf);
+		*psBuf->pWrite++ = cChr;							// Firstly store char in buffer
+		psBuf->xUsed++;									// & adjust the Used counter
 		if (psBuf->pWrite == psBuf->pEnd)					// Last character written in last slot &
 			psBuf->pWrite = psBuf->pBeg;					// yes, wrap write pointer to start
-		vBufIsrExit(psBuf) ;
-		iRV = cChr ;
+		vBufIsrExit(psBuf);
+		iRV = cChr;
 	} else {
-		iRV = EOF ;
+		iRV = EOF;
 	}
-	return iRV ;
+	return iRV;
 }
 
 /**
@@ -341,23 +341,23 @@ int	xBufPutC(int cChr, buf_t * psBuf) {
  */
 int	xBufGetC(buf_t * psBuf) {
 	if (xBufAvail(psBuf) == 0) {
-		return EOF ;
+		return EOF;
 	}
-	vBufIsrEntry(psBuf) ;
-	int cChr = *psBuf->pRead++ ;							// read character & adjust pointer
-	psBuf->xUsed-- ;									// & adjust the Used counter
+	vBufIsrEntry(psBuf);
+	int cChr = *psBuf->pRead++;							// read character & adjust pointer
+	psBuf->xUsed--;									// & adjust the Used counter
 	if (FF_STCHK(psBuf, FF_CIRCULAR)) {					// Circular buffer ...
 		if (psBuf->pRead == psBuf->pEnd) {				// and at end of buffer?
-			psBuf->pRead = psBuf->pBeg ;				// yes, wrap to start
+			psBuf->pRead = psBuf->pBeg;				// yes, wrap to start
 		}
 	} else {											// linear buffer ?
 		if (psBuf->xUsed == 0) {						// Handle pointer reset if empty
-			psBuf->pWrite	= psBuf->pBeg ;
-			psBuf->pRead	= psBuf->pBeg ;
+			psBuf->pWrite	= psBuf->pBeg;
+			psBuf->pRead	= psBuf->pBeg;
 		}
 	}
-	vBufIsrExit(psBuf) ;
-	return cChr ;
+	vBufIsrExit(psBuf);
+	return cChr;
 }
 
 /**
@@ -367,9 +367,9 @@ int	xBufGetC(buf_t * psBuf) {
  */
 int xBufPeek(buf_t * psBuf) {
 	if (xBufAvail(psBuf) == 0) {
-		return EOF ;
+		return EOF;
 	}
-	return *psBuf->pRead ;								// read character
+	return *psBuf->pRead;								// read character
 }
 
 /**
@@ -381,27 +381,27 @@ int xBufPeek(buf_t * psBuf) {
  */
 char *	pcBufGetS(char * pBuf, int Number, buf_t * psBuf) {
 	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pBuf))
-	char *	pTmp = pBuf ;
+	char *	pTmp = pBuf;
 	while (Number > 1) {
-		int	cChr = xBufGetC(psBuf) ;
+		int	cChr = xBufGetC(psBuf);
 		if (cChr == EOF) {								// EOF reached?
-			*pTmp = CHR_NUL ;							// terminate buffer
-			return NULL ;								// indicate EOF before NEWLINE
+			*pTmp = CHR_NUL;							// terminate buffer
+			return NULL;								// indicate EOF before NEWLINE
 		}
 		if (cChr == CHR_LF) {							// end of string reached ?
-			*pTmp = cChr ;								// store the NEWLINE
-			*pTmp = CHR_NUL ;							// terminate buffer
-			return pBuf ;								// and return a valid state
+			*pTmp = cChr;								// store the NEWLINE
+			*pTmp = CHR_NUL;							// terminate buffer
+			return pBuf;								// and return a valid state
 		}
 		if ((cChr == CHR_CR) && (FF_STCHK(psBuf, FF_MODEBIN) == false)) {
-			continue ;
+			continue;
 		}
-		*pTmp++ = cChr ;								// store the character, adjust the pointer
-		Number-- ;										// and update remaining chars to read
+		*pTmp++ = cChr;								// store the character, adjust the pointer
+		Number--;										// and update remaining chars to read
 	}
 // If we get here we have read (Number - 1) characters and still no NEWLINE
-	*pTmp = CHR_NUL ;									// terminate buffer
-	return pBuf ;										// and return a valid state
+	*pTmp = CHR_NUL;									// terminate buffer
+	return pBuf;										// and return a valid state
 }
 
 /**
@@ -414,24 +414,24 @@ char *	pcBufGetS(char * pBuf, int Number, buf_t * psBuf) {
  * @return		number of bytes allocated to buffer or an error code
  */
 size_t	xBufWrite(void * pvBuf, size_t Size, size_t Count, buf_t * psBuf) {
-	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
+	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf);
 	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pvBuf))
 	if (FF_STCHK(psBuf, FF_CIRCULAR)) {
 		IF_myASSERT(debugRESULT, 0)
-		return 0 ;										// indicate nothing written
+		return 0;										// indicate nothing written
 	}
 
-	Count *= Size ;										// calculate requested number of BYTES
+	Count *= Size;										// calculate requested number of BYTES
 	if (Count > (psBuf->pEnd - psBuf->pWrite)) {		// write size bigger than available to end?
-		xBufCompact(psBuf) ;							// compact up, if possible
-		Count = psBuf->pEnd - psBuf->pWrite ;			// then adjust...
+		xBufCompact(psBuf);							// compact up, if possible
+		Count = psBuf->pEnd - psBuf->pWrite;			// then adjust...
 	}
-	vBufIsrEntry(psBuf) ;
-	memcpy(psBuf->pWrite, pvBuf, Count) ;				// move contents across
-	psBuf->pWrite	+= Count ;							// update the payload pointers and length counters
-	psBuf->xUsed	+= Count ;
-	vBufIsrExit(psBuf) ;
-	return Count ;
+	vBufIsrEntry(psBuf);
+	memcpy(psBuf->pWrite, pvBuf, Count);				// move contents across
+	psBuf->pWrite	+= Count;							// update the payload pointers and length counters
+	psBuf->xUsed	+= Count;
+	vBufIsrExit(psBuf);
+	return Count;
 }
 
 /**
@@ -443,30 +443,30 @@ size_t	xBufWrite(void * pvBuf, size_t Size, size_t Count, buf_t * psBuf) {
  * @return
  */
 size_t	xBufRead(void * pvBuf, size_t Size, size_t Count, buf_t * psBuf) {
-	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
+	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf);
 	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pvBuf))
 	if (FF_STCHK(psBuf, FF_CIRCULAR)) {
 		IF_myASSERT(debugRESULT, 0)
-		return 0 ;										// indicate nothing read
+		return 0;										// indicate nothing read
 	}
 	if (Size == 0 || Count == 0) {
 		IF_myASSERT(debugRESULT, 0)
-		return 0 ;
+		return 0;
 	}
 
-	Count *= Size ;										// calculate requested number of BYTES
+	Count *= Size;										// calculate requested number of BYTES
 	if (Count > psBuf->xUsed) {							// If more requested than available,
-		Count = psBuf->xUsed ;							// then adjust...
+		Count = psBuf->xUsed;							// then adjust...
 	}
-	vBufIsrEntry(psBuf) ;
-	memcpy(pvBuf, psBuf->pRead, Count) ;				// move contents across
-	psBuf->pRead	+= Count ;							// update READ pointer for next
-	psBuf->xUsed	-= Count ;							// adjust remaining count
+	vBufIsrEntry(psBuf);
+	memcpy(pvBuf, psBuf->pRead, Count);				// move contents across
+	psBuf->pRead	+= Count;							// update READ pointer for next
+	psBuf->xUsed	-= Count;							// adjust remaining count
 	if (psBuf->xUsed == 0) {
-		psBuf->pRead = psBuf->pWrite = psBuf->pBeg ;	// reset all to start
+		psBuf->pRead = psBuf->pWrite = psBuf->pBeg;	// reset all to start
 	}
-	vBufIsrExit(psBuf) ;
-	return Count ;
+	vBufIsrExit(psBuf);
+	return Count;
 }
 
 /**
@@ -478,47 +478,47 @@ size_t	xBufRead(void * pvBuf, size_t Size, size_t Count, buf_t * psBuf) {
  * @return
  */
 int	xBufSeek(buf_t * psBuf, int Offset, int whence, int flags) {
-char * pTmp ;
-	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
+char * pTmp;
+	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf);
 	if (FF_STCHK(psBuf, FF_CIRCULAR)) {					// working on CIRCULAR buffer
-		IF_myASSERT(debugRESULT, 0) ;
-		return erFAILURE ;								// yes, abort
+		IF_myASSERT(debugRESULT, 0);
+		return erFAILURE;								// yes, abort
 	}
-	IF_P(debugSTRUCTURE, "[Seek 1] B=%p R=%p W=%p S=%d U=%d\r\n", psBuf->pBeg, psBuf->pRead, psBuf->pWrite, psBuf->xSize, psBuf->xUsed) ;
+	IF_P(debugSTRUCTURE, "[Seek 1] B=%p R=%p W=%p S=%d U=%d\r\n", psBuf->pBeg, psBuf->pRead, psBuf->pWrite, psBuf->xSize, psBuf->xUsed);
 
-	vBufIsrEntry(psBuf) ;
+	vBufIsrEntry(psBuf);
 	if (flags & FF_MODER) {
 		pTmp =  (whence == SEEK_SET)	? psBuf->pBeg + Offset :
 				(whence == SEEK_CUR)	? psBuf->pRead + Offset :
-				(whence == SEEK_END)	? psBuf->pEnd + Offset : psBuf->pRead ;
+				(whence == SEEK_END)	? psBuf->pEnd + Offset : psBuf->pRead;
 		if (pTmp < psBuf->pBeg) {
-			myASSERT(0) ;
-			pTmp = psBuf->pBeg ;
+			myASSERT(0);
+			pTmp = psBuf->pBeg;
 		} else if (pTmp > psBuf->pEnd) {
-			myASSERT(0) ;
-			pTmp = psBuf->pEnd ;
+			myASSERT(0);
+			pTmp = psBuf->pEnd;
 		}
-		psBuf->pRead = pTmp ;
+		psBuf->pRead = pTmp;
 	}
 	if (flags & FF_MODEW) {
 		pTmp =  (whence == SEEK_SET)	? psBuf->pBeg + Offset :
 				(whence == SEEK_CUR)	? psBuf->pWrite + Offset :
-				(whence == SEEK_END)	? psBuf->pEnd + Offset : psBuf->pWrite ;
+				(whence == SEEK_END)	? psBuf->pEnd + Offset : psBuf->pWrite;
 		if (pTmp < psBuf->pBeg) {			// seek pos BEFORE start of buffer?
 			myASSERT(0)	;					// yes !!!
-			pTmp = psBuf->pBeg ;
+			pTmp = psBuf->pBeg;
 		} else if (pTmp > psBuf->pEnd) {	// seek pos BEYOND end of buffer?
 			myASSERT(0)	;					// yes,
-			pTmp = psBuf->pEnd ;
+			pTmp = psBuf->pEnd;
 		}
-		psBuf->pWrite = pTmp ;
+		psBuf->pWrite = pTmp;
 	}
-	psBuf->xUsed = psBuf->pWrite - psBuf->pRead ;
-	vBufIsrExit(psBuf) ;
+	psBuf->xUsed = psBuf->pWrite - psBuf->pRead;
+	vBufIsrExit(psBuf);
 
-	IF_myASSERT(debugRESULT, (psBuf->xUsed <= psBuf->xSize)) ;
-	IF_P(debugSTRUCTURE, "[Seek 2] B=%p R=%p W=%p S=%d U=%u\r\n", psBuf->pBeg, psBuf->pRead, psBuf->pWrite, psBuf->xSize, psBuf->xUsed) ;
-	return erSUCCESS ;
+	IF_myASSERT(debugRESULT, (psBuf->xUsed <= psBuf->xSize));
+	IF_P(debugSTRUCTURE, "[Seek 2] B=%p R=%p W=%p S=%d U=%u\r\n", psBuf->pBeg, psBuf->pRead, psBuf->pWrite, psBuf->xSize, psBuf->xUsed);
+	return erSUCCESS;
 }
 
 /**
@@ -529,25 +529,25 @@ char * pTmp ;
  */
 int	xBufTell(buf_t * psBuf, int flags) {
 	int	iRV = erFAILURE;
-	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
+	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf);
 	if (FF_STCHK(psBuf, FF_CIRCULAR)) {				// working on circular buffer
 		IF_myASSERT(debugRESULT, 0)
-		return erFAILURE ;							// yes, abort..
+		return erFAILURE;							// yes, abort..
 	}
 
 	// Can only ask for MODER or MODEW not both or MODERW
 	if (((flags & FF_MODER) && (flags & FF_MODEW)) || (flags & FF_MODERW)) {
 		IF_myASSERT(debugRESULT, 0)
-		return erFAILURE ;
+		return erFAILURE;
 	}
-	vBufIsrEntry(psBuf) ;
+	vBufIsrEntry(psBuf);
 	if (flags & FF_MODER) {
-		iRV =  psBuf->pRead - psBuf->pBeg ;
+		iRV =  psBuf->pRead - psBuf->pBeg;
 	} else if (FF_STCHK(psBuf, FF_MODEW)) {
-		iRV = psBuf->pWrite - psBuf->pBeg ;
+		iRV = psBuf->pWrite - psBuf->pBeg;
 	}
-	vBufIsrExit(psBuf) ;
-	return iRV ;
+	vBufIsrExit(psBuf);
+	return iRV;
 }
 
 /**
@@ -557,25 +557,25 @@ int	xBufTell(buf_t * psBuf, int flags) {
  * @return
  */
 char *	pcBufTellPointer(buf_t * psBuf, int flags) {
-char * pcRetVal = (char *) erFAILURE ;
-	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
+char * pcRetVal = (char *) erFAILURE;
+	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf);
 	if (FF_STCHK(psBuf, FF_CIRCULAR)) {				// working on circular buffer
 		IF_myASSERT(debugRESULT, 0)
-		return pcRetVal ;
+		return pcRetVal;
 	}
 
 	// Can only ask for MODER or MODEW not both nor MODERW
 	if (((flags & FF_MODER) && (flags & FF_MODEW)) || (flags & FF_MODERW)) {
 		IF_myASSERT(debugRESULT, 0)
-		return pcRetVal ;
+		return pcRetVal;
 	}
 	if (flags & FF_MODER) {
-		pcRetVal = psBuf->pRead ;
+		pcRetVal = psBuf->pRead;
 	} else if (flags & FF_MODEW) {
-		pcRetVal = psBuf->pWrite ;
+		pcRetVal = psBuf->pWrite;
 	}
 	IF_myASSERT(debugRESULT, halCONFIG_inSRAM(pcRetVal))
-	return pcRetVal ;
+	return pcRetVal;
 }
 
 /**
@@ -588,11 +588,11 @@ char * pcRetVal = (char *) erFAILURE ;
  * @return	number of characters printed
  */
 int	xBufPrintClose(buf_t * psBuf) {
-	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
-	IF_myASSERT(debugPARAM, psBuf->xUsed > 0) ;
+	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf);
+	IF_myASSERT(debugPARAM, psBuf->xUsed > 0);
 	int iRV = nprintfx(psBuf->xUsed, "%s", psBuf->pRead);
-	xBufClose(psBuf) ;
-	return iRV ;
+	xBufClose(psBuf);
+	return iRV;
 }
 
 /**
@@ -602,94 +602,94 @@ int	xBufPrintClose(buf_t * psBuf) {
  * @return	status of the buffer close event
  */
 int	xBufSyslogClose(buf_t * psBuf, uint32_t Prio) {
-	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf) ;
-	IF_myASSERT(debugPARAM, psBuf->xUsed > 0) ;
-	SL_LOG(Prio, "%.*s", psBuf->xUsed, psBuf->pRead) ;
-	return xBufClose(psBuf) ;
+	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf);
+	IF_myASSERT(debugPARAM, psBuf->xUsed > 0);
+	SL_LOG(Prio, "%.*s", psBuf->xUsed, psBuf->pRead);
+	return xBufClose(psBuf);
 }
 
 #define	bufSIZE		100
 #define	bufSTEP		10
 
 void	vBufUnitTest(void) {
-	int	iRV ;
-	buf_t * psBuf = psBufOpen(0, bufSIZE, FF_MODER|FF_MODEW, 0) ;
+	int	iRV;
+	buf_t * psBuf = psBufOpen(0, bufSIZE, FF_MODER|FF_MODEW, 0);
 	for(int a = 0; a < bufSIZE; a += bufSTEP) {
 		for(int b = 0; b < bufSTEP; b++) {
-			iRV = xBufPutC(b + '0', psBuf) ;
-			if (iRV != (b + '0')) 	P("Failed")  ;
+			iRV = xBufPutC(b + '0', psBuf);
+			if (iRV != (b + '0')) 	P("Failed");
 		}
 	}
 	// buffer should be full
-	if (xBufAvail(psBuf) != bufSIZE) 											P("Failed")  ;
-	if (xBufSpace(psBuf) != 0) 													P("Failed")  ;
-	if (pcBufTellPointer(psBuf, FF_MODER) != psBuf->pBeg) 						P("Failed")  ;
+	if (xBufAvail(psBuf) != bufSIZE) 											P("Failed");
+	if (xBufSpace(psBuf) != 0) 													P("Failed");
+	if (pcBufTellPointer(psBuf, FF_MODER) != psBuf->pBeg) 						P("Failed");
 	// because we are using the xUsed value to track space, pWrite should be wrapped around
-	if (pcBufTellPointer(psBuf, FF_MODEW) != psBuf->pRead) 						P("Failed")  ;
+	if (pcBufTellPointer(psBuf, FF_MODEW) != psBuf->pRead) 						P("Failed");
 
 	// make sure that we get an error if we write another char...
-	if (xBufPutC('Z', psBuf) != EOF) 											P("Failed")  ;
+	if (xBufPutC('Z', psBuf) != EOF) 											P("Failed");
 
 	// now read the buffer empty and verify the contents
 	for(int a = 0; a < bufSIZE; a++) {
-		if (xBufGetC(psBuf) != ('0' + (a % bufSTEP)))							P("Failed")  ;
+		if (xBufGetC(psBuf) != ('0' + (a % bufSTEP)))							P("Failed");
 	}
 
 	// make sure we get an EOF error if we try read another char
-	if (xBufGetC(psBuf) != EOF)													P("Failed")  ;
+	if (xBufGetC(psBuf) != EOF)													P("Failed");
 
 	// at this stage (empty) the pointers should both automatically be reset to the start
-	if ((psBuf->pRead != psBuf->pWrite) || (psBuf->pRead != psBuf->pBeg))		P("Failed")  ;
+	if ((psBuf->pRead != psBuf->pWrite) || (psBuf->pRead != psBuf->pBeg))		P("Failed");
 
 	// seek the write pointer to the end, effectively making all content available again.
-	if (xBufSeek(psBuf, bufSIZE, SEEK_SET, FF_MODEW) != erSUCCESS)				P("Failed")  ;
-	if ((xBufAvail(psBuf) != bufSIZE) || (xBufSpace(psBuf) != 0))				P("Failed A=%d - B=%d", xBufAvail(psBuf), xBufSpace(psBuf))  ;
+	if (xBufSeek(psBuf, bufSIZE, SEEK_SET, FF_MODEW) != erSUCCESS)				P("Failed");
+	if ((xBufAvail(psBuf) != bufSIZE) || (xBufSpace(psBuf) != 0))				P("Failed A=%d - B=%d", xBufAvail(psBuf), xBufSpace(psBuf));
 
 	// rewind the write pointer, make effectively empty
-	if (xBufSeek(psBuf, -bufSIZE, SEEK_END, FF_MODEW) != erSUCCESS)				P("Failed")  ;
-	if ((xBufAvail(psBuf) != 0) || (xBufSpace(psBuf) != bufSIZE))				P("Failed")  ;
+	if (xBufSeek(psBuf, -bufSIZE, SEEK_END, FF_MODEW) != erSUCCESS)				P("Failed");
+	if ((xBufAvail(psBuf) != 0) || (xBufSpace(psBuf) != bufSIZE))				P("Failed");
 
 	// move write pointer to middle
-	if (xBufSeek(psBuf, bufSIZE/2, SEEK_SET, FF_MODEW) != erSUCCESS)			P("Failed")  ;
-	if (xBufAvail(psBuf) != xBufSpace(psBuf))									P("Failed")  ;
+	if (xBufSeek(psBuf, bufSIZE/2, SEEK_SET, FF_MODEW) != erSUCCESS)			P("Failed");
+	if (xBufAvail(psBuf) != xBufSpace(psBuf))									P("Failed");
 
 	// move read pointer to middle
-	if (xBufSeek(psBuf, bufSIZE/2, SEEK_SET, FF_MODER) != erSUCCESS)			P("Failed")  ;
-	if ((xBufAvail(psBuf) != 0) || (xBufSpace(psBuf) != bufSIZE))				P("Failed")  ;
+	if (xBufSeek(psBuf, bufSIZE/2, SEEK_SET, FF_MODER) != erSUCCESS)			P("Failed");
+	if ((xBufAvail(psBuf) != 0) || (xBufSpace(psBuf) != bufSIZE))				P("Failed");
 
 	// move both read & write pointers simultaneously to start
-	if (xBufSeek(psBuf, -bufSIZE/2, SEEK_CUR, FF_MODER|FF_MODEW) != erSUCCESS)	P("Failed")  ;
-	if ((psBuf->pBeg != psBuf->pRead) && (psBuf->pBeg != psBuf->pWrite))		P("Failed")  ;
-	if ((xBufAvail(psBuf) != 0) || (xBufSpace(psBuf) != bufSIZE))				P("Failed")  ;
+	if (xBufSeek(psBuf, -bufSIZE/2, SEEK_CUR, FF_MODER|FF_MODEW) != erSUCCESS)	P("Failed");
+	if ((psBuf->pBeg != psBuf->pRead) && (psBuf->pBeg != psBuf->pWrite))		P("Failed");
+	if ((xBufAvail(psBuf) != 0) || (xBufSpace(psBuf) != bufSIZE))				P("Failed");
 
-	if (xBufSeek(psBuf, bufSIZE, SEEK_SET, FF_MODEW) != erSUCCESS)				P("Failed")  ;
-	printfx("Avail=100%%\r\n%!'+hhY", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER)) ;
-	xBufSeek(psBuf, bufSIZE / 2, SEEK_SET, FF_MODER) ;
-	printfx("Avail=50%%\r\n%!'+hhY", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER)) ;
-	xBufSeek(psBuf, -(bufSIZE / 4), SEEK_CUR, FF_MODER) ;
-	printfx("Avail=75%%\r\n%!'+hhY", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER)) ;
+	if (xBufSeek(psBuf, bufSIZE, SEEK_SET, FF_MODEW) != erSUCCESS)				P("Failed");
+	printfx("Avail=100%%\r\n%!'+hhY", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER));
+	xBufSeek(psBuf, bufSIZE / 2, SEEK_SET, FF_MODER);
+	printfx("Avail=50%%\r\n%!'+hhY", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER));
+	xBufSeek(psBuf, -(bufSIZE / 4), SEEK_CUR, FF_MODER);
+	printfx("Avail=75%%\r\n%!'+hhY", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER));
 
-	char cBuffer[50] ;
-	xBufSeek(psBuf, 0, SEEK_SET, FF_MODER) ;
-	xBufSeek(psBuf, 0, SEEK_END, FF_MODEW) ;
+	char cBuffer[50];
+	xBufSeek(psBuf, 0, SEEK_SET, FF_MODER);
+	xBufSeek(psBuf, 0, SEEK_END, FF_MODEW);
 	// read pointer should be at start and write pointer at the end.
-	if ((xBufAvail(psBuf) != bufSIZE) || (xBufSpace(psBuf) != 0))				P("Failed A=%d - B=%d", xBufAvail(psBuf), xBufSpace(psBuf))  ;
+	if ((xBufAvail(psBuf) != bufSIZE) || (xBufSpace(psBuf) != 0))				P("Failed A=%d - B=%d", xBufAvail(psBuf), xBufSpace(psBuf));
 
 	// read first 25 characters at start of buffer, no compacting should have happened
-	if (xBufRead(cBuffer, 5, 5, psBuf) != 25)									P("Failed")  ;
-	printfx("Avail=75\r\n%!'+hhY", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER)) ;
-	printfx("cBuffer=25\r\n%!'+hhY", 25, cBuffer) ;
-	if ((xBufAvail(psBuf) != 75) || (xBufSpace(psBuf) != 25))					P("Failed")  ;
+	if (xBufRead(cBuffer, 5, 5, psBuf) != 25)									P("Failed");
+	printfx("Avail=75\r\n%!'+hhY", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER));
+	printfx("cBuffer=25\r\n%!'+hhY", 25, cBuffer);
+	if ((xBufAvail(psBuf) != 75) || (xBufSpace(psBuf) != 25))					P("Failed");
 
 	// try to write 25 chars just read, should fail since FF_MODEPACK not enabled
-	if (xBufWrite(cBuffer, 5, 5, psBuf) != 0)									P("Failed")  ;
-	if ((xBufAvail(psBuf) != 75) || (xBufSpace(psBuf) != 25))					P("Failed")  ;
-	printfx("Avail=75\r\n%!'+hhY", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER)) ;
+	if (xBufWrite(cBuffer, 5, 5, psBuf) != 0)									P("Failed");
+	if ((xBufAvail(psBuf) != 75) || (xBufSpace(psBuf) != 25))					P("Failed");
+	printfx("Avail=75\r\n%!'+hhY", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER));
 
-	FF_SET(psBuf, FF_MODEPACK) ;
+	FF_SET(psBuf, FF_MODEPACK);
 	// try to write 25 chars just read, should be placed at end after compacting...
-	if (xBufWrite(cBuffer, 5, 5, psBuf) != 25)									P("Failed")  ;
-	if ((xBufAvail(psBuf) != bufSIZE) || (xBufSpace(psBuf) != 0))				P("Failed")  ;
-	printfx("25 at End\r\n%!'+hhY", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER)) ;
-	xBufClose(psBuf) ;
+	if (xBufWrite(cBuffer, 5, 5, psBuf) != 25)									P("Failed");
+	if ((xBufAvail(psBuf) != bufSIZE) || (xBufSpace(psBuf) != 0))				P("Failed");
+	printfx("25 at End\r\n%!'+hhY", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER));
+	xBufClose(psBuf);
 }
