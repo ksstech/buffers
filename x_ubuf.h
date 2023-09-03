@@ -24,9 +24,9 @@ enum { ioctlUBUF_UNDEFINED, ioctlUBUF_I_PTR_CNTL, ioctlUBUF_NUMBER };
 typedef	struct ubuf_t {
 	u8_t * pBuf;
 	SemaphoreHandle_t mux;
-	volatile u16_t	IdxWR;			// index to next space to WRITE to
-	volatile u16_t	IdxRD;			// index to next char to be READ from
-	volatile u16_t	Used;
+	volatile u16_t IdxWR;			// index to next space to WRITE to
+	volatile u16_t IdxRD;			// index to next char to be READ from
+	volatile u16_t Used;
 	u16_t Size;
 	u16_t flags;					// stdlib related flags
 	u8_t count;						// history command counter
