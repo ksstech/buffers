@@ -3,9 +3,7 @@
  * Copyright (c) 2014-22 Andre M. Maree / KSS Technologies (Pty) Ltd.
  */
 
-#include <string.h>
-
-#include "hal_config.h"
+#include "hal_variables.h"
 #include "hal_nvic.h"
 #include "x_buffers.h"
 #include "FreeRTOS_Support.h"
@@ -29,7 +27,7 @@
 
 buf_t bufTable[configBUFFERS_MAX_OPEN];
 
-#ifdef ESP_PLATFORM
+#if defined(ESP_PLATFORM)
 	spinlock_t muxBuffers = { 0 };
 #else
 	portMUX_TYPE muxBuffers = { 0 };
@@ -64,13 +62,9 @@ void *	pvBufTake(size_t BufSize) {
  * @return
  */
 int	xBufGive(void * pvBuf) {
-	if (pvBuf == BufSmall) {
-		return xRtosSemaphoreGive(&BufSmlLock);
-	} else if (pvBuf == BufMedium) {
-		return xRtosSemaphoreGive(&BufMedLock);
-	} else 	if (pvBuf == BufLarge) {
-		return xRtosSemaphoreGive(&BufLrgLock);
-	}
+	if (pvBuf == BufSmall) return xRtosSemaphoreGive(&BufSmlLock);
+	else if (pvBuf == BufMedium) return xRtosSemaphoreGive(&BufMedLock);
+	else if (pvBuf == BufLarge) return xRtosSemaphoreGive(&BufLrgLock);
 	return (BaseType_t) pdFAIL;
 }
 
