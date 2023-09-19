@@ -5,7 +5,7 @@
 #include <string.h>
 
 #include "hbuf.h"
-#include "hal_variables.h"
+#include "hal_config.h"
 #include "FreeRTOS_Support.h"
 #include "printfx.h"
 
