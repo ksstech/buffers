@@ -212,7 +212,7 @@ int	xUBufPutC(ubuf_t * psUB, int cChr) {
 	++psUB->Used;
 	xUBufUnLock(psUB);
 	// ensure that the indexes are same when buffer is full
-	IF_CP (debugTRACK && (psUB->Used == psUB->Size) && (psUB->IdxRD != psUB->IdxWR), "ALERT!!! s=%d u=%d w=%d r=%d cChr=%d\r\n", psUB->Size, psUB->Used, psUB->IdxWR, psUB->IdxRD, cChr);
+//	IF_CP (debugTRACK && (psUB->Used == psUB->Size) && (psUB->IdxRD != psUB->IdxWR), "ALERT!!! s=%d u=%d w=%d r=%d cChr=%d\r\n", psUB->Size, psUB->Used, psUB->IdxWR, psUB->IdxRD, cChr);
 //	IF_myASSERT(debugTRACK && (psUB->Used == psUB->Size), psUB->IdxRD == psUB->IdxWR);
 	return cChr;
 }
