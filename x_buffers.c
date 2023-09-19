@@ -3,7 +3,7 @@
  * Copyright (c) 2014-22 Andre M. Maree / KSS Technologies (Pty) Ltd.
  */
 
-#include "hal_variables.h"
+#include "hal_config.h"
 #include "hal_nvic.h"
 #include "x_buffers.h"
 #include "FreeRTOS_Support.h"
