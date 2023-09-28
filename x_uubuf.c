@@ -2,13 +2,15 @@
  * x_uubuf.c
  */
 
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include "hal_config.h"
 
 #include "x_uubuf.h"
 #include "FreeRTOS_Support.h"
 #include "printfx.h"
+
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 // ################################### Global/public functions #####################################
 

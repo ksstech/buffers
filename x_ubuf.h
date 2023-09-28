@@ -4,9 +4,10 @@
 
 #pragma	once
 
-#include <fcntl.h>
-
+#include "definitions.h"
 #include "FreeRTOS_Support.h"
+
+#include <fcntl.h>
 
 #ifdef __cplusplus
 extern "C" {
