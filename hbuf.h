@@ -1,5 +1,5 @@
 /*
- * hbuf.h - Copyright 2022 Andre M. Maree/KSS Technologies (Pty) Ltd.
+ * hbuf.h - Copyright (c) 2022-23 Andre M. Maree/KSS Technologies (Pty) Ltd.
  */
 
 #pragma	once

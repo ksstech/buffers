@@ -45,7 +45,7 @@ typedef	struct ubuf_t {
 } ubuf_t;
 DUMB_STATIC_ASSERT(sizeof(ubuf_t) == (12 + sizeof(char *) + sizeof(SemaphoreHandle_t)));
 
-extern ubuf_t sUBuf[] ;
+extern ubuf_t sUBuf[];
 
 // ################################### EXTERNAL FUNCTIONS ##########################################
 
