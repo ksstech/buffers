@@ -1,6 +1,5 @@
 /*
- * x_buffers.c
- * Copyright (c) 2014-22 Andre M. Maree / KSS Technologies (Pty) Ltd.
+ * x_buffers.c - Copyright (c) 2014-23 Andre M. Maree / KSS Technologies (Pty) Ltd.
  */
 
 #include "hal_config.h"
@@ -11,6 +10,8 @@
 #include "syslog.h"
 #include "x_stdio.h"
 #include "x_errors_events.h"
+
+#include <string.h>
 
 // ############################### BUILD: debug configuration options ##############################
 
