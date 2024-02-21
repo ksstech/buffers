@@ -1,6 +1,4 @@
-/*
- * x_buffers.c - Copyright (c) 2014-24 Andre M. Maree / KSS Technologies (Pty) Ltd.
- */
+// x_buffers.c - Copyright (c) 2014-24 Andre M. Maree / KSS Technologies (Pty) Ltd.
 
 #include "hal_config.h"
 #include "hal_nvic.h"
@@ -40,7 +38,7 @@ SemaphoreHandle_t	BufSmlLock , BufMedLock, BufLrgLock;
 uint8_t	BufSmall[64], BufMedium[128], BufLarge[256];
 
 /**
- * pvBufTake()
+ * @brief
  * @param BufSize
  */
 void *	pvBufTake(size_t BufSize) {
@@ -58,7 +56,7 @@ void *	pvBufTake(size_t BufSize) {
 }
 
 /**
- * xBufGive()
+ * @brief
  * @param pvBuf
  * @return
  */
@@ -72,10 +70,10 @@ int	xBufGive(void * pvBuf) {
 // ################################# Private/Local support functions ###############################
 
 /**
- * xBufCheck()
+ * @brief
  * @param psBuf
  */
-void	xBufCheck(buf_t * psBuf) {
+void xBufCheck(buf_t * psBuf) {
 	myASSERT(halCONFIG_inSRAM(psBuf) && halCONFIG_inSRAM(psBuf->pBeg));
 	myASSERT(INRANGE(configBUFFERS_SIZE_MIN, psBuf->xSize, configBUFFERS_SIZE_MAX));
 	myASSERT((psBuf->pEnd - psBuf->pBeg) == psBuf->xSize);
@@ -85,7 +83,7 @@ void	xBufCheck(buf_t * psBuf) {
 }
 
 /**
- * vBufIsrEntry()
+ * @brief
  * @param psBuf
  */
 static void vBufIsrEntry(buf_t * psBuf) {
@@ -101,15 +99,15 @@ static void vBufIsrEntry(buf_t * psBuf) {
 }
 
 /**
- * vBufIsrExit()
+ * @brief
  * @param psBuf
  */
-static	void	vBufIsrExit(buf_t * psBuf) {
+static void vBufIsrExit(buf_t * psBuf) {
 	if (FF_STCHK(psBuf, FF_FROMISR)) {					// if called from an ISR
 		FF_UNSET(psBuf, FF_FROMISR);					// just clear the flag
 	} else {
 	#if	defined(ESP_PLATFORM)
-		portEXIT_CRITICAL(&muxBuffers);				// else re-enable interrupts
+		portEXIT_CRITICAL(&muxBuffers);					// else re-enable interrupts
 	#else
 		taskEXIT_CRITICAL();							// else re-enable interrupts
 	#endif
@@ -117,27 +115,26 @@ static	void	vBufIsrExit(buf_t * psBuf) {
 }
 
 /**
- * vBufTakePointer()
+ * @brief
  * @return
  */
 static buf_t * vBufTakePointer(void) {
 	#if	defined(ESP_PLATFORM)
-	spinlock_initialize(&muxBuffers);
+	if (muxBuffers.count == 0 && muxBuffers.owner == 0) spinlock_initialize(&muxBuffers);
 	#endif
 	for (int i = 0; i < configBUFFERS_MAX_OPEN; ++i) {
-		if (bufTable[i].pBeg == 0)
-			return &bufTable[i];
+		if (bufTable[i].pBeg == 0) return &bufTable[i];
 	}
-/* If we ASSERT() here something might be recursing hence eating up all structures.
- * Common cause is if we use an SL_ or IF_SL_ in the socketsX module,
- * since this will call syslog() which will want to allocate a buffer,
- * which will call back here, and so we recurse to a crash...... */
+	/* If we ASSERT() here something might be recursing hence eating up all structures.
+	 * Common cause is if we use an SL_ or IF_SL_ in the socketsX module,
+	 * since this will call syslog() which will want to allocate a buffer,
+	 * which will call back here, and so we recurse to a crash...... */
 	myASSERT(0);
 	return NULL;
 }
 
 /**
- * vBufGivePointer()
+ * @brief
  * @param psBuf
  * @return
  */
@@ -157,7 +154,6 @@ int	xBufCompact(buf_t * psBuf) {
 		return erFAILURE;
 	}
 	if (psBuf->pRead > psBuf->pBeg) {					// yes, some empty space at start?
-//		P("Compacting");
 		vBufIsrEntry(psBuf);
 		memmove(psBuf->pBeg, psBuf->pRead, psBuf->xUsed);
 		psBuf->pRead	= psBuf->pBeg;					// reset read pointer to beginning
@@ -171,25 +167,23 @@ int	xBufCompact(buf_t * psBuf) {
 // ################################### Public/Global functions #####################################
 
 /**
- * xBufReport()
+ * @brief
  * @param psBuf
  * @return
  */
 int	xBufReport(buf_t * psBuf) {
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf);
 	return P("B=%p  E=%p  R=%p  W=%p  S=%d  U=%d",
-								psBuf->pBeg,	psBuf->pEnd,
-								psBuf->pRead,	psBuf->pWrite,
-								psBuf->xSize,	psBuf->xUsed);
+		psBuf->pBeg, psBuf->pEnd, psBuf->pRead, psBuf->pWrite, psBuf->xSize, psBuf->xUsed);
 }
 
 /**
- * vBufReset() - reset input/output pointers, allow to treat as a normal linear buffer
- * @param pCb		pointer to the buffer control structure
- * @param Used		amount of data in buffer, available to be read
- * @return			None
+ * @brief		reset input/output pointers, allow to treat as a normal linear buffer
+ * @param pCb	pointer to the buffer control structure
+ * @param Used	amount of data in buffer, available to be read
+ * @return		None
  */
-void	vBufReset(buf_t * psBuf, size_t Used) {
+void vBufReset(buf_t * psBuf, size_t Used) {
 	vBufIsrEntry(psBuf);
 	psBuf->pRead	= psBuf->pBeg;						// Setup READ pointers
 	psBuf->pWrite	= psBuf->pBeg;						// setup WRITE pointers
@@ -200,15 +194,15 @@ void	vBufReset(buf_t * psBuf, size_t Used) {
 }
 
 /**
- * xBufReuse() populate the control structure fields
- * @param psBuf		pointer to already allocated buffer structure
- * @param pBuf		pointer to already allocated actual buffer space
- * @param Size		bytes of already allocated space
- * @param flags		defined in x_stdio.h (minimal implemented)
- * @param Used		data in buffer, available to be read
- * @return			erSUCCESS
+ * @brief 		populate the control structure fields
+ * @param psBuf	pointer to already allocated buffer structure
+ * @param pBuf	pointer to already allocated actual buffer space
+ * @param Size	bytes of already allocated space
+ * @param flags	defined in x_stdio.h (minimal implemented)
+ * @param Used	data in buffer, available to be read
+ * @return		erSUCCESS
  */
-static int	xBufReuse(buf_t * psBuf, char * pBuf, size_t Size, uint32_t flags, size_t Used) {
+static int xBufReuse(buf_t * psBuf, char * pBuf, size_t Size, uint32_t flags, size_t Used) {
 	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(psBuf) && pBuf != 0 && Used <= Size)
 	vBufIsrEntry(psBuf);
 	psBuf->pBeg		= pBuf;
@@ -222,13 +216,12 @@ static int	xBufReuse(buf_t * psBuf, char * pBuf, size_t Size, uint32_t flags, si
 }
 
 /**
- * psBufOpen() - create a buffer
  * @brief		allocate memory for the buffer and the control structure populate the control structure fields
- * @param pBuf		pointer to the buffer memory to use, 0 to create new
- * @param Size		buffer size to use or create
- * @param flags		based on flags as defined in x_stdio.h (minimal implemented)
- * @param Used		amount of data in buffer, available to be read
- * @return	pointer to the buffer handle or NULL if failed
+ * @param pBuf	pointer to the buffer memory to use, 0 to create new
+ * @param Size	buffer size to use or create
+ * @param flags	based on flags as defined in x_stdio.h (minimal implemented)
+ * @param Used	amount of data in buffer, available to be read
+ * @return		pointer to the buffer handle or NULL if failed
  */
 buf_t * psBufOpen(void * pBuf, size_t Size, uint32_t flags, size_t Used) {
 	if ((pBuf == NULL) && (INRANGE(configBUFFERS_SIZE_MIN, Size, configBUFFERS_SIZE_MAX) == false)) {
@@ -254,7 +247,6 @@ buf_t * psBufOpen(void * pBuf, size_t Size, uint32_t flags, size_t Used) {
 }
 
 /**
- * xBufClose() - delete a buffer
  * @brief	deallocate the memory for the buffer and the control structure
  * @param	psBuf	pointer to the buffer control structure
  * @return	SUCCESS if deleted with error, FAILURE otherwise
@@ -277,22 +269,21 @@ int	xBufClose(buf_t * psBuf) {
 }
 
 /**
- * xBufAvail() - get the number of characters in the buffer
+ * @brief		get the number of characters in the buffer
  * @param psBuf	pointer to the buffer control structure
  * @return		Number of characters
  */
-size_t	xBufAvail(buf_t * psBuf) {
+size_t xBufAvail(buf_t * psBuf) {
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf);
 	return psBuf->xUsed;
 }
 
 /**
- * xBufSpace() - get the empty slots in buffer
  * @brief		automatically pack the buffer to free up maximum contiguous space
  * @param psBuf	pointer to the buffer control structure
  * @return		Number of empty slots
  */
-size_t	xBufSpace(buf_t * psBuf) {
+size_t xBufSpace(buf_t * psBuf) {
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf);
 	if (FF_STCHK(psBuf, FF_MODEPACK))
 		xBufCompact(psBuf);
@@ -300,7 +291,6 @@ size_t	xBufSpace(buf_t * psBuf) {
 }
 
 /**
- * xBufPutC() - write a character to the buffer
  * @brief		buffer and control structure MUST have been created prior
  * @param psBuf pointer to buffer control structure
  * @param cChr	the char to be written
@@ -311,8 +301,7 @@ int	xBufPutC(int cChr, buf_t * psBuf) {
 	int	iRV;
 	if ((cChr == CHR_LF) && (FF_STCHK(psBuf, FF_MODEBIN) == 0)) {
 		iRV = xBufPutC(CHR_CR, psBuf);
-		if (iRV == EOF)
-			return iRV;
+		if (iRV == EOF) return iRV;
 	}
 	if (psBuf->xSize > psBuf->xUsed) {
 		vBufIsrEntry(psBuf);
@@ -329,15 +318,12 @@ int	xBufPutC(int cChr, buf_t * psBuf) {
 }
 
 /**
- * xBufGetC() - read a character from the buffer
  * @brief		buffer and control structure MUST have been created prior
  * @param psBuf	pointer to buffer control structure
- * @return		if successful the character read else EOF
+ * @return		character read else EOF
  */
 int	xBufGetC(buf_t * psBuf) {
-	if (xBufAvail(psBuf) == 0) {
-		return EOF;
-	}
+	if (xBufAvail(psBuf) == 0) return EOF;
 	vBufIsrEntry(psBuf);
 	int cChr = *psBuf->pRead++;							// read character & adjust pointer
 	psBuf->xUsed--;									// & adjust the Used counter
@@ -356,25 +342,23 @@ int	xBufGetC(buf_t * psBuf) {
 }
 
 /**
- * xBufPeek()
+ * @brief
  * @param psBuf
  * @return
  */
 int xBufPeek(buf_t * psBuf) {
-	if (xBufAvail(psBuf) == 0) {
-		return EOF;
-	}
+	if (xBufAvail(psBuf) == 0) return EOF;
 	return *psBuf->pRead;								// read character
 }
 
 /**
- * pcBufGetS()
+ * @brief
  * @param pBuf
  * @param Number
  * @param psBuf
  * @return
  */
-char *	pcBufGetS(char * pBuf, int Number, buf_t * psBuf) {
+char * pcBufGetS(char * pBuf, int Number, buf_t * psBuf) {
 	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pBuf))
 	char *	pTmp = pBuf;
 	while (Number > 1) {
@@ -400,15 +384,14 @@ char *	pcBufGetS(char * pBuf, int Number, buf_t * psBuf) {
 }
 
 /**
- * xBufWrite() - add 1 or more structures to the packet payload
- * @brief
+ * @brief		add 1 or more structures to the packet payload
  * @param pvBuf	pointer to new payload data
  * @param Size	of structure/unit to be added
  * @param Count	of items of the structure/unit to be added
  * @param psBuf	pointer to the buffer structure
  * @return		number of bytes allocated to buffer or an error code
  */
-size_t	xBufWrite(void * pvBuf, size_t Size, size_t Count, buf_t * psBuf) {
+size_t xBufWrite(void * pvBuf, size_t Size, size_t Count, buf_t * psBuf) {
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf);
 	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pvBuf))
 	if (FF_STCHK(psBuf, FF_CIRCULAR)) {
@@ -430,14 +413,14 @@ size_t	xBufWrite(void * pvBuf, size_t Size, size_t Count, buf_t * psBuf) {
 }
 
 /**
- * xBufRead()
+ * @brief
  * @param pvBuf
  * @param Size
  * @param xLen
  * @param psBuf
  * @return
  */
-size_t	xBufRead(void * pvBuf, size_t Size, size_t Count, buf_t * psBuf) {
+size_t xBufRead(void * pvBuf, size_t Size, size_t Count, buf_t * psBuf) {
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf);
 	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(pvBuf))
 	if (FF_STCHK(psBuf, FF_CIRCULAR)) {
@@ -465,7 +448,7 @@ size_t	xBufRead(void * pvBuf, size_t Size, size_t Count, buf_t * psBuf) {
 }
 
 /**
- * xBufSeek()
+ * @brief
  * @param psBuf
  * @param Offset
  * @param whence
@@ -517,7 +500,7 @@ char * pTmp;
 }
 
 /**
- * xBufTell() - return index of read or write pointer into the buffer
+ * @brief		return index of read or write pointer into the buffer
  * @param psBuf
  * @param flags
  * @return
@@ -546,12 +529,12 @@ int	xBufTell(buf_t * psBuf, int flags) {
 }
 
 /**
- * pcBufTellPointer()
+ * @brief
  * @param psBuf
  * @param flags
  * @return
  */
-char *	pcBufTellPointer(buf_t * psBuf, int flags) {
+char * pcBufTellPointer(buf_t * psBuf, int flags) {
 char * pcRetVal = (char *) erFAILURE;
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf);
 	if (FF_STCHK(psBuf, FF_CIRCULAR)) {				// working on circular buffer
@@ -564,17 +547,13 @@ char * pcRetVal = (char *) erFAILURE;
 		IF_myASSERT(debugRESULT, 0)
 		return pcRetVal;
 	}
-	if (flags & FF_MODER) {
-		pcRetVal = psBuf->pRead;
-	} else if (flags & FF_MODEW) {
-		pcRetVal = psBuf->pWrite;
-	}
+	if (flags & FF_MODER) pcRetVal = psBuf->pRead;
+	else if (flags & FF_MODEW) pcRetVal = psBuf->pWrite;
 	IF_myASSERT(debugRESULT, halCONFIG_inSRAM(pcRetVal))
 	return pcRetVal;
 }
 
 /**
- * xBufPrintClose() - output buffer contents to the console and close the buffer
  * @brief	Treat the buffer contents as a string and do not try to interpret it.
  * 			All embedded modifier and specifier characters will be ignored.
  * 			Any embedded NUL characters will be interpreted as string terminators
@@ -606,7 +585,7 @@ int	xBufSyslogClose(buf_t * psBuf, uint32_t Prio) {
 #define	bufSIZE		100
 #define	bufSTEP		10
 
-void	vBufUnitTest(void) {
+void vBufUnitTest(void) {
 	int	iRV;
 	buf_t * psBuf = psBufOpen(0, bufSIZE, FF_MODER|FF_MODEW, 0);
 	for(int a = 0; a < bufSIZE; a += bufSTEP) {
