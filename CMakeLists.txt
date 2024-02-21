@@ -3,8 +3,8 @@
 set( srcs "x_buffers.c" "x_ubuf.c" "x_uubuf.c" "hbuf.c")
 set( include_dirs "." )
 set( priv_include_dirs )
-set( requires "rtos-support vfs" )
-set( priv_requires "common printfx syslog systiming" )
+set( requires "main vfs" )
+set( priv_requires )
 
 idf_component_register(
 	SRCS ${srcs}
