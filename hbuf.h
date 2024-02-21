@@ -1,6 +1,4 @@
-/*
- * hbuf.h - Copyright (c) 2022-24 Andre M. Maree/KSS Technologies (Pty) Ltd.
- */
+// hbuf.h
 
 #pragma	once
 
@@ -15,11 +13,7 @@ extern "C" {
 #define cliSIZE_HBUF	1024
 
 // ###################################### BUILD : CONFIG definitions ###############################
-
-
 // ####################################### enumerations ############################################
-
-
 // ####################################### structures  #############################################
 
 typedef struct __attribute__((packed)) {

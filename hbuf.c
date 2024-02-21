@@ -1,11 +1,10 @@
-/*
- * hbuf.c - Copyright 2022 Andre M. Maree/KSS Technologies (Pty) Ltd.
- */
+// hbuf.c - Copyright 2022-24 Andre M. Maree/KSS Technologies (Pty) Ltd.
 
 #include <string.h>
 
-#include "hbuf.h"
 #include "hal_config.h"
+#include "hbuf.h"
+
 #include "FreeRTOS_Support.h"
 #include "printfx.h"
 
