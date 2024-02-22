@@ -56,10 +56,10 @@ void vHBufAddCmd(hbuf_t * psHB, u8_t * pu8Buf, size_t Size) {
 static int vHBufCopyCmd(hbuf_t * psHB, int iStart, u8_t * pu8Buf, size_t Size) {
 	int iNow = 0;
 	while(iNow < Size) {
-		u8_t U8 = psHB->Buf[iStart + iNow];
-		if (U8 == 0)
+		u8_t U8val = psHB->Buf[iStart + iNow];
+		if (U8val == 0)
 			break;
-		pu8Buf[iNow++] = U8;
+		pu8Buf[iNow++] = U8val;
 	}
 	return iNow;
 }
