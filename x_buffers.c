@@ -1,12 +1,12 @@
 // x_buffers.c - Copyright (c) 2014-24 Andre M. Maree / KSS Technologies (Pty) Ltd.
 
 #include "hal_config.h"
+#include "hal_stdio.h"
 #include "hal_nvic.h"
 #include "x_buffers.h"
 #include "FreeRTOS_Support.h"
 #include "printfx.h"
 #include "syslog.h"
-#include "x_stdio.h"
 #include "x_errors_events.h"
 
 #include <string.h>
@@ -198,11 +198,11 @@ void vBufReset(buf_t * psBuf, size_t Used) {
  * @param psBuf	pointer to already allocated buffer structure
  * @param pBuf	pointer to already allocated actual buffer space
  * @param Size	bytes of already allocated space
- * @param flags	defined in x_stdio.h (minimal implemented)
+ * @param flags	minimally implemented
  * @param Used	data in buffer, available to be read
  * @return		erSUCCESS
  */
-static int xBufReuse(buf_t * psBuf, char * pBuf, size_t Size, uint32_t flags, size_t Used) {
+static int xBufReuse(buf_t * psBuf, char * pBuf, size_t Size, u32_t flags, size_t Used) {
 	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(psBuf) && pBuf != 0 && Used <= Size)
 	vBufIsrEntry(psBuf);
 	psBuf->pBeg		= pBuf;
@@ -219,11 +219,11 @@ static int xBufReuse(buf_t * psBuf, char * pBuf, size_t Size, uint32_t flags, si
  * @brief		allocate memory for the buffer and the control structure populate the control structure fields
  * @param pBuf	pointer to the buffer memory to use, 0 to create new
  * @param Size	buffer size to use or create
- * @param flags	based on flags as defined in x_stdio.h (minimal implemented)
+ * @param flags	based on flags as defined, minimally implemented
  * @param Used	amount of data in buffer, available to be read
  * @return		pointer to the buffer handle or NULL if failed
  */
-buf_t * psBufOpen(void * pBuf, size_t Size, uint32_t flags, size_t Used) {
+buf_t * psBufOpen(void * pBuf, size_t Size, u32_t flags, size_t Used) {
 	if ((pBuf == NULL) && (INRANGE(configBUFFERS_SIZE_MIN, Size, configBUFFERS_SIZE_MAX) == false)) {
 		myASSERT(0);
 		return pvFAILURE;
@@ -575,7 +575,7 @@ int	xBufPrintClose(buf_t * psBuf) {
  * @param	Syslog priority to be used
  * @return	status of the buffer close event
  */
-int	xBufSyslogClose(buf_t * psBuf, uint32_t Prio) {
+int	xBufSyslogClose(buf_t * psBuf, u32_t Prio) {
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf);
 	IF_myASSERT(debugPARAM, psBuf->xUsed > 0);
 	SL_LOG(Prio, "%.*s", psBuf->xUsed, psBuf->pRead);
