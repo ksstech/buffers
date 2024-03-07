@@ -185,10 +185,10 @@ int	xBufReport(buf_t * psBuf) {
  */
 void vBufReset(buf_t * psBuf, size_t Used) {
 	vBufIsrEntry(psBuf);
-	psBuf->pRead	= psBuf->pBeg;						// Setup READ pointers
-	psBuf->pWrite	= psBuf->pBeg;						// setup WRITE pointers
-	psBuf->xUsed	= Used;							// indicate (re)used space, if any
-	FF_UNSET(psBuf, FF_UNGETC);						// and no ungetc'd character..
+	psBuf->pRead = psBuf->pBeg;							// Setup READ pointers
+	psBuf->pWrite = psBuf->pBeg;						// setup WRITE pointers
+	psBuf->xUsed = Used;								// indicate (re)used space, if any
+	FF_UNSET(psBuf, FF_UNGETC);							// and no ungetc'd character..
 	vBufIsrExit(psBuf);
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf);
 }
