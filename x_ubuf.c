@@ -1,12 +1,10 @@
-/*
- * x_ubuf.c
- * Copyright (c) 2016-22 Andre M. Maree / KSS Technologies (Pty) Ltd.
- */
+// x_ubuf.c - Copyright (c) 2016-24 Andre M. Maree / KSS Technologies (Pty) Ltd.
 
 #include <errno.h>
 
 #include "x_ubuf.h"
 #include "hal_config.h"
+#include "hal_stdio.h"
 #include "printfx.h"
 #include "syslog.h"
 #include "systiming.h"
@@ -30,7 +28,6 @@
 
 // #################################### PRIVATE structures #########################################
 
-
 static size_t uBufSize = ubufSIZE_DEFAULT;
 
 // ################################# Local/static functions ########################################
@@ -42,7 +39,10 @@ static int xUBufBlockAvail(ubuf_t * psUB) {
 		return erFAILURE;
 	}
 	if (psUB->Used == 0) {
-		if (psUB->flags & O_NONBLOCK) { errno = EAGAIN; return EOF; }
+		if (FF_STCHK(psUB, O_NONBLOCK)) {
+			errno = EAGAIN; 
+			return EOF;
+		}
 		while (psUB->Used == 0) vTaskDelay(2);
 	}
 	return erSUCCESS;
@@ -57,7 +57,7 @@ static ssize_t xUBufBlockSpace(ubuf_t * psUB, size_t Size) {
 	ssize_t Avail = psUB->Size - psUB->Used;
 	if (Avail >= Size) return Size;						// sufficient space ?
 	// at this point, we do NOT have sufficient space available, must make space
-	if (psUB->f_history || (psUB->flags & O_TRUNC)) {	// yes, supposed to TRUNCate ?
+	if (psUB->f_history || FF_STCHK(psUB, O_TRUNC)) {	// yes, supposed to TRUNCate ?
 		xUBufLock(psUB);
 		int Req = Size - Avail;
 		psUB->IdxRD += Req;								// adjust output/read index accordingly
@@ -65,17 +65,16 @@ static ssize_t xUBufBlockSpace(ubuf_t * psUB, size_t Size) {
 		psUB->Used -= Req;								// adjust remaining character count
 		xUBufUnLock(psUB);
 
-	} else if (psUB->flags & O_NONBLOCK) {				// non-blocking mode ?
+	} else if (FF_STCHK(psUB, O_NONBLOCK)) {			// non-blocking mode ?
+		FF_SET(psUB, FF_STATERR);
 		errno = EAGAIN;									// yes, set error code
 		return Avail;									// and return actual space available
 
 	} else {											// block till available
-		do {
-			if (xTaskGetSchedulerState() == taskSCHEDULER_RUNNING)
-				vTaskDelay(2);							// loop waiting for sufficient space
-			else
-				xClockDelayMsec(2);
-			Avail = psUB->Size - psUB->Used;
+		do {											// loop waiting for sufficient space
+			if (xTaskGetSchedulerState() == taskSCHEDULER_RUNNING) vTaskDelay(2);							
+			else xClockDelayMsec(2);
+			Avail = psUB->Size - psUB->Used;			// update available space
 		} while (Avail < Size);							// wait for space to open...
 	}
 	return Size;
@@ -191,21 +190,18 @@ int xUBufEmptyBlock(ubuf_t * psUB, int (*hdlr)(u8_t *, ssize_t)) {
 
 int	xUBufGetC(ubuf_t * psUB) {
 	int iRV = xUBufBlockAvail(psUB);
-	if (iRV != erSUCCESS)
-		return iRV;
+	if (iRV != erSUCCESS) return iRV;
 	xUBufLock(psUB);
 	iRV = psUB->pBuf[psUB->IdxRD++];
 	psUB->IdxRD %= psUB->Size;							// handle wrap
-	if (--psUB->Used == 0)
-		psUB->IdxRD = psUB->IdxWR = 0;					// reset In/Out indexes
+	if (--psUB->Used == 0) psUB->IdxRD = psUB->IdxWR = 0;	// reset In/Out indexes
 	xUBufUnLock(psUB);
 	return iRV;
 }
 
 int	xUBufPutC(ubuf_t * psUB, int cChr) {
 	int iRV = xUBufBlockSpace(psUB, sizeof(char));
-	if (iRV != sizeof(char))
-		return iRV;
+	if (iRV != sizeof(char)) return iRV;
 	xUBufLock(psUB);
 	psUB->pBuf[psUB->IdxWR++] = cChr;					// store character in buffer, adjust pointer
 	psUB->IdxWR %= psUB->Size;							// handle wrap
@@ -277,7 +273,6 @@ void vUBufStepWrite(ubuf_t * psUB, int Step)	{
  * Cursor DN: set IdxRD forward 1 entry, then copy entry to outside buffer
  *			  IdxRD left ....
  */
-
 int xUBufStringCopy(ubuf_t * psUB, u8_t * pu8Buf, int xLen) {
 	for (int xNow = 0; xNow < xLen; ++xNow) {
 		*pu8Buf++ = psUB->pBuf[psUB->IdxRD++];
@@ -368,10 +363,10 @@ int	xUBufOpen(const char * pccPath, int flags, int Size) {
 	int fd = 0;
 	do {
 		if (sUBuf[fd].pBuf == NULL) {
-			sUBuf[fd].pBuf	= pvRtosMalloc(Size);
-			sUBuf[fd].flags	= flags;
-			sUBuf[fd].Size	= Size;
-			sUBuf[fd].IdxWR	= sUBuf[fd].IdxRD	= sUBuf[fd].Used	= 0;
+			sUBuf[fd].pBuf = pvRtosMalloc(Size);
+			sUBuf[fd]._flags = flags;
+			sUBuf[fd].Size = Size;
+			sUBuf[fd].IdxWR	= sUBuf[fd].IdxRD = sUBuf[fd].Used = 0;
 			return fd;
 		} else {
 			fd++;
@@ -470,7 +465,7 @@ void vUBufReport(ubuf_t * psUB) {
 	if (halCONFIG_inSRAM(psUB)) {
 		printfx_lock(NULL);
 		printfx_nolock("p=%p  s=%d  u=%d  Iw=%d  Ir=%d  mux=%p  f=0x%X",
-			psUB->pBuf, psUB->Size, psUB->Used, psUB->IdxWR, psUB->IdxRD, psUB->mux, psUB->flags);
+			psUB->pBuf, psUB->Size, psUB->Used, psUB->IdxWR, psUB->IdxRD, psUB->mux, psUB->_flags);
 		printfx_nolock(" fI=%d fA=%d fS=%d fNL=%d fH=%d\r\n",
 			psUB->f_init, psUB->f_alloc, psUB->f_struct, psUB->f_nolock, psUB->f_history);
 		if (psUB->Used) {

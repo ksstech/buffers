@@ -29,7 +29,7 @@ typedef	struct ubuf_t {
 	volatile u16_t IdxRD;			// index to next char to be READ from
 	volatile u16_t Used;
 	u16_t Size;
-	u16_t flags;					// stdlib related flags
+	u16_t _flags;					// stdlib related flags
 	u8_t count;						// history command counter
 	union {
 		struct  __attribute__((packed)) {
@@ -40,7 +40,7 @@ typedef	struct ubuf_t {
 			u8_t	f_history:1;
 			u8_t	f_spare:3;
 		};
-		u8_t	_flags;				// module flags
+		u8_t	f_flags;				// module flags
 	};
 } ubuf_t;
 DUMB_STATIC_ASSERT(sizeof(ubuf_t) == (12 + sizeof(char *) + sizeof(SemaphoreHandle_t)));
