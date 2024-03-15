@@ -1,6 +1,6 @@
 // x_buffers.c - Copyright (c) 2014-24 Andre M. Maree / KSS Technologies (Pty) Ltd.
 
-#include "hal_config.h"
+#include "hal_platform.h"
 #include "hal_stdio.h"
 #include "hal_nvic.h"
 #include "x_buffers.h"

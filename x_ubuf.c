@@ -3,7 +3,7 @@
 #include <errno.h>
 
 #include "x_ubuf.h"
-#include "hal_config.h"
+#include "hal_platform.h"
 #include "hal_stdio.h"
 #include "printfx.h"
 #include "syslog.h"

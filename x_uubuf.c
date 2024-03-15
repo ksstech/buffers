@@ -1,8 +1,6 @@
-/*
- * x_uubuf.c
- */
+// x_uubuf.c
 
-#include "hal_config.h"
+#include "hal_platform.h"
 
 #include "x_uubuf.h"
 #include "FreeRTOS_Support.h"

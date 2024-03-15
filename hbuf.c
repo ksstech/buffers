@@ -2,7 +2,7 @@
 
 #include <string.h>
 
-#include "hal_config.h"
+#include "hal_platform.h"
 #include "hbuf.h"
 
 #include "FreeRTOS_Support.h"
