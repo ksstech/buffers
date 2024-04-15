@@ -56,7 +56,7 @@ int	xUUBufCreate(uubuf_t * psUUBuf, char * pcBuf, size_t BufSize, size_t Used) {
 		psUUBuf->Used	= Used ;
 		psUUBuf->Alloc	= 0 ;							// show memory as provided, NOT allocated
 	} else {
-		psUUBuf->pBuf	= pvRtosMalloc(psUUBuf->Size) ;
+		psUUBuf->pBuf	= malloc(psUUBuf->Size) ;
 		psUUBuf->Used	= 0 ;
 		psUUBuf->Alloc	= psUUBuf->Size ;				// show memory as ALLOCATED
 	}
@@ -66,8 +66,7 @@ int	xUUBufCreate(uubuf_t * psUUBuf, char * pcBuf, size_t BufSize, size_t Used) {
 }
 
 void vUUBufDestroy(uubuf_t * psUUBuf) {
-	if (psUUBuf->Alloc)
-		vRtosFree(psUUBuf->pBuf);
+	if (psUUBuf->Alloc) free(psUUBuf->pBuf);
 }
 
 void vUUBufAdjust(uubuf_t * psUUBuf, ssize_t Adj)	{
