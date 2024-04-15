@@ -233,8 +233,8 @@ buf_t * psBufOpen(void * pBuf, size_t Size, u32_t flags, size_t Used) {
 	if (psBuf != NULL) {								// unused entry found?
 		vBufIsrEntry(psBuf);
 		if (pBuf == 0) {
-			pBuf 	= pvRtosMalloc(Size);					// allocate memory for buffer
 			flags	|= FF_BUFFALOC;					// make sure flag is SET !!
+			pBuf = malloc(Size);					// allocate memory for buffer
 			memset(pBuf, 0, Size);
 			Used	= 0;								// cannot have used something in a new buffer
 		} else {
@@ -262,7 +262,7 @@ int	xBufClose(buf_t * psBuf) {
 	#elif defined( __TI_ARM__ )
 		psBuf->flags = 0;
 	#endif
-		vRtosFree(pTmp);									// return buffer
+		free(pTmp);										// return buffer
 	}
 	vBufIsrExit(psBuf);
 	return iRV;
