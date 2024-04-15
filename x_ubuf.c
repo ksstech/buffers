@@ -82,7 +82,9 @@ static ssize_t xUBufBlockSpace(ubuf_t * psUB, size_t Size) {
 
 // ################################### Global/public functions #####################################
 
-void xUBufLock(ubuf_t * psUB) { if (!psUB->f_nolock) xRtosSemaphoreTake(&psUB->mux, portMAX_DELAY); }
+void xUBufLock(ubuf_t * psUB) {
+	if (!psUB->f_nolock) xSemaphoreTake(&psUB->mux, portMAX_DELAY); 
+}
 
 void xUBufUnLock(ubuf_t * psUB) { if (!psUB->f_nolock) xRtosSemaphoreGive(&psUB->mux); }
 
@@ -92,11 +94,11 @@ size_t xUBufSetDefaultSize(size_t NewSize) {
 }
 
 /**
- * @brief	Using the supplied uBUf structure, initialises the members as required
- * @param	psUB		structure to initialise
- * @param	pcBuf		preallocated buffer, if NULL will pvRtosMalloc
- * @param	BufSize		size of preallocated buffer, or size to be allocated
- * @param	Used		If preallocated buffer, portion already used
+ * @brief	Using the supplied uBuf structure, initialises the members as required
+ * @param	psUB structure to initialise
+ * @param	pcBuf preallocated buffer, if NULL will malloc
+ * @param	BufSize size of preallocated buffer, or size to be allocated
+ * @param	Used If preallocated buffer, portion already used
  * @return	Buffer size if successful, 0 if not.
  */
 ubuf_t * psUBufCreate(ubuf_t * psUB, u8_t * pcBuf, size_t BufSize, size_t Used) {
