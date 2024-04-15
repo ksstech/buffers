@@ -109,14 +109,14 @@ ubuf_t * psUBufCreate(ubuf_t * psUB, u8_t * pcBuf, size_t BufSize, size_t Used) 
 	if (psUB != NULL) {									// control structure supplied
 		psUB->f_struct = 0;								// yes, flag as NOT allocated
 	} else {
-		psUB = pvRtosMalloc(sizeof(ubuf_t));			// no, allocate
+		psUB = malloc(sizeof(ubuf_t));					// no, allocate
 		psUB->f_struct = 1;								// and flag as such
 	}
 	if (pcBuf != NULL) {								// buffer itself allocated
 		psUB->pBuf = pcBuf;								// yes, save pointer into control structure
 		psUB->f_alloc = 0;								// and flag as NOT allocated
 	} else {
-		psUB->pBuf = pvRtosMalloc(BufSize);				// no, allocate buffer of desired size
+		psUB->pBuf = malloc(BufSize);					// no, allocate buffer of desired size
 		psUB->f_alloc = 1;								// and flag as allocated
 	}
 	psUB->mux = NULL;
@@ -135,12 +135,12 @@ void vUBufDestroy(ubuf_t * psUB) {
 	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(psUB));
 	if (psUB->mux) vRtosSemaphoreDelete(&psUB->mux);
 	if (psUB->f_alloc) {
-		vRtosFree(psUB->pBuf);
+		free(psUB->pBuf);
 		psUB->pBuf = NULL;
 		psUB->Size = 0;
 		psUB->f_init = 0;
 	}
-	if (psUB->f_struct) vRtosFree(psUB);
+	if (psUB->f_struct) free(psUB);
 }
 
 void vUBufReset(ubuf_t * psUB) { psUB->IdxRD = psUB->IdxWR = psUB->Used = 0; }
@@ -365,7 +365,7 @@ int	xUBufOpen(const char * pccPath, int flags, int Size) {
 	int fd = 0;
 	do {
 		if (sUBuf[fd].pBuf == NULL) {
-			sUBuf[fd].pBuf = pvRtosMalloc(Size);
+			sUBuf[fd].pBuf = malloc(Size);
 			sUBuf[fd]._flags = flags;
 			sUBuf[fd].Size = Size;
 			sUBuf[fd].IdxWR	= sUBuf[fd].IdxRD = sUBuf[fd].Used = 0;
@@ -381,7 +381,7 @@ int	xUBufOpen(const char * pccPath, int flags, int Size) {
 int	xUBufClose(int fd) {
 	if (INRANGE(0, fd, ubufMAX_OPEN-1)) {
 		ubuf_t * psUB = &sUBuf[fd];
-		vRtosFree(psUB->pBuf);
+		free(psUB->pBuf);
 		vRtosSemaphoreDelete(&psUB->mux);
 		memset(psUB, 0, sizeof(ubuf_t));
 		return erSUCCESS;
