@@ -13,8 +13,7 @@
 // ################################### Global/public functions #####################################
 
 int	xUUBufPutC(uubuf_t * psUUBuf, int cChr) {
-	if (psUUBuf->Used == psUUBuf->Size)
-		return EOF ;	// full, return error
+	if (psUUBuf->Used == psUUBuf->Size) return EOF ;	// full, return error
 	*(psUUBuf->pBuf + psUUBuf->Idx)	= cChr ;			// store character in buffer, adjust pointer
 	++psUUBuf->Idx ;
 	++psUUBuf->Used ;
@@ -22,8 +21,7 @@ int	xUUBufPutC(uubuf_t * psUUBuf, int cChr) {
 }
 
 int	xUUBufGetC(uubuf_t * psUUBuf) {
-	if (xUUBufAvail(psUUBuf) == 0)
-		return EOF ;
+	if (xUUBufAvail(psUUBuf) == 0) return EOF ;
 	--psUUBuf->Used ;									// adjust the Used counter
 	return *(psUUBuf->pBuf + psUUBuf->Idx++) ;			// read character & adjust pointer
 }
@@ -41,8 +39,7 @@ char * pcUUBufGetS(char * pBuf, int Number, uubuf_t * psUUBuf) {
 			*pTmp = 0 ;									// terminate buffer
 			return pBuf ;								// and return a valid state
 		}
-		if (cChr == CHR_CR)
-			continue;
+		if (cChr == CHR_CR) continue;
 		*pTmp++ = cChr ;								// store the character, adjust the pointer
 		Number-- ;										// and update remaining chars to read
 	}
@@ -74,11 +71,8 @@ void vUUBufDestroy(uubuf_t * psUUBuf) {
 }
 
 void vUUBufAdjust(uubuf_t * psUUBuf, ssize_t Adj)	{
-	if (Adj < 0) {
-		psUUBuf->Idx -= Adj;
-	} else {
-		psUUBuf->Idx += Adj;
-	}
+	if (Adj < 0) psUUBuf->Idx -= Adj;
+	else psUUBuf->Idx += Adj;
 	psUUBuf->Used += Adj;
 }
 
