@@ -233,12 +233,12 @@ buf_t * psBufOpen(void * pBuf, size_t Size, u32_t flags, size_t Used) {
 	if (psBuf != NULL) {								// unused entry found?
 		vBufIsrEntry(psBuf);
 		if (pBuf == 0) {
-			flags	|= FF_BUFFALOC;					// make sure flag is SET !!
 			pBuf = malloc(Size);					// allocate memory for buffer
+			flags |= FF_BUFFALOC;						// make sure flag is SET !!
 			memset(pBuf, 0, Size);
-			Used	= 0;								// cannot have used something in a new buffer
+			Used = 0;									// cannot have used something in a new buffer
 		} else {
-			flags	&= ~FF_BUFFALOC;					// make sure flag is CLEAR !!
+			flags &= ~FF_BUFFALOC;						// make sure flag is CLEAR !!
 		}
 		vBufIsrExit(psBuf);
 		xBufReuse(psBuf, pBuf, Size, flags, Used)	;	// setup
@@ -254,7 +254,7 @@ buf_t * psBufOpen(void * pBuf, size_t Size, u32_t flags, size_t Used) {
 int	xBufClose(buf_t * psBuf) {
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf);
 	vBufIsrEntry(psBuf);
-	char *	pTmp = psBuf->pBeg;								// save pointer for later use..
+	char *	pTmp = psBuf->pBeg;							// save pointer for later use..
 	int iRV = vBufGivePointer(psBuf);
 	if ((iRV == erSUCCESS) && FF_STCHK(psBuf, FF_BUFFALOC)) {
 	#if defined( __GNUC__ )
