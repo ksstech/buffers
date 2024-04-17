@@ -83,7 +83,7 @@ static ssize_t xUBufBlockSpace(ubuf_t * psUB, size_t Size) {
 // ################################### Global/public functions #####################################
 
 void xUBufLock(ubuf_t * psUB) {
-	if (!psUB->f_nolock) xSemaphoreTake(&psUB->mux, portMAX_DELAY); 
+	if (!psUB->f_nolock) xRtosSemaphoreTake(&psUB->mux, portMAX_DELAY); 
 }
 
 void xUBufUnLock(ubuf_t * psUB) {
