@@ -86,7 +86,9 @@ void xUBufLock(ubuf_t * psUB) {
 	if (!psUB->f_nolock) xSemaphoreTake(&psUB->mux, portMAX_DELAY); 
 }
 
-void xUBufUnLock(ubuf_t * psUB) { if (!psUB->f_nolock) xRtosSemaphoreGive(&psUB->mux); }
+void xUBufUnLock(ubuf_t * psUB) {
+	if (!psUB->f_nolock) xRtosSemaphoreGive(&psUB->mux);
+}
 
 size_t xUBufSetDefaultSize(size_t NewSize) {
 	IF_myASSERT(debugPARAM, INRANGE(ubufSIZE_MINIMUM, NewSize, ubufSIZE_MAXIMUM));
