@@ -64,41 +64,6 @@ static int vHBufCopyCmd(hbuf_t * psHB, int iStart, u8_t * pu8Buf, size_t Size) {
 	return iNow;
 }
 
-/**
- * @brief
- */
-void vHBufReport(hbuf_t * psHB) {
-	if (psHB->Count == 0) {
-		printfx("CLI buffer empty\r\n");
-		return;
-	}
-	printfx_lock(NULL);
-	printfx_nolock("# HBuf #: No1=%d  Cur=%d  Free=%d  Cnt=%d", psHB->iNo1, psHB->iCur, psHB->iFree, psHB->Count);
-	u8_t * pNow = &psHB->Buf[psHB->iNo1];
-	u8_t u8Len;
-	while (true) {
-		u8Len = 0;
-		while (*pNow) {
-			if (u8Len == 0)
-				printfx_nolock(" '");
-			printfx_nolock("%c", *pNow);
-			++pNow;
-			if (pNow == &psHB->Buf[cliSIZE_HBUF]) {
-				pNow = psHB->Buf;
-			}
-			++u8Len;
-		}
-		if (u8Len > 0)
-			printfx_nolock("'");
-		++pNow;											// step over terminating '0'
-		if (pNow == &psHB->Buf[psHB->iFree]) {
-			break;
-		}
-	}
-	printfx_nolock("\r\n\n");
-	printfx_unlock(NULL);
-}
-
 // ########################### Commands to support looping through history #########################
 
 /**
@@ -142,4 +107,37 @@ int vHBufNxtCmd(hbuf_t * psHB, u8_t * pu8Buf, size_t Size) {
 		++iNow;
 		iNow %= cliSIZE_HBUF;
 	} while(1);
+}
+
+/**
+ * @brief
+ */
+void vHBufReport(report_t * psR, hbuf_t * psHB) {
+	WPFX_LOCK(psR);
+	if (psHB->Count == 0) {
+		wprintfx(psR, "# HBuf #: No1=%d  Cur=%d  Free=%d  Cnt=%d", psHB->iNo1, psHB->iCur, psHB->iFree, psHB->Count);
+		u8_t * pNow = &psHB->Buf[psHB->iNo1];
+		u8_t u8Len;
+		while (true) {
+			u8Len = 0;
+			while (*pNow) {
+				if (u8Len == 0)
+					wprintfx(psR, " '");
+				wprintfx(psR, "%c", *pNow);
+				++pNow;
+				if (pNow == &psHB->Buf[cliSIZE_HBUF])
+					pNow = psHB->Buf;
+				++u8Len;
+			}
+			if (u8Len > 0)
+				wprintfx(psR, "'");
+			++pNow;											// step over terminating '0'
+			if (pNow == &psHB->Buf[psHB->iFree])
+				break;
+		}
+	} else {
+		wprintfx(psR, "CLI buffer empty");
+	}
+	WPFX_LOCK(psR);
+	wprintfx(psR, (psR && psR->sFM.aNL) ? strCR2xLF : strCRLF);
 }
