@@ -51,16 +51,16 @@ char * pcUUBufGetS(char * pBuf, int Number, uubuf_t * psUUBuf) {
 }
 
 int	xUUBufCreate(uubuf_t * psUUBuf, char * pcBuf, size_t BufSize, size_t Used) {
-	psUUBuf->Size	= BufSize;
-	psUUBuf->Idx	= 0;
+	psUUBuf->Size = BufSize;
+	psUUBuf->Idx = 0;
 	if (pcBuf) {
-		psUUBuf->pBuf	= pcBuf;
-		psUUBuf->Used	= Used;
-		psUUBuf->Alloc	= 0;							// show memory as provided, NOT allocated
+		psUUBuf->pBuf = pcBuf;
+		psUUBuf->Used = Used;
+		psUUBuf->Alloc = 0;								// show memory as provided, NOT allocated
 	} else {
-		psUUBuf->pBuf	= malloc(psUUBuf->Size);
-		psUUBuf->Used	= 0;
-		psUUBuf->Alloc	= psUUBuf->Size;				// show memory as ALLOCATED
+		psUUBuf->pBuf = malloc(psUUBuf->Size);
+		psUUBuf->Used = 0;
+		psUUBuf->Alloc = psUUBuf->Size;					// show memory as ALLOCATED
 	}
 	if (psUUBuf->Used == 0)
 		memset(psUUBuf->pBuf, 0, psUUBuf->Size);		// clear buffer ONLY if nothing to be used
