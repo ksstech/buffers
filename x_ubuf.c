@@ -1,7 +1,11 @@
 // x_ubuf.c - Copyright (c) 2016-24 Andre M. Maree / KSS Technologies (Pty) Ltd.
 
+#include "hal_platform.h"
+#include "x_ubuf.h"
+
 #include <errno.h>
 
+#include "hal_memory.h"
 #include "hal_stdio.h"
 #include "printfx.h"
 #include "syslog.h"
