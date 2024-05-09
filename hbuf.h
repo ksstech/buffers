@@ -31,7 +31,7 @@ int vHBufNxtCmd(hbuf_t * psHB, u8_t * pu8Buf, size_t Size);
 int vHBufPrvCmd(hbuf_t * psHB, u8_t * pu8Buf, size_t Size);
 
 struct report_t;
-void vHBufReport(struct report_t *, hbuf_t *);
+int xHBufReport(struct report_t *, hbuf_t *);
 
 #ifdef __cplusplus
 }

@@ -2,8 +2,6 @@
 
 #include <errno.h>
 
-#include "x_ubuf.h"
-#include "hal_platform.h"
 #include "hal_stdio.h"
 #include "printfx.h"
 #include "syslog.h"
@@ -465,12 +463,12 @@ int	xUBufIoctl(int fd, int request, va_list vArgs) {
 
 // ######################################## Reporting ##############################################
 
-void vUBufReport(report_t * psR, ubuf_t * psUB) {
+int vUBufReport(report_t * psR, ubuf_t * psUB) {
+	int iRV = 0;
 	if (halCONFIG_inSRAM(psUB)) {
-		WPFX_LOCK(psR);
-		wprintfx(psR, "p=%p  s=%d  u=%d  Iw=%d  Ir=%d  mux=%p  f=0x%X",
+		iRV += wprintfx(psR, "p=%p  s=%d  u=%d  Iw=%d  Ir=%d  mux=%p  f=0x%X",
 			psUB->pBuf, psUB->Size, psUB->Used, psUB->IdxWR, psUB->IdxRD, psUB->mux, psUB->_flags);
-		wprintfx(psR, " fI=%d fA=%d fS=%d fNL=%d fH=%d\r\n",
+		iRV += wprintfx(psR, " fI=%d fA=%d fS=%d fNL=%d fH=%d\r\n",
 			psUB->f_init, psUB->f_alloc, psUB->f_struct, psUB->f_nolock, psUB->f_history);
 		if (psUB->Used) {
 			if (psUB->f_history) {
@@ -480,26 +478,26 @@ void vUBufReport(report_t * psR, ubuf_t * psUB) {
 					u8Len = 0;
 					while (*pNow) {
 						if (u8Len == 0)
-							wprintfx(psR, " '");
-						wprintfx(psR, "%c", *pNow);
+							iRV += wprintfx(psR, " '");
+						iRV += wprintfx(psR, "%c", *pNow);
 						++pNow;
 						if (pNow == psUB->pBuf + psUB->Size)
 							pNow = psUB->pBuf;
 						++u8Len;
 					}
 					if (u8Len > 0)
-						wprintfx(psR, "'");
+						iRV += wprintfx(psR, "'");
 					++pNow;											// step over terminating '0'
 					if (pNow == (psUB->pBuf + psUB->IdxWR))
 						break;
 				}
 			} else {
-				wprintfx(psR, "%!'+hhY\r\n", psUB->Used, psUB->pBuf);
+				iRV += wprintfx(psR, "%!'+hhY\r\n", psUB->Used, psUB->pBuf);
 			}
 		}
-		WPFX_UNLOCK(psR);
-		wprintfx(psR, strCRLF);
+		iRV += wprintfx(psR, repFORM_TST(psR,aNL) ? strCR2xLF : strCRLF);
 	}
+	return iRV;
 }
 
 // ################################## Diagnostic and testing functions #############################

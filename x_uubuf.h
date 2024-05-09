@@ -48,7 +48,7 @@ int	xUUBufCreate(uubuf_t * psUUBuf, char * pBuf, size_t BufSize, size_t Used);
 void vUUBufDestroy(uubuf_t * psUUBuf);
 void vUUBufAdjust(uubuf_t * psUUBuf, ssize_t Adj);
 struct report_t;
-void vUUBufReport(struct report_t *, uubuf_t * psUUBuf);
+int vUUBufReport(struct report_t *, uubuf_t * psUUBuf);
 
 #ifdef __cplusplus
 }

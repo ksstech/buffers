@@ -85,7 +85,7 @@ int xUBufStringPrv(ubuf_t * psUB, u8_t * pu8Buf, int Size);
 void vUBufStringAdd(ubuf_t * psUB, u8_t * pu8Buf, int Size);
 
 struct report_t;
-void vUBufReport(struct report_t * psR, ubuf_t *);
+int vUBufReport(struct report_t * psR, ubuf_t *);
 
 #ifdef __cplusplus
 }

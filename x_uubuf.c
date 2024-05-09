@@ -81,12 +81,8 @@ void vUUBufAdjust(uubuf_t * psUUBuf, ssize_t Adj) {
 	psUUBuf->Used += Adj;
 }
 
-void vUUBufReport(report_t * psR, uubuf_t * psUUBuf) {
-	WPFX_LOCK(psR);
-	wprintfx(NULL, "P=%p  B=%p  I=%d  S=%d  U=%d  A=%d\r\n",
-			psUUBuf, psUUBuf->pBuf, psUUBuf->Idx, psUUBuf->Size, psUUBuf->Used, psUUBuf->Alloc);
-	if (psUUBuf->Used)
-		wprintfx(NULL, "%!'+hhY", psUUBuf->Used, psUUBuf->pBuf);
-	WPFX_UNLOCK(psR)
-	wprintfx(psR, (psR && psR->sFM.aNL) ? strCR2xLF : strCRLF);
+int vUUBufReport(report_t * psR, uubuf_t * psUUBuf) {
+	return wprintfx(NULL, "P=%p  B=%p  I=%d  S=%d  U=%d  A=%d\r\n%!'+hhY%s", psUUBuf, psUUBuf->pBuf,
+			psUUBuf->Idx, psUUBuf->Size, psUUBuf->Used, psUUBuf->Alloc, psUUBuf->Used, psUUBuf->pBuf,
+			repFORM_TST(psR,aNL) ? strCR2xLF : strCRLF);
 }

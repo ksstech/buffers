@@ -171,7 +171,7 @@ int	xBufCompact(buf_t * psBuf) {
  */
 int	xBufReport(buf_t * psBuf) {
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf);
-	return P("B=%p  E=%p  R=%p  W=%p  S=%d  U=%d",
+	return PX("B=%p  E=%p  R=%p  W=%p  S=%d  U=%d",
 		psBuf->pBeg, psBuf->pEnd, psBuf->pRead, psBuf->pWrite, psBuf->xSize, psBuf->xUsed);
 }
 
@@ -460,7 +460,7 @@ char * pTmp;
 		IF_myASSERT(debugRESULT, 0);
 		return erFAILURE;								// yes, abort
 	}
-	IF_P(debugSTRUCTURE, "[Seek 1] B=%p R=%p W=%p S=%d U=%d\r\n", psBuf->pBeg, psBuf->pRead, psBuf->pWrite, psBuf->xSize, psBuf->xUsed);
+	IF_PX(debugSTRUCTURE, "[Seek 1] B=%p R=%p W=%p S=%d U=%d\r\n", psBuf->pBeg, psBuf->pRead, psBuf->pWrite, psBuf->xSize, psBuf->xUsed);
 
 	vBufIsrEntry(psBuf);
 	if (flags & FF_MODER) {
@@ -493,7 +493,7 @@ char * pTmp;
 	vBufIsrExit(psBuf);
 
 	IF_myASSERT(debugRESULT, (psBuf->xUsed <= psBuf->xSize));
-	IF_P(debugSTRUCTURE, "[Seek 2] B=%p R=%p W=%p S=%d U=%u\r\n", psBuf->pBeg, psBuf->pRead, psBuf->pWrite, psBuf->xSize, psBuf->xUsed);
+	IF_PX(debugSTRUCTURE, "[Seek 2] B=%p R=%p W=%p S=%d U=%u\r\n", psBuf->pBeg, psBuf->pRead, psBuf->pWrite, psBuf->xSize, psBuf->xUsed);
 	return erSUCCESS;
 }
 
@@ -589,52 +589,52 @@ void vBufUnitTest(void) {
 	for(int a = 0; a < bufSIZE; a += bufSTEP) {
 		for(int b = 0; b < bufSTEP; b++) {
 			iRV = xBufPutC(b + '0', psBuf);
-			if (iRV != (b + '0')) 	P("Failed");
+			if (iRV != (b + '0')) 	PX("Failed");
 		}
 	}
 	// buffer should be full
-	if (xBufAvail(psBuf) != bufSIZE) 											P("Failed");
-	if (xBufSpace(psBuf) != 0) 													P("Failed");
-	if (pcBufTellPointer(psBuf, FF_MODER) != psBuf->pBeg) 						P("Failed");
+	if (xBufAvail(psBuf) != bufSIZE) 											PX("Failed");
+	if (xBufSpace(psBuf) != 0) 													PX("Failed");
+	if (pcBufTellPointer(psBuf, FF_MODER) != psBuf->pBeg) 						PX("Failed");
 	// because we are using the xUsed value to track space, pWrite should be wrapped around
-	if (pcBufTellPointer(psBuf, FF_MODEW) != psBuf->pRead) 						P("Failed");
+	if (pcBufTellPointer(psBuf, FF_MODEW) != psBuf->pRead) 						PX("Failed");
 
 	// make sure that we get an error if we write another char...
-	if (xBufPutC('Z', psBuf) != EOF) 											P("Failed");
+	if (xBufPutC('Z', psBuf) != EOF) 											PX("Failed");
 
 	// now read the buffer empty and verify the contents
 	for(int a = 0; a < bufSIZE; a++) {
-		if (xBufGetC(psBuf) != ('0' + (a % bufSTEP)))							P("Failed");
+		if (xBufGetC(psBuf) != ('0' + (a % bufSTEP)))							PX("Failed");
 	}
 
 	// make sure we get an EOF error if we try read another char
-	if (xBufGetC(psBuf) != EOF)													P("Failed");
+	if (xBufGetC(psBuf) != EOF)													PX("Failed");
 
 	// at this stage (empty) the pointers should both automatically be reset to the start
-	if ((psBuf->pRead != psBuf->pWrite) || (psBuf->pRead != psBuf->pBeg))		P("Failed");
+	if ((psBuf->pRead != psBuf->pWrite) || (psBuf->pRead != psBuf->pBeg))		PX("Failed");
 
 	// seek the write pointer to the end, effectively making all content available again.
-	if (xBufSeek(psBuf, bufSIZE, SEEK_SET, FF_MODEW) != erSUCCESS)				P("Failed");
-	if ((xBufAvail(psBuf) != bufSIZE) || (xBufSpace(psBuf) != 0))				P("Failed A=%d - B=%d", xBufAvail(psBuf), xBufSpace(psBuf));
+	if (xBufSeek(psBuf, bufSIZE, SEEK_SET, FF_MODEW) != erSUCCESS)				PX("Failed");
+	if ((xBufAvail(psBuf) != bufSIZE) || (xBufSpace(psBuf) != 0))				PX("Failed A=%d - B=%d", xBufAvail(psBuf), xBufSpace(psBuf));
 
 	// rewind the write pointer, make effectively empty
-	if (xBufSeek(psBuf, -bufSIZE, SEEK_END, FF_MODEW) != erSUCCESS)				P("Failed");
-	if ((xBufAvail(psBuf) != 0) || (xBufSpace(psBuf) != bufSIZE))				P("Failed");
+	if (xBufSeek(psBuf, -bufSIZE, SEEK_END, FF_MODEW) != erSUCCESS)				PX("Failed");
+	if ((xBufAvail(psBuf) != 0) || (xBufSpace(psBuf) != bufSIZE))				PX("Failed");
 
 	// move write pointer to middle
-	if (xBufSeek(psBuf, bufSIZE/2, SEEK_SET, FF_MODEW) != erSUCCESS)			P("Failed");
-	if (xBufAvail(psBuf) != xBufSpace(psBuf))									P("Failed");
+	if (xBufSeek(psBuf, bufSIZE/2, SEEK_SET, FF_MODEW) != erSUCCESS)			PX("Failed");
+	if (xBufAvail(psBuf) != xBufSpace(psBuf))									PX("Failed");
 
 	// move read pointer to middle
-	if (xBufSeek(psBuf, bufSIZE/2, SEEK_SET, FF_MODER) != erSUCCESS)			P("Failed");
-	if ((xBufAvail(psBuf) != 0) || (xBufSpace(psBuf) != bufSIZE))				P("Failed");
+	if (xBufSeek(psBuf, bufSIZE/2, SEEK_SET, FF_MODER) != erSUCCESS)			PX("Failed");
+	if ((xBufAvail(psBuf) != 0) || (xBufSpace(psBuf) != bufSIZE))				PX("Failed");
 
 	// move both read & write pointers simultaneously to start
-	if (xBufSeek(psBuf, -bufSIZE/2, SEEK_CUR, FF_MODER|FF_MODEW) != erSUCCESS)	P("Failed");
-	if ((psBuf->pBeg != psBuf->pRead) && (psBuf->pBeg != psBuf->pWrite))		P("Failed");
-	if ((xBufAvail(psBuf) != 0) || (xBufSpace(psBuf) != bufSIZE))				P("Failed");
+	if (xBufSeek(psBuf, -bufSIZE/2, SEEK_CUR, FF_MODER|FF_MODEW) != erSUCCESS)	PX("Failed");
+	if ((psBuf->pBeg != psBuf->pRead) && (psBuf->pBeg != psBuf->pWrite))		PX("Failed");
+	if ((xBufAvail(psBuf) != 0) || (xBufSpace(psBuf) != bufSIZE))				PX("Failed");
 
-	if (xBufSeek(psBuf, bufSIZE, SEEK_SET, FF_MODEW) != erSUCCESS)				P("Failed");
+	if (xBufSeek(psBuf, bufSIZE, SEEK_SET, FF_MODEW) != erSUCCESS)				PX("Failed");
 	wprintfx(NULL, "Avail=100%%\r\n%!'+hhY", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER));
 	xBufSeek(psBuf, bufSIZE / 2, SEEK_SET, FF_MODER);
 	wprintfx(NULL, "Avail=50%%\r\n%!'+hhY", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER));
@@ -645,23 +645,23 @@ void vBufUnitTest(void) {
 	xBufSeek(psBuf, 0, SEEK_SET, FF_MODER);
 	xBufSeek(psBuf, 0, SEEK_END, FF_MODEW);
 	// read pointer should be at start and write pointer at the end.
-	if ((xBufAvail(psBuf) != bufSIZE) || (xBufSpace(psBuf) != 0))				P("Failed A=%d - B=%d", xBufAvail(psBuf), xBufSpace(psBuf));
+	if ((xBufAvail(psBuf) != bufSIZE) || (xBufSpace(psBuf) != 0))				PX("Failed A=%d - B=%d", xBufAvail(psBuf), xBufSpace(psBuf));
 
 	// read first 25 characters at start of buffer, no compacting should have happened
-	if (xBufRead(cBuffer, 5, 5, psBuf) != 25)									P("Failed");
+	if (xBufRead(cBuffer, 5, 5, psBuf) != 25)									PX("Failed");
 	wprintfx(NULL, "Avail=75\r\n%!'+hhY", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER));
 	wprintfx(NULL, "cBuffer=25\r\n%!'+hhY", 25, cBuffer);
-	if ((xBufAvail(psBuf) != 75) || (xBufSpace(psBuf) != 25))					P("Failed");
+	if ((xBufAvail(psBuf) != 75) || (xBufSpace(psBuf) != 25))					PX("Failed");
 
 	// try to write 25 chars just read, should fail since FF_MODEPACK not enabled
-	if (xBufWrite(cBuffer, 5, 5, psBuf) != 0)									P("Failed");
-	if ((xBufAvail(psBuf) != 75) || (xBufSpace(psBuf) != 25))					P("Failed");
+	if (xBufWrite(cBuffer, 5, 5, psBuf) != 0)									PX("Failed");
+	if ((xBufAvail(psBuf) != 75) || (xBufSpace(psBuf) != 25))					PX("Failed");
 	wprintfx(NULL, "Avail=75\r\n%!'+hhY", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER));
 
 	FF_SET(psBuf, FF_MODEPACK);
 	// try to write 25 chars just read, should be placed at end after compacting...
-	if (xBufWrite(cBuffer, 5, 5, psBuf) != 25)									P("Failed");
-	if ((xBufAvail(psBuf) != bufSIZE) || (xBufSpace(psBuf) != 0))				P("Failed");
+	if (xBufWrite(cBuffer, 5, 5, psBuf) != 25)									PX("Failed");
+	if ((xBufAvail(psBuf) != bufSIZE) || (xBufSpace(psBuf) != 0))				PX("Failed");
 	wprintfx(NULL, "25 at End\r\n%!'+hhY", xBufAvail(psBuf), pcBufTellPointer(psBuf, FF_MODER));
 	xBufClose(psBuf);
 }
