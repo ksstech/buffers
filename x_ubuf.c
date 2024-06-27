@@ -103,7 +103,7 @@ size_t xUBufSetDefaultSize(size_t NewSize) {
  * @param	pcBuf preallocated buffer, if NULL will malloc
  * @param	BufSize size of preallocated buffer, or size to be allocated
  * @param	Used If preallocated buffer, portion already used
- * @return	Buffer size if successful, 0 if not.
+ * @return	pointer to the buffer structure
  */
 ubuf_t * psUBufCreate(ubuf_t * psUB, u8_t * pcBuf, size_t BufSize, size_t Used) {
 	IF_myASSERT(debugPARAM, (psUB == NULL) || halCONFIG_inSRAM(psUB));
@@ -130,21 +130,24 @@ ubuf_t * psUBufCreate(ubuf_t * psUB, u8_t * pcBuf, size_t BufSize, size_t Used) 
 	psUB->count = 0;
 	psUB->f_nolock = 0;
 	psUB->f_history = 0;
-	if (Used == 0) memset(psUB->pBuf, 0, psUB->Size);	// clear buffer ONLY if nothing to be used
+	if (Used == 0)
+		memset(psUB->pBuf, 0, psUB->Size);				// clear buffer ONLY if nothing to be used
 	psUB->f_init = 1;
 	return psUB;
 }
 
 void vUBufDestroy(ubuf_t * psUB) {
 	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(psUB));
-	if (psUB->mux) vRtosSemaphoreDelete(&psUB->mux);
+	if (psUB->mux)
+		vRtosSemaphoreDelete(&psUB->mux);
 	if (psUB->f_alloc) {
 		free(psUB->pBuf);
 		psUB->pBuf = NULL;
 		psUB->Size = 0;
 		psUB->f_init = 0;
 	}
-	if (psUB->f_struct) free(psUB);
+	if (psUB->f_struct)
+		free(psUB);
 }
 
 void vUBufReset(ubuf_t * psUB) { psUB->IdxRD = psUB->IdxWR = psUB->Used = 0; }
