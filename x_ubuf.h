@@ -65,6 +65,10 @@ void vUBufStepRead(ubuf_t * psUBuf, int Step);
 
 size_t xUBufSetDefaultSize(size_t);
 ubuf_t * psUBufCreate(ubuf_t * psUBuf, u8_t * pcBuf, size_t BufSize, size_t Used);
+/**
+ * @brief	Delete semaphore and free allocated (buffer and/or structure) memory if allocated
+ * @param	psUB structure to destroy
+ */
 void vUBufDestroy(ubuf_t *);
 void vUBufReset(ubuf_t *);
 int	xUBufGetC(ubuf_t *);
