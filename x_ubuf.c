@@ -92,7 +92,9 @@ static ssize_t xUBufBlockSpace(ubuf_t * psUB, size_t Size) {
 			} else { 
 				xClockDelayMsec(2);
 			}
+			xUBufLock(psUB);
 			Avail = psUB->Size - psUB->Used;			// update available space
+			xUBufUnLock(psUB);
 		} while (Avail < Size);							// wait for space to open...
 	}
 	return Size;
@@ -159,16 +161,27 @@ void vUBufDestroy(ubuf_t * psUB) {
 	}
 }
 
-void vUBufReset(ubuf_t * psUB) { psUB->IdxRD = psUB->IdxWR = psUB->Used = 0; }
+void vUBufReset(ubuf_t * psUB) {
+	xUBufLock(psUB);
+	psUB->IdxRD = psUB->IdxWR = psUB->Used = 0; 
+	xUBufUnLock(psUB);
+}
 
 int	xUBufGetUsed(ubuf_t * psUB) { return psUB->Used; }
 
-int	xUBufGetSpace(ubuf_t * psUB) { return psUB->Size - psUB->Used; }
+int	xUBufGetSpace(ubuf_t * psUB) {
+	xUBufLock(psUB);
+	int iRV = psUB->Size - psUB->Used; 
+	xUBufUnLock(psUB);
+	return iRV;
+}
 
 int xUBufGetUsedBlock(ubuf_t * psUB) {
-	if (psUB->Used == 0) return 0;
-	if (psUB->IdxRD >= psUB->IdxWR) return psUB->Size - psUB->IdxRD;
-	return psUB->Used;
+	int iRV;
+	xUBufLock(psUB);
+	iRV = (psUB->IdxRD >= psUB->IdxWR) ? (psUB->Size - psUB->IdxRD) : psUB->Used;
+	xUBufUnLock(psUB);
+	return iRV;
 }
 
 /**
@@ -254,9 +267,19 @@ char * pcUBufGetS(char * pBuf, int Number, ubuf_t * psUB) {
 	return pBuf;										// and return a valid state
 }
 
-u8_t * pcUBufTellRead(ubuf_t * psUB) { return psUB->pBuf + psUB->IdxRD; }
+u8_t * pcUBufTellRead(ubuf_t * psUB) {
+	xUBufLock(psUB);
+	u8_t * pU8 = psUB->pBuf + psUB->IdxRD;
+	xUBufUnLock(psUB);
+	return pU8;
+}
 
-u8_t * pcUBufTellWrite(ubuf_t * psUB)	{ return psUB->pBuf + psUB->IdxWR; }
+u8_t * pcUBufTellWrite(ubuf_t * psUB) {
+	xUBufLock(psUB);
+	u8_t * pU8 = psUB->pBuf + psUB->IdxWR;
+	xUBufUnLock(psUB);
+	return pU8;
+}
 
 void vUBufStepRead(ubuf_t * psUB, int Step) {
 	IF_myASSERT(debugTRACK, Step > 0);
