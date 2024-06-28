@@ -34,6 +34,16 @@ static size_t uBufSize = ubufSIZE_DEFAULT;
 
 // ################################# Local/static functions ########################################
 
+static void xUBufLock(ubuf_t * psUB) {
+	if (psUB->f_nolock == 0)
+		xRtosSemaphoreTake(&psUB->mux, portMAX_DELAY); 
+}
+
+static void xUBufUnLock(ubuf_t * psUB) {
+	if (psUB->f_nolock == 0)
+		xRtosSemaphoreGive(&psUB->mux);
+}
+
 static int xUBufBlockAvail(ubuf_t * psUB) {
 	if ((psUB->pBuf == NULL) || (psUB->Size == 0)) {
 		IF_myASSERT(debugTRACK, 0);
@@ -89,14 +99,6 @@ static ssize_t xUBufBlockSpace(ubuf_t * psUB, size_t Size) {
 }
 
 // ################################### Global/public functions #####################################
-
-void xUBufLock(ubuf_t * psUB) {
-	if (!psUB->f_nolock) xRtosSemaphoreTake(&psUB->mux, portMAX_DELAY); 
-}
-
-void xUBufUnLock(ubuf_t * psUB) {
-	if (!psUB->f_nolock) xRtosSemaphoreGive(&psUB->mux);
-}
 
 size_t xUBufSetDefaultSize(size_t NewSize) {
 	IF_myASSERT(debugPARAM, INRANGE(ubufSIZE_MINIMUM, NewSize, ubufSIZE_MAXIMUM));

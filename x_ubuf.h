@@ -49,9 +49,6 @@ extern ubuf_t sUBuf[];
 
 // ################################### EXTERNAL FUNCTIONS ##########################################
 
-void xUBufLock(ubuf_t * psUBuf);
-void xUBufUnLock(ubuf_t * psUBuf);
-
 int	xUBufGetUsed(ubuf_t * psUBuf);
 int xUBufGetUsedBlock(ubuf_t * psUBuf);
 int	xUBufGetSpace(ubuf_t * psUBuf);
