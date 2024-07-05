@@ -540,7 +540,7 @@ int vUBufReport(report_t * psR, ubuf_t * psUB) {
 				iRV += wprintfx(psR, "%!'+hhY\r\n", psUB->Used, psUB->pBuf);
 			}
 		}
-		iRV += wprintfx(psR, repFORM_TST(psR,aNL) ? strCR2xLF : strCRLF);
+		iRV += wprintfx(psR, repFORM_TST(psR,aNL) ? strNLx2 : strNL);
 	}
 	return iRV;
 }

@@ -141,6 +141,6 @@ int xHBufReport(report_t * psR, hbuf_t * psHB) {
 	} else {
 		iRV += wprintfx(psR, "CLI buffer empty");
 	}
-	wprintfx(psR, repFORM_TST(psR,aNL) ? strCR2xLF : strCRLF);
+	wprintfx(psR, repFORM_TST(psR,aNL) ? strNLx2 : strNL);
 	return iRV;
 }
