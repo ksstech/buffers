@@ -1,6 +1,4 @@
-/*
- * x_ubuf.h
- */
+// x_ubuf.h
 
 #pragma	once
 
