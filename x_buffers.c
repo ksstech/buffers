@@ -60,9 +60,12 @@ void *	pvBufTake(size_t BufSize) {
  * @return
  */
 int	xBufGive(void * pvBuf) {
-	if (pvBuf == BufSmall) return xRtosSemaphoreGive(&BufSmlLock);
-	else if (pvBuf == BufMedium) return xRtosSemaphoreGive(&BufMedLock);
-	else if (pvBuf == BufLarge) return xRtosSemaphoreGive(&BufLrgLock);
+	if (pvBuf == BufSmall)
+		return xRtosSemaphoreGive(&BufSmlLock);
+	else if (pvBuf == BufMedium)
+		return xRtosSemaphoreGive(&BufMedLock);
+	else if (pvBuf == BufLarge)
+		return xRtosSemaphoreGive(&BufLrgLock);
 	return (BaseType_t) pdFAIL;
 }
 
