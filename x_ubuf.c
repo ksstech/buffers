@@ -116,8 +116,8 @@ size_t xUBufSetDefaultSize(size_t NewSize) {
  * @return	pointer to the buffer structure
  */
 ubuf_t * psUBufCreate(ubuf_t * psUB, u8_t * pcBuf, size_t BufSize, size_t Used) {
-	IF_myASSERT(debugPARAM, (psUB == NULL) || halCONFIG_inSRAM(psUB));
-	IF_myASSERT(debugPARAM, (pcBuf == NULL) || halCONFIG_inSRAM(pcBuf));
+	IF_myASSERT(debugPARAM, (psUB == NULL) || halMemorySRAM(psUB));
+	IF_myASSERT(debugPARAM, (pcBuf == NULL) || halMemorySRAM(pcBuf));
 	IF_myASSERT(debugPARAM, !(pcBuf == NULL && Used > 0));
 	IF_myASSERT(debugPARAM, INRANGE(ubufSIZE_MINIMUM, BufSize, ubufSIZE_MAXIMUM) && Used <= BufSize);
 	if (psUB != NULL) {									// control structure supplied
@@ -147,7 +147,7 @@ ubuf_t * psUBufCreate(ubuf_t * psUB, u8_t * pcBuf, size_t BufSize, size_t Used) 
 }
 
 void vUBufDestroy(ubuf_t * psUB) {
-	IF_myASSERT(debugPARAM, halCONFIG_inSRAM(psUB));
+	IF_myASSERT(debugPARAM, halMemorySRAM(psUB));
 	if (psUB->mux)
 		vRtosSemaphoreDelete(&psUB->mux);
 	if (psUB->f_alloc) {
@@ -510,7 +510,7 @@ int	xUBufIoctl(int fd, int request, va_list vArgs) {
 
 int vUBufReport(report_t * psR, ubuf_t * psUB) {
 	int iRV = 0;
-	if (halCONFIG_inSRAM(psUB)) {
+	if (halMemorySRAM(psUB)) {
 		iRV += wprintfx(psR, "p=%p  s=%d  u=%d  Iw=%d  Ir=%d  mux=%p  f=0x%X",
 			psUB->pBuf, psUB->Size, psUB->Used, psUB->IdxWR, psUB->IdxRD, psUB->mux, psUB->_flags);
 		iRV += wprintfx(psR, " fI=%d fA=%d fS=%d fNL=%d fH=%d\r\n",
