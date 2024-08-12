@@ -385,6 +385,12 @@ void vUBufStringAdd(ubuf_t * psUB, u8_t * pu8Buf, int Size) {
 
 // ##################################### ESP-IDF VFS support #######################################
 
+int xUBufOpen(const char *, int, int);
+int xUBufClose(int);
+ssize_t xUBufRead(int, void *, size_t);
+ssize_t xUBufWrite(int, const void *, size_t);
+int xUBufIoctl(int, int, va_list);
+
 static const esp_vfs_t dev_ubuf = {
 	.flags	= ESP_VFS_FLAG_DEFAULT,
 	.write	= xUBufWrite,
