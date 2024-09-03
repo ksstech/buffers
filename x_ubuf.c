@@ -245,7 +245,7 @@ int	xUBufPutC(ubuf_t * psUB, int cChr) {
 	++psUB->Used;
 	xUBufUnLock(psUB);
 	// ensure that the indexes are same when buffer is full
-//	IF_CP (debugTRACK && (psUB->Used == psUB->Size) && (psUB->IdxRD != psUB->IdxWR), "ALERT!!! s=%d u=%d w=%d r=%d cChr=%d\r\n", psUB->Size, psUB->Used, psUB->IdxWR, psUB->IdxRD, cChr);
+//	IF_CP (debugTRACK && (psUB->Used == psUB->Size) && (psUB->IdxRD != psUB->IdxWR), "ALERT!!! s=%d u=%d w=%d r=%d cChr=%d" strNL, psUB->Size, psUB->Used, psUB->IdxWR, psUB->IdxRD, cChr);
 //	IF_myASSERT(debugTRACK && (psUB->Used == psUB->Size), psUB->IdxRD == psUB->IdxWR);
 	return cChr;
 }
@@ -519,7 +519,7 @@ int vUBufReport(report_t * psR, ubuf_t * psUB) {
 	if (halMemorySRAM(psUB)) {
 		iRV += wprintfx(psR, "p=%p  s=%d  u=%d  Iw=%d  Ir=%d  mux=%p  f=0x%X",
 			psUB->pBuf, psUB->Size, psUB->Used, psUB->IdxWR, psUB->IdxRD, psUB->mux, psUB->_flags);
-		iRV += wprintfx(psR, " fI=%d fA=%d fS=%d fNL=%d fH=%d\r\n",
+		iRV += wprintfx(psR, " fI=%d fA=%d fS=%d fNL=%d fH=%d" strNL,
 			psUB->f_init, psUB->f_alloc, psUB->f_struct, psUB->f_nolock, psUB->f_history);
 		if (psUB->Used) {
 			if (psUB->f_history) {
@@ -543,10 +543,11 @@ int vUBufReport(report_t * psR, ubuf_t * psUB) {
 						break;
 				}
 			} else {
-				iRV += wprintfx(psR, "%!'+hhY\r\n", psUB->Used, psUB->pBuf);
+				iRV += wprintfx(psR, "%!'+hhY" strNL, psUB->Used, psUB->pBuf);
 			}
 		}
-		iRV += wprintfx(psR, repFORM_TST(psR,aNL) ? strNLx2 : strNL);
+		if (repFORM_TST(psR,aNL))
+			iRV += wprintfx(psR, strNL);
 	}
 	return iRV;
 }
@@ -559,12 +560,12 @@ void vUBufTest(void) {
 	vUBufInit();
 	int Count, Result;
 	int fd = open("/ubuf", O_RDWR | O_NONBLOCK);
-	wprintfx(NULL, "fd=%d\r\n", fd);
+	wprintfx(NULL, "fd=%d" strNL, fd);
 	// fill the buffer
 	for (Count = 0; Count < ubufSIZE_DEFAULT; ++Count) {
 		Result = write(fd, "a", 1);
 		if (Result != 1) {
-			wprintfx(NULL, "write() FAILED with %d\r\n", Result);
+			wprintfx(NULL, "write() FAILED with %d" strNL, Result);
 		}
 	}
 
@@ -573,14 +574,14 @@ void vUBufTest(void) {
 
 	// Check that error is returned
 	Result = write(fd, "A", 1);
-	wprintfx(NULL, "Result (%d) write() to FULL buffer =  %s\r\n", Result, (Result == 0) ? "Passed" : "Failed");
+	wprintfx(NULL, "Result (%d) write() to FULL buffer =  %s" strNL, Result, (Result == 0) ? "Passed" : "Failed");
 
 	// empty the buffer and check what is returned...
 	char cBuf[4] = { 0 };
 	for (Count = 0; Count < ubufSIZE_DEFAULT; ++Count) {
 		Result = read(fd, cBuf, 1);
 		if ((Result != 1) || (cBuf[0] != CHR_a)) {
-			wprintfx(NULL, "read() FAILED with %d & '%c'\r\n", Result, cBuf[0]);
+			wprintfx(NULL, "read() FAILED with %d & '%c'" strNL, Result, cBuf[0]);
 		}
 	}
 
@@ -589,34 +590,34 @@ void vUBufTest(void) {
 
 	// Check that error is returned
 	Result = read(fd, cBuf, 1);
-	wprintfx(NULL, "Result (%d) read() from EMPTY buffer = %s\r\n", Result, (Result == erFAILURE) ? "Passed" : "Failed");
+	wprintfx(NULL, "Result (%d) read() from EMPTY buffer = %s" strNL, Result, (Result == erFAILURE) ? "Passed" : "Failed");
 
 	// Test printing to buffer
 	for (Count = 0, Result = 0; Count < ubufSIZE_DEFAULT; ++Count) {
 		Result += dprintfx(fd, "%c", (Count % 10) + CHR_0);
 	}
-	wprintfx(NULL, "dprintf() %s with %d expected %d\r\n", (Result == Count) ? "PASSED" : "FAILED" , Result, Count);
+	wprintfx(NULL, "dprintf() %s with %d expected %d" strNL, (Result == Count) ? "PASSED" : "FAILED" , Result, Count);
 
 	// check that it is full
 	vUBufReport(NULL, &sUBuf[0]);
 
 	// Check that error is returned
 	Result = dprintfx(fd, "%c", CHR_A);
-	wprintfx(NULL, "Result (%d) dprintf() to FULL buffer (without O_TRUNC) =  %s\r\n", Result, (Result == erFAILURE) ? "Passed" : "Failed");
+	wprintfx(NULL, "Result (%d) dprintf() to FULL buffer (without O_TRUNC) =  %s" strNL, Result, (Result == erFAILURE) ? "Passed" : "Failed");
 
 	Result = close(fd);
-	wprintfx(NULL, "Result (%d) close() buffer =  %s\r\n", Result, (Result == erSUCCESS) ? "Passed" : "Failed");
+	wprintfx(NULL, "Result (%d) close() buffer =  %s" strNL, Result, (Result == erSUCCESS) ? "Passed" : "Failed");
 
 	// Now test the O_TRUNC functionality
 	size_t Size = xUBufSetDefaultSize(ubufTEST_SIZE);
-	wprintfx(NULL, "xUBufSetDefaultSize(%d) %s with %d\r\n", ubufTEST_SIZE, (Size == ubufTEST_SIZE) ? "PASSED" : "FAILED", Size);
+	wprintfx(NULL, "xUBufSetDefaultSize(%d) %s with %d" strNL, ubufTEST_SIZE, (Size == ubufTEST_SIZE) ? "PASSED" : "FAILED", Size);
 	fd = open("/ubuf", O_RDWR | O_TRUNC);
-	wprintfx(NULL, "fd=%d\r\n", fd);
+	wprintfx(NULL, "fd=%d" strNL, fd);
 	// fill the buffer
 	for (Count = 0; Count < ubufTEST_SIZE; ++Count) {
 		Result = write(fd, "a", 1);
 		if (Result != 1) {
-			wprintfx(NULL, "write() FAILED with %d\r\n", Result);
+			wprintfx(NULL, "write() FAILED with %d" strNL, Result);
 		}
 	}
 	Result = write(fd, "0123456789", 10);
@@ -624,5 +625,5 @@ void vUBufTest(void) {
 	vUBufReport(NULL, &sUBuf[0]);
 
 	Result = close(fd);
-	wprintfx(NULL, "Result (%d) close() buffer =  %s\r\n", Result, (Result == erSUCCESS) ? "Passed" : "Failed");
+	wprintfx(NULL, "Result (%d) close() buffer =  %s" strNL, Result, (Result == erSUCCESS) ? "Passed" : "Failed");
 }
