@@ -178,10 +178,8 @@ int xUBufGetUsedBlock(ubuf_t * psUB) {
 }
 
 int xUBufEmptyBlock(ubuf_t * psUB, int (*hdlr)(u8_t *, ssize_t)) {
-	if (psUB->Used == 0)
-		return 0;
-	if (hdlr == NULL)
-		return erINV_PARA;
+	if (psUB->Used == 0)			return 0;
+	if (hdlr == NULL)				return erINV_PARA;
 	xUBufLock(psUB);
 	int iRV = 0;
 	ssize_t Size, Total = 0;
