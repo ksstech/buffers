@@ -201,7 +201,9 @@ int xUBufEmptyBlock(ubuf_t * psUB, int (*hdlr)(u8_t *, ssize_t)) {
 			psUB->IdxWR = 0;							// reset write index
 		}
 	}
-	IF_myASSERT(debugTRACK, psUB->Used==0 && psUB->IdxRD==0 && psUB->IdxWR==0);
+	IF_myASSERT(debugTRACK, psUB->Used == 0);
+	IF_myASSERT(debugTRACK, psUB->IdxRD == 0);
+	IF_myASSERT(debugTRACK, psUB->IdxWR == 0);
 	xUBufUnLock(psUB);
 	return (iRV > 0 ) ? Total : iRV;
 }
