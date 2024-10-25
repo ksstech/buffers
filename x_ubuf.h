@@ -50,6 +50,13 @@ extern ubuf_t sUBuf[];
 int	xUBufGetUsed(ubuf_t * psUBuf);
 int xUBufGetUsedBlock(ubuf_t * psUBuf);
 int	xUBufGetSpace(ubuf_t * psUBuf);
+
+/**
+ * @brief	Empty the specified buffer using the handler supplied
+ * 			Buffer will be emptied in 1 or 2 calls depending on state of pointers.
+ * @return	0+ represent the number of bytes written
+ * 			<0 representing an error code
+ */
 int xUBufEmptyBlock(ubuf_t * psUBuf, int (*hdlr)(u8_t *, ssize_t));
 
 u8_t * pcUBufTellWrite(ubuf_t * psUBuf);
@@ -59,7 +66,17 @@ void vUBufStepWrite(ubuf_t * psUBuf, int Step);
 void vUBufStepRead(ubuf_t * psUBuf, int Step);
 
 size_t xUBufSetDefaultSize(size_t);
+
+/**
+ * @brief	Using the supplied uBuf structure, initialises the members as required
+ * @param	psUB structure to initialise
+ * @param	pcBuf preallocated buffer, if NULL will malloc
+ * @param	BufSize size of preallocated buffer, or size to be allocated
+ * @param	Used If preallocated buffer, portion already used
+ * @return	pointer to the buffer structure
+ */
 ubuf_t * psUBufCreate(ubuf_t * psUBuf, u8_t * pcBuf, size_t BufSize, size_t Used);
+
 /**
  * @brief	Delete semaphore and free allocated (buffer and/or structure) memory if allocated
  * @param	psUB structure to destroy
@@ -74,8 +91,23 @@ char * pcUBufGetS(char *, int, ubuf_t *);
 void vUBufInit(void);
 
 // HISTORY support functions
+
+/**
+ * @brief	copy previous (older) command added to buffer supplied
+ * @return	number of characters copied
+ */
 int xUBufStringNxt(ubuf_t * psUB, u8_t * pu8Buf, int Size);
+
+/**
+ * @brief	copy next (newer) command to buffer supplied
+ * @return	number of characters copied
+ */
 int xUBufStringPrv(ubuf_t * psUB, u8_t * pu8Buf, int Size);
+
+/**
+ * @brief	Add characters from buffer supplied to end of buffer
+ * 			If insufficient free space, delete complete entries starting with oldest
+ */
 void vUBufStringAdd(ubuf_t * psUB, u8_t * pu8Buf, int Size);
 
 struct report_t;

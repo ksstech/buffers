@@ -107,14 +107,6 @@ size_t xUBufSetDefaultSize(size_t NewSize) {
 	return uBufSize = NewSize;
 }
 
-/**
- * @brief	Using the supplied uBuf structure, initialises the members as required
- * @param	psUB structure to initialise
- * @param	pcBuf preallocated buffer, if NULL will malloc
- * @param	BufSize size of preallocated buffer, or size to be allocated
- * @param	Used If preallocated buffer, portion already used
- * @return	pointer to the buffer structure
- */
 ubuf_t * psUBufCreate(ubuf_t * psUB, u8_t * pcBuf, size_t BufSize, size_t Used) {
 	IF_myASSERT(debugPARAM, (psUB == NULL) || halMemorySRAM(psUB));
 	IF_myASSERT(debugPARAM, (pcBuf == NULL) || halMemorySRAM(pcBuf));
@@ -185,12 +177,6 @@ int xUBufGetUsedBlock(ubuf_t * psUB) {
 	return iRV;
 }
 
-/**
- * @brief	Empty the specified buffer using the handler supplied
- * 			Buffer will be emptied in 1 or 2 calls depending on state of pointers.
- * @return	0+ represent the number of bytes written
- * 			<0 representing an error code
- */
 int xUBufEmptyBlock(ubuf_t * psUB, int (*hdlr)(u8_t *, ssize_t)) {
 	if (psUB->Used == 0)
 		return 0;
@@ -328,10 +314,6 @@ int xUBufStringCopy(ubuf_t * psUB, u8_t * pu8Buf, int xLen) {
 	return xLen;
 }
 
-/**
- * @brief	copy previous (older) command added to buffer supplied
- * @return	number of characters copied
- */
 int xUBufStringNxt(ubuf_t * psUB, u8_t * pu8Buf, int Size) {
 	IF_myASSERT(debugPARAM, psUB->f_history);
 	// step back over NUL and then further back to chr before next NUL
@@ -350,10 +332,6 @@ int xUBufStringNxt(ubuf_t * psUB, u8_t * pu8Buf, int Size) {
 	return xLen;
 }
 
-/**
- * @brief	copy next (newer) command to buffer supplied
- * @return	number of characters copied
- */
 int xUBufStringPrv(ubuf_t * psUB, u8_t * pu8Buf, int Size) {
 	IF_myASSERT(debugPARAM, psUB->f_history);
 	int xLen = 0;
@@ -369,10 +347,6 @@ int xUBufStringPrv(ubuf_t * psUB, u8_t * pu8Buf, int Size) {
 	return xUBufStringCopy(psUB, pu8Buf, xLen);
 }
 
-/**
- * @brief	Add characters from buffer supplied to end of buffer
- * 			If insufficient free space, delete complete entries starting with oldest
- */
 void vUBufStringAdd(ubuf_t * psUB, u8_t * pu8Buf, int Size) {
 	IF_myASSERT(debugPARAM, psUB->f_history);
 	int cChr;
