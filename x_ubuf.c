@@ -3,15 +3,14 @@
 #include "hal_platform.h"
 #include "x_ubuf.h"
 
-#include <errno.h>
-
 #include "hal_memory.h"
 #include "hal_stdio.h"
 #include "printfx.h"
 #include "syslog.h"
 #include "systiming.h"
-#include "x_errors_events.h"
+#include "errors_events.h"
 
+#include <errno.h>
 #include "esp_vfs.h"
 
 #define	debugFLAG					0xF000
@@ -481,10 +480,6 @@ int	xUBufIoctl(int fd, int request, va_list vArgs) {
 	}
 	return 1;
 }
-
-// ##################################### HISTORY use support #######################################
-
-
 
 // ######################################## Reporting ##############################################
 
