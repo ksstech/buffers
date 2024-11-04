@@ -485,7 +485,7 @@ int	xUBufIoctl(int fd, int request, va_list vArgs) {
 
 int vUBufReport(report_t * psR, ubuf_t * psUB) {
 	int iRV = 0;
-	if (halMemorySRAM(psUB)) {
+	if (halMemoryRAM(psUB)) {
 		iRV += wprintfx(psR, "p=%p  s=%d  u=%d  Iw=%d  Ir=%d  mux=%p  f=0x%X",
 			psUB->pBuf, psUB->Size, psUB->Used, psUB->IdxWR, psUB->IdxRD, psUB->mux, psUB->_flags);
 		iRV += wprintfx(psR, " fI=%d fA=%d fS=%d fNL=%d fH=%d" strNL,
