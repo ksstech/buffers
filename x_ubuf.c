@@ -177,34 +177,31 @@ int xUBufGetUsedBlock(ubuf_t * psUB) {
 }
 
 int xUBufEmptyBlock(ubuf_t * psUB, int (*hdlr)(u8_t *, ssize_t)) {
+	IF_myASSERT(debugPARAM, (hdlr != NULL) && halMemoryRAM(psUB));
 	if (psUB->Used == 0)			return 0;
-	if (hdlr == NULL)				return erINV_PARA;
-	xUBufLock(psUB);
 	int iRV = 0;
 	ssize_t Size, Total = 0;
+	xUBufLock(psUB);
 	if (psUB->IdxRD >= psUB->IdxWR) {
 		Size = psUB->Size - psUB->IdxRD;
 		iRV = hdlr(psUB->pBuf + psUB->IdxRD, Size);
 		if (iRV > 0) {
-			Total += Size;
-			psUB->Used -= Size;							// decrease total available
+			Total += iRV;								// Update bytes written count
+			psUB->Used -= iRV;							// decrease total available
 			psUB->IdxRD = 0;							// reset read index
 		}
-		IF_myASSERT(debugTRACK, iRV == Size);
 	}
-	if ((iRV >= 0) && psUB->Used) {
+	if ((iRV > erFAILURE) && psUB->Used) {
 		iRV = hdlr(psUB->pBuf, psUB->Used);
 		if (iRV > 0) {
-			Total += psUB->Used;
-			psUB->Used = 0;								// nothing left...
+			Total += iRV;
+			psUB->Used -= iRV;							// nothing left...
 			psUB->IdxWR = 0;							// reset write index
 		}
 	}
-	IF_myASSERT(debugTRACK, psUB->Used == 0);
-	IF_myASSERT(debugTRACK, psUB->IdxRD == 0);
-	IF_myASSERT(debugTRACK, psUB->IdxWR == 0);
+	IF_myASSERT(debugTRACK, psUB->Used == 0 && psUB->IdxRD == 0 && psUB->IdxWR == 0);
 	xUBufUnLock(psUB);
-	return (iRV > 0 ) ? Total : iRV;
+	return (iRV < erSUCCESS) ? iRV : Total;
 }
 
 int	xUBufGetC(ubuf_t * psUB) {
