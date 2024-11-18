@@ -102,36 +102,6 @@ size_t xUBufSetDefaultSize(size_t NewSize) {
 	return uBufSize = NewSize;
 }
 
-ubuf_t * psUBufCreate(ubuf_t * psUB, u8_t * pcBuf, size_t BufSize, size_t Used) {
-	IF_myASSERT(debugPARAM, (psUB == NULL) || halMemorySRAM(psUB));
-	IF_myASSERT(debugPARAM, (pcBuf == NULL) || halMemorySRAM(pcBuf));
-	IF_myASSERT(debugPARAM, !(pcBuf == NULL && Used > 0));
-	IF_myASSERT(debugPARAM, INRANGE(ubufSIZE_MINIMUM, BufSize, ubufSIZE_MAXIMUM) && Used <= BufSize);
-	if (psUB != NULL) {									// control structure supplied
-		psUB->f_struct = 0;								// yes, flag as NOT allocated
-	} else {
-		psUB = malloc(sizeof(ubuf_t));					// no, allocate
-		psUB->f_struct = 1;								// and flag as such
-	}
-	if (pcBuf != NULL) {								// buffer itself allocated
-		psUB->pBuf = pcBuf;								// yes, save pointer into control structure
-		psUB->f_alloc = 0;								// and flag as NOT allocated
-	} else {
-		psUB->pBuf = malloc(BufSize);					// no, allocate buffer of desired size
-		psUB->f_alloc = 1;								// and flag as allocated
-	}
-	psUB->mux = NULL;
-	psUB->IdxWR = psUB->Used  = Used;
-	psUB->IdxRD = 0;
-	psUB->Size = BufSize;
-	psUB->count = 0;
-	psUB->f_nolock = 0;
-	psUB->f_history = 0;
-	if (Used == 0)
-		memset(psUB->pBuf, 0, psUB->Size);				// clear buffer ONLY if nothing to be used
-	psUB->f_init = 1;
-	return psUB;
-}
 
 int	xUBufGetUsed(ubuf_t * psUB) { return psUB->Used; }
 
@@ -260,6 +230,36 @@ void vUBufStepWrite(ubuf_t * psUB, int Step) {
 	IF_myASSERT(debugTRACK, psUB->IdxWR <= psUB->Size);	// cannot step outside
 	psUB->IdxWR %= psUB->Size;
 	xUBufUnLock(psUB);
+}
+
+ubuf_t * psUBufCreate(ubuf_t * psUB, u8_t * pcBuf, size_t BufSize, size_t Used) {
+	IF_myASSERT(debugPARAM, (psUB == NULL) || halMemorySRAM(psUB));
+	IF_myASSERT(debugPARAM, (pcBuf == NULL) || halMemorySRAM(pcBuf));
+	IF_myASSERT(debugPARAM, !(pcBuf == NULL && Used > 0));
+	IF_myASSERT(debugPARAM, INRANGE(ubufSIZE_MINIMUM, BufSize, ubufSIZE_MAXIMUM) && Used <= BufSize);
+	if (psUB != NULL) {									// control structure supplied
+		psUB->f_struct = 0;								// yes, flag as NOT allocated
+	} else {
+		psUB = malloc(sizeof(ubuf_t));					// no, allocate
+		psUB->f_struct = 1;								// and flag as such
+	}
+	if (pcBuf != NULL) {								// buffer itself allocated
+		psUB->pBuf = pcBuf;								// yes, save pointer into control structure
+		psUB->f_alloc = 0;								// and flag as NOT allocated
+	} else {
+		psUB->pBuf = malloc(BufSize);					// no, allocate buffer of desired size
+		psUB->f_alloc = 1;								// and flag as allocated
+	}
+	psUB->mux = NULL;
+	psUB->IdxWR = psUB->Used  = Used;
+	psUB->IdxRD = 0;
+	psUB->Size = BufSize;
+	psUB->count = 0;
+	psUB->f_nolock = 0;
+	psUB->f_history = 0;
+	if (Used == 0) memset(psUB->pBuf, 0, psUB->Size);	// clear buffer ONLY if nothing to be used
+	psUB->f_init = 1;
+	return psUB;
 }
 
 void vUBufDestroy(ubuf_t * psUB) {
