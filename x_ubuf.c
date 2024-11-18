@@ -97,11 +97,7 @@ static ssize_t xUBufBlockSpace(ubuf_t * psUB, size_t Size) {
 
 // ################################### Global/public functions #####################################
 
-size_t xUBufSetDefaultSize(size_t NewSize) {
-	IF_myASSERT(debugPARAM, INRANGE(ubufSIZE_MINIMUM, NewSize, ubufSIZE_MAXIMUM));
-	return uBufSize = NewSize;
-}
-
+size_t xUBufSetDefaultSize(size_t NewSize) { return uBufSize = INRANGE(ubufSIZE_MINIMUM, NewSize, ubufSIZE_MAXIMUM) ? NewSize : ubufSIZE_DEFAULT; }
 
 int	xUBufGetUsed(ubuf_t * psUB) { return psUB->Used; }
 
