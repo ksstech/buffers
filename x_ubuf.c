@@ -44,25 +44,16 @@ static void xUBufUnLock(ubuf_t * psUB) {
 }
 
 static int xUBufBlockAvail(ubuf_t * psUB) {
-	if ((psUB->pBuf == NULL) || (psUB->Size == 0)) {
-		IF_myASSERT(debugTRACK, 0);
-		errno = ENOMEM;
-		return erFAILURE;
-	}
 /**
  * @brief		check if a character is available to be read
  * @param[in]	psUBuf - pointer to buffer control structure
  * @return		erSUCCESS or erFAILURE/EOF with errno set
  * @note		might block until a character is availoble depending on O_NONBLOCK being set..
  */
+	if ((psUB->pBuf == NULL) || (psUB->Size == 0)) { errno = ENOMEM; return erFAILURE; }
 	if (psUB->Used == 0) {
-		if (FF_STCHK(psUB, O_NONBLOCK)) {
-			errno = EAGAIN; 
-			return EOF;
-		}
-		while (psUB->Used == 0) {
-			vTaskDelay(2);
-		}
+		if (FF_STCHK(psUB, O_NONBLOCK)) { errno = EAGAIN; return EOF; }
+		while (psUB->Used == 0) vTaskDelay(2);
 	}
 	return erSUCCESS;
 }
@@ -77,8 +68,7 @@ static int xUBufBlockAvail(ubuf_t * psUB) {
 static ssize_t xUBufBlockSpace(ubuf_t * psUB, size_t Size) {
 	IF_myASSERT(debugPARAM, Size <= psUB->Size);
 	ssize_t Avail = psUB->Size - psUB->Used;
-	if (Avail >= Size)
-		return Size;									// sufficient space ?
+	if (Avail >= Size)								return Size;			// sufficient space ?
 	// at this point, we do NOT have sufficient space available, must make space
 	if (psUB->f_history || FF_STCHK(psUB, O_TRUNC)) {	// yes, supposed to TRUNCate ?
 		xUBufLock(psUB);
@@ -95,11 +85,8 @@ static ssize_t xUBufBlockSpace(ubuf_t * psUB, size_t Size) {
 
 	} else {											// block till available
 		do {											// loop waiting for sufficient space
-			if (xTaskGetSchedulerState() == taskSCHEDULER_RUNNING) {
-				vTaskDelay(2);							
-			} else { 
-				xClockDelayMsec(2);
-			}
+			if (xTaskGetSchedulerState() == taskSCHEDULER_RUNNING) vTaskDelay(2);							
+			else xClockDelayMsec(2);
 			xUBufLock(psUB);
 			Avail = psUB->Size - psUB->Used;			// update available space
 			xUBufUnLock(psUB);
@@ -215,21 +202,18 @@ int xUBufEmptyBlock(ubuf_t * psUB, int (*hdlr)(u8_t *, ssize_t)) {
 
 int	xUBufGetC(ubuf_t * psUB) {
 	int iRV = xUBufBlockAvail(psUB);
-	if (iRV != erSUCCESS)
-		return iRV;
+	if (iRV != erSUCCESS) return iRV;
 	xUBufLock(psUB);
 	iRV = psUB->pBuf[psUB->IdxRD++];
 	psUB->IdxRD %= psUB->Size;							// handle wrap
-	if (--psUB->Used == 0)
-		psUB->IdxRD = psUB->IdxWR = 0;					// reset In/Out indexes
+	if (--psUB->Used == 0) psUB->IdxRD = psUB->IdxWR = 0;	// reset In/Out indexes
 	xUBufUnLock(psUB);
 	return iRV;
 }
 
 int	xUBufPutC(ubuf_t * psUB, int cChr) {
 	int iRV = xUBufBlockSpace(psUB, sizeof(char));
-	if (iRV != sizeof(char))
-		return iRV;
+	if (iRV != sizeof(char))						return iRV;
 	xUBufLock(psUB);
 	psUB->pBuf[psUB->IdxWR++] = cChr;					// store character in buffer, adjust pointer
 	psUB->IdxWR %= psUB->Size;							// handle wrap
@@ -275,8 +259,7 @@ u8_t * pcUBufTellWrite(ubuf_t * psUB) {
 
 void vUBufStepRead(ubuf_t * psUB, int Step) {
 	IF_myASSERT(debugTRACK, Step > 0);
-	if (psUB->f_history)
-		return;
+	if (psUB->f_history) return;						// can/should not be done on history type buffer
 	xUBufLock(psUB);
 	psUB->Used -= Step;
 	if (psUB->Used) {
@@ -291,8 +274,7 @@ void vUBufStepRead(ubuf_t * psUB, int Step) {
 
 void vUBufStepWrite(ubuf_t * psUB, int Step) {
 	IF_myASSERT(debugTRACK, Step > 0);
-	if (psUB->f_history)
-		return;
+	if (psUB->f_history) return;						// can/should not be done on history type buffer
 	xUBufLock(psUB);
 	psUB->Used += Step;
 	IF_myASSERT(debugTRACK, psUB->Used <= psUB->Size);	// cannot step outside
