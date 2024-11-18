@@ -173,15 +173,10 @@ char * pcUBufGetS(char * pBuf, int Number, ubuf_t * psUB) {
 	char *	pTmp = pBuf;
 	while (Number > 1) {
 		int cChr = xUBufGetC(psUB);
-		if (cChr == EOF) {								// EOF reached?
-			*pTmp = 0;
-			return NULL;								// indicate EOF before NEWLINE
-		}
-		if (cChr != CHR_CR)								// all except CR
-			*pTmp++ = cChr;								// store character, adjust pointer
+		if (cChr == CHR_LF || cChr == CHR_NUL) break;	// end of string reached
+		if (cChr == EOF) { *pTmp = 0; return NULL; }	// EOF reached before NEWLINE? indicate so...
+		*pTmp++ = cChr;									// store character & adjust pointer
 		--Number;										// update remaining chars to read
-		if (cChr == CHR_LF || cChr == CHR_NUL)			// end of string reached ?
-			break;
 	}
 	*pTmp = 0;
 	return pBuf;										// and return a valid state
@@ -205,11 +200,11 @@ void vUBufStepRead(ubuf_t * psUB, int Step) {
 	IF_myASSERT(debugTRACK, Step > 0);
 	if (psUB->f_history) return;						// can/should not be done on history type buffer
 	xUBufLock(psUB);
-	psUB->Used -= Step;
+	psUB->Used -= (Step < psUB->Used) ? Step : psUB->Used;
 	if (psUB->Used) {
 		psUB->IdxRD += Step;
-		IF_myASSERT(debugTRACK, psUB->IdxRD <= psUB->Size);
 		psUB->IdxRD %= psUB->Size;
+		IF_myASSERT(debugTRACK, psUB->IdxRD <= psUB->Size);
 	} else {
 		psUB->IdxRD = psUB->IdxWR = 0;
 	}
