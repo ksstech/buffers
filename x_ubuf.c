@@ -43,13 +43,13 @@ static void xUBufUnLock(ubuf_t * psUB) {
 		xRtosSemaphoreGive(&psUB->mux);
 }
 
-static int xUBufBlockAvail(ubuf_t * psUB) {
 /**
  * @brief		check if a character is available to be read
  * @param[in]	psUBuf - pointer to buffer control structure
  * @return		erSUCCESS or erFAILURE/EOF with errno set
  * @note		might block until a character is availoble depending on O_NONBLOCK being set..
  */
+static int xUBufCheckAvail(ubuf_t * psUB) {
 	if ((psUB->pBuf == NULL) || (psUB->Size == 0)) { errno = ENOMEM; return erFAILURE; }
 	if (psUB->Used == 0) {
 		if (FF_STCHK(psUB, O_NONBLOCK)) { errno = EAGAIN; return EOF; }
@@ -201,7 +201,7 @@ int xUBufEmptyBlock(ubuf_t * psUB, int (*hdlr)(u8_t *, ssize_t)) {
 }
 
 int	xUBufGetC(ubuf_t * psUB) {
-	int iRV = xUBufBlockAvail(psUB);
+	int iRV = xUBufCheckAvail(psUB);
 	if (iRV != erSUCCESS) return iRV;
 	xUBufLock(psUB);
 	iRV = psUB->pBuf[psUB->IdxRD++];
@@ -411,7 +411,7 @@ ssize_t	xUBufRead(int fd, void * pBuf, size_t Size) {
 		return erFAILURE;
 	}
 	ubuf_t * psUB = &sUBuf[fd];
-	int iRV = xUBufBlockAvail(psUB);
+	int iRV = xUBufCheckAvail(psUB);
 	if (iRV != erSUCCESS)
 		return iRV;
 	ssize_t	count = 0;
