@@ -149,12 +149,6 @@ void vUBufDestroy(ubuf_t * psUB) {
 	}
 }
 
-void vUBufReset(ubuf_t * psUB) {
-	xUBufLock(psUB);
-	psUB->IdxRD = psUB->IdxWR = psUB->Used = 0; 
-	xUBufUnLock(psUB);
-}
-
 int	xUBufGetUsed(ubuf_t * psUB) { return psUB->Used; }
 
 int	xUBufGetSpace(ubuf_t * psUB) {
@@ -284,6 +278,12 @@ void vUBufStepWrite(ubuf_t * psUB, int Step) {
 	xUBufUnLock(psUB);
 }
 
+
+void vUBufReset(ubuf_t * psUB) {
+	xUBufLock(psUB);
+	psUB->IdxRD = psUB->IdxWR = psUB->Used = 0; 
+	xUBufUnLock(psUB);
+}
 // ################################# History buffer extensions #####################################
 
 /* non CR	: add it to buffer with xUBufPutC()
