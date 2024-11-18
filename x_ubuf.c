@@ -133,22 +133,6 @@ ubuf_t * psUBufCreate(ubuf_t * psUB, u8_t * pcBuf, size_t BufSize, size_t Used) 
 	return psUB;
 }
 
-void vUBufDestroy(ubuf_t * psUB) {
-	IF_myASSERT(debugPARAM, halMemorySRAM(psUB));
-	if (psUB->mux)
-		vRtosSemaphoreDelete(&psUB->mux);
-	if (psUB->f_alloc) {
-		free(psUB->pBuf);
-		psUB->f_alloc = 0;
-		psUB->pBuf = NULL;
-		psUB->Size = 0;
-		psUB->f_init = 0;
-	}
-	if (psUB->f_struct) {
-		free(psUB);
-	}
-}
-
 int	xUBufGetUsed(ubuf_t * psUB) { return psUB->Used; }
 
 int	xUBufGetSpace(ubuf_t * psUB) {
@@ -278,12 +262,25 @@ void vUBufStepWrite(ubuf_t * psUB, int Step) {
 	xUBufUnLock(psUB);
 }
 
+void vUBufDestroy(ubuf_t * psUB) {
+	IF_myASSERT(debugPARAM, halMemorySRAM(psUB));
+	if (psUB->mux) vRtosSemaphoreDelete(&psUB->mux);
+	if (psUB->f_alloc) {
+		free(psUB->pBuf);
+		psUB->f_alloc = 0;
+		psUB->pBuf = NULL;
+		psUB->Size = 0;
+		psUB->f_init = 0;
+	}
+	if (psUB->f_struct)  free(psUB);
+}
 
 void vUBufReset(ubuf_t * psUB) {
 	xUBufLock(psUB);
 	psUB->IdxRD = psUB->IdxWR = psUB->Used = 0; 
 	xUBufUnLock(psUB);
 }
+
 // ################################# History buffer extensions #####################################
 
 /* non CR	: add it to buffer with xUBufPutC()
