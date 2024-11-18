@@ -49,6 +49,12 @@ static int xUBufBlockAvail(ubuf_t * psUB) {
 		errno = ENOMEM;
 		return erFAILURE;
 	}
+/**
+ * @brief		check if a character is available to be read
+ * @param[in]	psUBuf - pointer to buffer control structure
+ * @return		erSUCCESS or erFAILURE/EOF with errno set
+ * @note		might block until a character is availoble depending on O_NONBLOCK being set..
+ */
 	if (psUB->Used == 0) {
 		if (FF_STCHK(psUB, O_NONBLOCK)) {
 			errno = EAGAIN; 
@@ -62,8 +68,11 @@ static int xUBufBlockAvail(ubuf_t * psUB) {
 }
 
 /**
- * MUST still check logic if Size requested is equal to or bigger than buffer size.
- * Also must do with a) empty and b) partial full buffers
+ * @brief		wait till an empty block of specified size is available 
+ * @param[in]	psUBuf - pointer to buffer control structure
+ * @return		erSUCCESS or erFAILURE/EOF with errno set
+ * @note		MUST still check logic if Size requested is equal to or bigger than buffer size.
+ * 				Also must do with a) empty and b) partial full buffers
  */
 static ssize_t xUBufBlockSpace(ubuf_t * psUB, size_t Size) {
 	IF_myASSERT(debugPARAM, Size <= psUB->Size);
