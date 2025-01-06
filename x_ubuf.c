@@ -76,7 +76,7 @@ static ssize_t xUBufBlockSpace(ubuf_t * psUB, size_t Size) {
 	// at this point, we do NOT have sufficient space available, must make space
 	if (psUB->f_history || FF_STCHK(psUB, O_TRUNC)) {	// yes, supposed to TRUNCate ?
 		xUBufLock(psUB);
-		int Req = Size - Avail;
+		int Req = Size - (psUB->Size - psUB->Used);
 		psUB->IdxRD += Req;								// adjust output/read index accordingly
 		psUB->IdxRD %= psUB->Size;						// correct for wrap
 		psUB->Used -= Req;								// adjust remaining character count
@@ -91,10 +91,7 @@ static ssize_t xUBufBlockSpace(ubuf_t * psUB, size_t Size) {
 		do {											// loop waiting for sufficient space
 			if (xTaskGetSchedulerState() == taskSCHEDULER_RUNNING) vTaskDelay(2);							
 			else xClockDelayMsec(2);
-			xUBufLock(psUB);
-			Avail = psUB->Size - psUB->Used;			// update available space
-			xUBufUnLock(psUB);
-		} while (Avail < Size);							// wait for space to open...
+		} while (xUBufGetSpace(psUB) < Size);			// wait for space to open...
 	}
 	return Size;
 }
