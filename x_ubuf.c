@@ -34,13 +34,11 @@ static size_t uBufSize = ubufSIZE_DEFAULT;
 // ################################# Local/static functions ########################################
 
 static void xUBufLock(ubuf_t * psUB) {
-	if (psUB->f_nolock == 0)
-		xRtosSemaphoreTake(&psUB->mux, portMAX_DELAY); 
+	if (psUB->f_nolock == 0) xRtosSemaphoreTake(&psUB->mux, portMAX_DELAY); 
 }
 
 static void xUBufUnLock(ubuf_t * psUB) {
-	if (psUB->f_nolock == 0)
-		xRtosSemaphoreGive(&psUB->mux);
+	if (psUB->f_nolock == 0) xRtosSemaphoreGive(&psUB->mux);
 }
 
 /**
@@ -50,9 +48,15 @@ static void xUBufUnLock(ubuf_t * psUB) {
  * @note		might block until a character is availoble depending on O_NONBLOCK being set..
  */
 static int xUBufCheckAvail(ubuf_t * psUB) {
-	if ((psUB->pBuf == NULL) || (psUB->Size == 0)) { errno = ENOMEM; return erFAILURE; }
+	if ((psUB->pBuf == NULL) || (psUB->Size == 0)) {
+		errno = ENOMEM; 
+		return erFAILURE;
+	}
 	if (psUB->Used == 0) {
-		if (FF_STCHK(psUB, O_NONBLOCK)) { errno = EAGAIN; return EOF; }
+		if (FF_STCHK(psUB, O_NONBLOCK)) {
+			errno = EAGAIN; 
+			return EOF;
+		}
 		while (psUB->Used == 0) vTaskDelay(2);
 	}
 	return erSUCCESS;
