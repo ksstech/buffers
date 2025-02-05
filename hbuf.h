@@ -12,8 +12,8 @@ extern "C" {
 
 #define cliSIZE_HBUF	1024
 
-// ###################################### BUILD : CONFIG definitions ###############################
 // ####################################### enumerations ############################################
+
 // ####################################### structures  #############################################
 
 typedef struct __attribute__((packed)) {
@@ -26,9 +26,9 @@ typedef struct __attribute__((packed)) {
 
 // ################################### EXTERNAL FUNCTIONS ##########################################
 
-void vHBufAddCmd(hbuf_t * psHB, u8_t * pu8Buf, size_t Size);
-int vHBufNxtCmd(hbuf_t * psHB, u8_t * pu8Buf, size_t Size);
-int vHBufPrvCmd(hbuf_t * psHB, u8_t * pu8Buf, size_t Size);
+void vHBufAddCmd(hbuf_t *, u8_t *, size_t);
+int vHBufNxtCmd(hbuf_t *, u8_t *, size_t);
+int vHBufPrvCmd(hbuf_t *, u8_t *, size_t);
 
 struct report_t;
 int xHBufReport(struct report_t *, hbuf_t *);
