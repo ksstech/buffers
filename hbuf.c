@@ -1,4 +1,4 @@
-// hbuf.c - Copyright 2022-24 Andre M. Maree/KSS Technologies (Pty) Ltd.
+// hbuf.c - Copyright 2022-25 Andre M. Maree/KSS Technologies (Pty) Ltd.
 
 #include <string.h>
 
