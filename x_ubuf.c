@@ -251,6 +251,7 @@ ubuf_t * psUBufCreate(ubuf_t * psUB, u8_t * pcBuf, size_t BufSize, size_t Used) 
 	psUB->f_history = 0;
 	if (Used == 0) memset(psUB->pBuf, 0, psUB->Size);	// clear buffer ONLY if nothing to be used
 	psUB->f_init = 1;
+	SL_INFO("History buffer created, %lu bytes @ %p, flags=x%02X", psUB->Size, psUB->pBuf, psUB->f_flags);
 	return psUB;
 }
 
