@@ -489,7 +489,8 @@ int vUBufReport(report_t * psR, ubuf_t * psUB) {
 				iRV += wprintfx(psR, "%!'+hhY" strNL, psUB->Used, psUB->pBuf);
 			}
 		}
-		if (repFORM_TST(psR,aNL)) iRV += wprintfx(psR, strNL);
+		if (fmTST(aNL))
+			iRV += wprintfx(psR, strNL);
 	}
 	return iRV;
 }
