@@ -475,13 +475,16 @@ int vUBufReport(report_t * psR, ubuf_t * psUB) {
 				while (true) {
 					u8Len = 0;
 					while (*pNow) {
-						if (u8Len == 0) iRV += wprintfx(psR, " '");
+						if (u8Len == 0)
+							iRV += wprintfx(psR, " '");
 						iRV += wprintfx(psR, "%c", *pNow);
 						++pNow;
-						if (pNow == psUB->pBuf + psUB->Size) pNow = psUB->pBuf;
+						if (pNow == psUB->pBuf + psUB->Size)
+							pNow = psUB->pBuf;
 						++u8Len;
 					}
-					if (u8Len > 0) iRV += wprintfx(psR, "'");
+					if (u8Len > 0)
+						iRV += wprintfx(psR, "'");
 					++pNow;											// step over terminating '0'
 					if (pNow == (psUB->pBuf + psUB->IdxWR)) break;
 				}

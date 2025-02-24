@@ -31,14 +31,14 @@ typedef	struct ubuf_t {
 	u8_t count;						// history command counter
 	union {
 		struct  __attribute__((packed)) {
-			u8_t	f_init:1;
-			u8_t	f_alloc:1;		// buffer malloc'd
-			u8_t	f_struct:1;		// struct malloc'd
-			u8_t	f_nolock:1;
-			u8_t	f_history:1;
-			u8_t	f_spare:3;
+			u8_t f_init:1;
+			u8_t f_alloc:1;			// buffer malloc'd
+			u8_t f_struct:1;		// struct malloc'd
+			u8_t f_nolock:1;
+			u8_t f_history:1;
+			u8_t f_spare:3;
 		};
-		u8_t	f_flags;				// module flags
+		u8_t f_flags;				// module flags
 	};
 } ubuf_t;
 DUMB_STATIC_ASSERT(sizeof(ubuf_t) == (12 + sizeof(char *) + sizeof(SemaphoreHandle_t)));
