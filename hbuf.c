@@ -6,7 +6,7 @@
 #include "hbuf.h"
 
 #include "FreeRTOS_Support.h"
-#include "printfx.h"
+#include "report.h"
 
 // ################################### Global/public functions #####################################
 

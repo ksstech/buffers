@@ -6,7 +6,7 @@
 #include "hal_nvic.h"
 #include "x_buffers.h"
 #include "FreeRTOS_Support.h"
-#include "printfx.h"
+#include "report.h"
 #include "syslog.h"
 #include "errors_events.h"
 

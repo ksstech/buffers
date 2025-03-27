@@ -5,7 +5,7 @@
 
 #include "hal_memory.h"
 #include "hal_stdio.h"
-#include "printfx.h"
+#include "report.h"
 #include "syslog.h"
 #include "systiming.h"
 #include "errors_events.h"

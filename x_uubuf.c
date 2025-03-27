@@ -4,7 +4,7 @@
 
 #include "x_uubuf.h"
 #include "FreeRTOS_Support.h"
-#include "printfx.h"
+#include "report.h"
 
 #include <string.h>
 #include <stdlib.h>
