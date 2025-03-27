@@ -483,9 +483,9 @@ int	xUBufIoctl(int fd, int request, va_list vArgs) {
 int vUBufReport(report_t * psR, ubuf_t * psUB) {
 	int iRV = 0;
 	if (halMemoryRAM(psUB)) {
-		iRV += wprintfx(psR, "P=%p  Sz=%d  U=%d  iW=%d  iR=%d  mux=%p  f=x%X",
+		iRV += report(psR, "P=%p  Sz=%d  U=%d  iW=%d  iR=%d  mux=%p  f=x%X",
 			psUB->pBuf, psUB->Size, psUB->Used, psUB->IdxWR, psUB->IdxRD, psUB->mux, psUB->_flags);
-		iRV += wprintfx(psR, "  fI=%d  fA=%d  fS=%d  fNL=%d  fH=%d" strNL,
+		iRV += report(psR, "  fI=%d  fA=%d  fS=%d  fNL=%d  fH=%d" strNL,
 			psUB->f_init, psUB->f_alloc, psUB->f_struct, psUB->f_nolock, psUB->f_history);
 		if (psUB->Used) {
 			if (psUB->f_history) {
@@ -495,24 +495,24 @@ int vUBufReport(report_t * psR, ubuf_t * psUB) {
 					u8Len = 0;
 					while (*pNow) {
 						if (u8Len == 0)
-							iRV += wprintfx(psR, " '");
-						iRV += wprintfx(psR, "%c", *pNow);
+							iRV += report(psR, " '");
+						iRV += report(psR, "%c", *pNow);
 						++pNow;
 						if (pNow == psUB->pBuf + psUB->Size)
 							pNow = psUB->pBuf;
 						++u8Len;
 					}
 					if (u8Len > 0)
-						iRV += wprintfx(psR, "'");
+						iRV += report(psR, "'");
 					++pNow;											// step over terminating '0'
 					if (pNow == (psUB->pBuf + psUB->IdxWR)) break;
 				}
 			} else {
-				iRV += wprintfx(psR, "%!'+hhY" strNL, psUB->Used, psUB->pBuf);
+				iRV += report(psR, "%!'+hhY" strNL, psUB->Used, psUB->pBuf);
 			}
 		}
 		if (fmTST(aNL))
-			iRV += wprintfx(psR, strNL);
+			iRV += report(psR, strNL);
 	}
 	return iRV;
 }
