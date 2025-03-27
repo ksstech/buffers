@@ -82,6 +82,6 @@ void vUUBufAdjust(uubuf_t * psUUBuf, ssize_t Adj) {
 }
 
 int vUUBufReport(report_t * psR, uubuf_t * psUUBuf) {
-	return wprintfx(NULL, "P=%p  B=%p  I=%d  S=%d  U=%d  A=%d\r\n%!'+hhY%s", psUUBuf, psUUBuf->pBuf, psUUBuf->Idx, 
+	return PX("P=%p  B=%p  I=%d  S=%d  U=%d  A=%d\r\n%!'+hhY%s", psUUBuf, psUUBuf->pBuf, psUUBuf->Idx, 
 			psUUBuf->Size, psUUBuf->Used, psUUBuf->Alloc, psUUBuf->Used, psUUBuf->pBuf, fmTST(aNL) ? strNLx2 : strNL);
 }
