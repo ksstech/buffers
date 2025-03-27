@@ -593,7 +593,7 @@ void vBufUnitTest(void) {
 	for(int a = 0; a < bufSIZE; a += bufSTEP) {
 		for(int b = 0; b < bufSTEP; b++) {
 			iRV = xBufPutC(b + '0', psBuf);
-			if (iRV != (b + '0')) 	PX("Failed");
+			if (iRV != (b + '0'))												PX("Failed");
 		}
 	}
 	// buffer should be full
