@@ -398,7 +398,7 @@ static int _xUBufClose(int fd) {
 }
 
 /**
- * xUBufRead() -
+ * _xUBufRead() -
  */
 static ssize_t _xUBufRead(int fd, void * pBuf, size_t Size) {
 	if (OUTSIDE(0, fd, ubufMAX_OPEN-1)) {
