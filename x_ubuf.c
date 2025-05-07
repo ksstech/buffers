@@ -446,21 +446,7 @@ static ssize_t _xUBufRead(int fd, void * pBuf, size_t Size) {
 		return erFAILURE;
 	}
 	ubuf_t * psUB = &sUBuf[fd];
-	int iRV = xUBufCheckAvail(psUB);
-	if (iRV != erSUCCESS)
-		return iRV;
-	ssize_t	count = 0;
-	xUBufLock(psUB);
-	while((psUB->Used > 0) && (count < Size)) {
-		*(char *)pBuf++ = *(psUB->pBuf + psUB->IdxRD++);
-		--psUB->Used;
-		++count;
-		if (psUB->IdxRD == psUB->Size) {				// past the end?
-			psUB->IdxRD = 0;							// yes, reset to start
-		}
-	}
-	xUBufUnLock(psUB);
-	return count;
+	return xUBufRead(psUB, pBuf, Size);
 }
 
 static ssize_t _xUBufWrite(int fd, const void * pBuf, size_t Size) {
@@ -469,21 +455,7 @@ static ssize_t _xUBufWrite(int fd, const void * pBuf, size_t Size) {
 		return erFAILURE;
 	}
 	ubuf_t * psUB = &sUBuf[fd];
-
-	ssize_t Avail = xUBufBlockSpace(psUB, Size);
-	if (Avail < 1)
-		return EOF;
-	ssize_t	Count = 0;
-	xUBufLock(psUB);
-	while((psUB->Used < psUB->Size) && (Count < Avail)) {
-		*(psUB->pBuf + psUB->IdxWR++) = *(const char *)pBuf++;
-		++psUB->Used;
-		++Count;
-		if (psUB->IdxWR == psUB->Size)					// past the end?
-			psUB->IdxWR = 0;							// yes, reset to start
-	}
-	xUBufUnLock(psUB);
-	return Count;
+	return xUBufWrite(psUB, pBuf, Size);
 }
 
 static int _xUBufIoctl(int fd, int request, va_list vArgs) {
