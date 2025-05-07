@@ -118,29 +118,29 @@ int vHBufNxtCmd(hbuf_t * psHB, u8_t * pu8Buf, size_t Size) {
 int xHBufReport(report_t * psR, hbuf_t * psHB) {
 	int iRV = 0;
 	if (psHB->Count == 0) {
-		iRV += report(psR, "# HBuf #: No1=%d  Cur=%d  Free=%d  Cnt=%d", psHB->iNo1, psHB->iCur, psHB->iFree, psHB->Count);
+		iRV += xReport(psR, "# HBuf #: No1=%d  Cur=%d  Free=%d  Cnt=%d", psHB->iNo1, psHB->iCur, psHB->iFree, psHB->Count);
 		u8_t * pNow = &psHB->Buf[psHB->iNo1];
 		u8_t u8Len;
 		while (true) {
 			u8Len = 0;
 			while (*pNow) {
 				if (u8Len == 0)
-					iRV += report(psR, " '");
-				iRV += report(psR, "%c", *pNow);
+					iRV += xReport(psR, " '");
+				iRV += xReport(psR, "%c", *pNow);
 				++pNow;
 				if (pNow == &psHB->Buf[cliSIZE_HBUF])
 					pNow = psHB->Buf;
 				++u8Len;
 			}
 			if (u8Len > 0)
-				iRV += report(psR, "'");
+				iRV += xReport(psR, "'");
 			++pNow;											// step over terminating '0'
 			if (pNow == &psHB->Buf[psHB->iFree])
 				break;
 		}
 	} else {
-		iRV += report(psR, "CLI buffer empty");
+		iRV += xReport(psR, "CLI buffer empty");
 	}
-	report(psR, fmTST(aNL) ? strNLx2 : strNL);
+	xReport(psR, fmTST(aNL) ? strNLx2 : strNL);
 	return iRV;
 }

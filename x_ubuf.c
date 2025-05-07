@@ -5,7 +5,6 @@
 
 #include "hal_memory.h"
 #include "hal_stdio.h"
-#include "report.h"
 #include "syslog.h"
 #include "systiming.h"
 #include "errors_events.h"
@@ -483,9 +482,9 @@ int	xUBufIoctl(int fd, int request, va_list vArgs) {
 int vUBufReport(report_t * psR, ubuf_t * psUB) {
 	int iRV = 0;
 	if (halMemoryRAM(psUB)) {
-		iRV += report(psR, "P=%p  Sz=%d  U=%d  iW=%d  iR=%d  mux=%p  f=x%X",
+		iRV += xReport(psR, "P=%p  Sz=%d  U=%d  iW=%d  iR=%d  mux=%p  f=x%X",
 			psUB->pBuf, psUB->Size, psUB->Used, psUB->IdxWR, psUB->IdxRD, psUB->mux, psUB->_flags);
-		iRV += report(psR, "  fI=%d  fA=%d  fS=%d  fNL=%d  fH=%d" strNL,
+		iRV += xReport(psR, "  fI=%d  fA=%d  fS=%d  fNL=%d  fH=%d" strNL,
 			psUB->f_init, psUB->f_alloc, psUB->f_struct, psUB->f_nolock, psUB->f_history);
 		if (psUB->Used) {
 			if (psUB->f_history) {
@@ -495,24 +494,25 @@ int vUBufReport(report_t * psR, ubuf_t * psUB) {
 					u8Len = 0;
 					while (*pNow) {
 						if (u8Len == 0)
-							iRV += report(psR, " '");
-						iRV += report(psR, "%c", *pNow);
+							iRV += xReport(psR, " '");
+						iRV += xReport(psR, "%c", *pNow);
 						++pNow;
 						if (pNow == psUB->pBuf + psUB->Size)
 							pNow = psUB->pBuf;
 						++u8Len;
 					}
 					if (u8Len > 0)
-						iRV += report(psR, "'");
+						iRV += xReport(psR, "'");
 					++pNow;											// step over terminating '0'
-					if (pNow == (psUB->pBuf + psUB->IdxWR)) break;
+					if (pNow == (psUB->pBuf + psUB->IdxWR))
+						break;
 				}
 			} else {
-				iRV += report(psR, "%!'+hhY" strNL, psUB->Used, psUB->pBuf);
+				iRV += xReport(psR, "%!'+hhY" strNL, psUB->Used, psUB->pBuf);
 			}
 		}
 		if (fmTST(aNL))
-			iRV += report(psR, strNL);
+			iRV += xReport(psR, strNL);
 	}
 	return iRV;
 }
