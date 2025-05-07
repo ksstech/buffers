@@ -277,12 +277,13 @@ ubuf_t * psUBufCreate(ubuf_t * psUB, u8_t * pcBuf, size_t BufSize, size_t Used) 
 	if (Used == 0)
 		memset(psUB->pBuf, 0, psUB->Size);				// clear buffer ONLY if nothing to be used
 	psUB->f_init = 1;
-	SL_INFO("History buffer created, %lu bytes @ %p, flags=x%02X", psUB->Size, psUB->pBuf, psUB->f_flags);
+	SL_INFO("A=%p  S=%lu  F=x%02X", psUB->pBuf, psUB->Size, psUB->f_flags);
 	return psUB;
 }
 
 void vUBufDestroy(ubuf_t * psUB) {
 	IF_myASSERT(debugPARAM, halMemorySRAM(psUB));
+	SL_INFO("A=%p  S=%lu  F=x%02X  M=x%X", psUB->pBuf, psUB->Size, psUB->f_flags, psUB->mux);
 	if (psUB->mux)
 		vRtosSemaphoreDelete(&psUB->mux);
 	if (psUB->f_alloc) {
