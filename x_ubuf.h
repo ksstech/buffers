@@ -93,10 +93,11 @@ int	xUBufGetC(ubuf_t *psUB);
 
 /**
  * @brief		write character to the buffer
- * @param[in]	psUB - pointer to buffer control structure
+ * @param[in]	psUB pointer to buffer control structure
+ * @param[in]	iChr characer to be written
  * @return		character written or 0 (if O_NONBLOCK) with EAGAIN set
  */
-int	xUBufPutC(ubuf_t *, int);
+int	xUBufPutC(ubuf_t * psUB, int iChr);
 
 /**
  * @brief		read character string up to CR or buffer full
