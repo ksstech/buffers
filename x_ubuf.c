@@ -58,7 +58,8 @@ static int xUBufCheckAvail(ubuf_t * psUB) {
 			errno = EAGAIN; 
 			return EOF;
 		}
-		while (psUB->Used == 0) vTaskDelay(2);
+		while (psUB->Used == 0)
+			vTaskDelay(2);
 	}
 	return erSUCCESS;
 }
@@ -75,7 +76,8 @@ static ssize_t xUBufBlockSpace(ubuf_t * psUB, size_t Size) {
 	ssize_t Avail = psUB->Size - psUB->Used;
 	if (Avail >= Size)
 		return Size;									// sufficient space ?
-	// at this point, we do NOT have sufficient space available, must make space
+
+	// at this point we do NOT have sufficient space available, must make some space
 	if (psUB->f_history || FF_STCHK(psUB, O_TRUNC)) {	// yes, supposed to TRUNCate ?
 		xUBufLock(psUB);
 		int Req = Size - (psUB->Size - psUB->Used);
@@ -125,7 +127,8 @@ int xUBufGetUsedBlock(ubuf_t * psUB) {
 
 int xUBufEmptyBlock(ubuf_t * psUB, int (*hdlr)(u8_t *, ssize_t)) {
 	IF_myASSERT(debugPARAM, (hdlr != NULL) && halMemoryRAM(psUB));
-	if (psUB->Used == 0)			return 0;
+	if (psUB->Used == 0)
+		return 0;
 	int iRV = 0;
 	ssize_t Size, Total = 0;
 	xUBufLock(psUB);
@@ -158,7 +161,7 @@ int	xUBufGetC(ubuf_t * psUB) {
 	xUBufLock(psUB);
 	iRV = psUB->pBuf[psUB->IdxRD++];
 	psUB->IdxRD %= psUB->Size;							// handle wrap
-	if (--psUB->Used == 0) 
+	if (--psUB->Used == 0)
 		psUB->IdxRD = psUB->IdxWR = 0;					// reset In/Out indexes
 	xUBufUnLock(psUB);
 	return iRV;
