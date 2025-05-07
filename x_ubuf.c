@@ -364,30 +364,8 @@ void vUBufStringAdd(ubuf_t * psUB, u8_t * pu8Buf, int Size) {
 
 // ##################################### ESP-IDF VFS support #######################################
 
-int xUBufOpen(const char *, int, int);
-int xUBufClose(int);
-ssize_t xUBufRead(int, void *, size_t);
-ssize_t xUBufWrite(int, const void *, size_t);
-int xUBufIoctl(int, int, va_list);
-
-static const esp_vfs_t dev_ubuf = {
-	.flags	= ESP_VFS_FLAG_DEFAULT,
-	.write	= xUBufWrite,
-	.lseek	= NULL,
-	.read	= xUBufRead,
-	.pread	= NULL,
-	.pwrite	= NULL,
-	.open	= xUBufOpen,
-	.close	= xUBufClose,
-	.fstat	= NULL,
-	.fcntl	= NULL,
-	.ioctl	= xUBufIoctl,
-	.fsync	= NULL,
-};
-
 ubuf_t sUBuf[ubufMAX_OPEN] = { 0 };
 
-void vUBufInit(void) { ESP_ERROR_CHECK(esp_vfs_register("/ubuf", &dev_ubuf, NULL)); }
 
 int	xUBufOpen(const char * pccPath, int flags, int Size) {
 //	CP("path='%s'  flags=0x%x  Size=%d", pccPath, flags, Size);
@@ -486,6 +464,23 @@ int	xUBufIoctl(int fd, int request, va_list vArgs) {
 	}
 	return 1;
 }
+
+static const esp_vfs_t dev_ubuf = {
+	.flags	= ESP_VFS_FLAG_DEFAULT,
+	.write	= _xUBufWrite,
+	.lseek	= NULL,
+	.read	= _xUBufRead,
+	.pread	= NULL,
+	.pwrite	= NULL,
+	.open	= _xUBufOpen,
+	.close	= _xUBufClose,
+	.fstat	= NULL,
+	.fcntl	= NULL,
+	.ioctl	= _xUBufIoctl,
+	.fsync	= NULL,
+};
+
+void vUBufInit(void) { ESP_ERROR_CHECK(esp_vfs_register("/ubuf", &dev_ubuf, NULL)); }
 
 // ######################################## Reporting ##############################################
 
