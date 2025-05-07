@@ -364,10 +364,9 @@ void vUBufStringAdd(ubuf_t * psUB, u8_t * pu8Buf, int Size) {
 
 // ##################################### ESP-IDF VFS support #######################################
 
-ubuf_t sUBuf[ubufMAX_OPEN] = { 0 };
+static ubuf_t sUBuf[ubufMAX_OPEN] = { 0 };
 
-
-int	xUBufOpen(const char * pccPath, int flags, int Size) {
+static int _xUBufOpen(const char * pccPath, int flags, int Size) {
 //	CP("path='%s'  flags=0x%x  Size=%d", pccPath, flags, Size);
 	IF_myASSERT(debugPARAM, (*pccPath == CHR_FWDSLASH) && INRANGE(ubufSIZE_MINIMUM, Size, ubufSIZE_MAXIMUM));
 	int fd = 0;
@@ -386,7 +385,7 @@ int	xUBufOpen(const char * pccPath, int flags, int Size) {
 	return erFAILURE;
 }
 
-int	xUBufClose(int fd) {
+static int _xUBufClose(int fd) {
 	if (INRANGE(0, fd, ubufMAX_OPEN-1)) {
 		ubuf_t * psUB = &sUBuf[fd];
 		free(psUB->pBuf);
@@ -401,8 +400,8 @@ int	xUBufClose(int fd) {
 /**
  * xUBufRead() -
  */
-ssize_t	xUBufRead(int fd, void * pBuf, size_t Size) {
-	if (OUTSIDE(0, fd, ubufMAX_OPEN-1) || (sUBuf[fd].pBuf == NULL) || (Size == 0)) {
+static ssize_t _xUBufRead(int fd, void * pBuf, size_t Size) {
+	if (OUTSIDE(0, fd, ubufMAX_OPEN-1)) {
 		errno = EBADF;
 		return erFAILURE;
 	}
@@ -424,8 +423,8 @@ ssize_t	xUBufRead(int fd, void * pBuf, size_t Size) {
 	return count;
 }
 
-ssize_t	xUBufWrite(int fd, const void * pBuf, size_t Size) {
-	if (OUTSIDE(0, fd, ubufMAX_OPEN-1) || !sUBuf[fd].pBuf || !Size) {
+static ssize_t _xUBufWrite(int fd, const void * pBuf, size_t Size) {
+	if (OUTSIDE(0, fd, ubufMAX_OPEN-1)) {
 		errno = EBADF;
 		return erFAILURE;
 	}
@@ -447,7 +446,7 @@ ssize_t	xUBufWrite(int fd, const void * pBuf, size_t Size) {
 	return Count;
 }
 
-int	xUBufIoctl(int fd, int request, va_list vArgs) {
+static int _xUBufIoctl(int fd, int request, va_list vArgs) {
 	ubuf_t ** ppsUBuf;
 	if (OUTSIDE(0, fd, ubufMAX_OPEN-1)) {
 		errno = EBADF;
