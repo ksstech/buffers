@@ -9,8 +9,10 @@
 #include "systiming.h"
 #include "errors_events.h"
 
-#include <errno.h>
 #include "esp_vfs.h"
+
+#include <errno.h>
+#include <stdatomic.h>
 
 #define	debugFLAG					0xF000
 
@@ -111,10 +113,15 @@ size_t xUBufSetDefaultSize(size_t NewSize) {
 int	xUBufGetUsed(ubuf_t * psUB) { return psUB->Used; }
 
 int	xUBufGetSpace(ubuf_t * psUB) {
+	#if 0
+	int iRV = psUB->Size;
+	return __atomic_sub_fetch(&iRV, psUB->Used, __ATOMIC_RELAXED);
+	#else
 	xUBufLock(psUB);
 	int iRV = psUB->Size - psUB->Used; 
 	xUBufUnLock(psUB);
 	return iRV;
+	#endif
 }
 
 int xUBufGetUsedBlock(ubuf_t * psUB) {
