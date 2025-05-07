@@ -108,6 +108,20 @@ int	xUBufPutC(ubuf_t *, int);
 char * pcUBufGetS(char * pBuf, int BufSize, ubuf_t *psUB);
 
 /**
+ * @brief		read multiple characters into the buffer provided
+ * @param[in]	psUB - pointer to buffer control structure
+ * @return		number of characters read or erFAILURE/EOF with errno set
+ */
+int	xUBufRead(ubuf_t *psUB, const void * pBuf, size_t Size);
+
+/**
+ * @brief		write multiple characters to the buffer
+ * @param[in]	psUB - pointer to buffer control structure
+ * @return		number of characters written or 0 (if O_NONBLOCK) with EAGAIN set
+ */
+ssize_t xUBufWrite(ubuf_t * psUB, const void * pBuf, size_t Size);
+
+/**
  * @brief		return the buffer read pointer
  * @param[in]	psUB - pointer to buffer control structure
  * @return		pointer to next character to be read
