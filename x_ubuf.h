@@ -80,7 +80,7 @@ int xUBufGetUsedBlock(ubuf_t * psUB);
  * @return		0+ value (number of bytes written) else < 0 (error code)
  * @note		Buffer will be emptied in 1 or 2 bursts. depending on state of pointers.
  */
-int xUBufEmptyBlock(ubuf_t * psUB, int (*hdlr)(u8_t *, ssize_t));
+int xUBufEmptyBlock(ubuf_t * psUB, int (*hdlr)(const void *, size_t));
 
 /**
  * @brief		read a character from the buffer

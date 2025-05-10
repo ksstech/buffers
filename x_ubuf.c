@@ -132,7 +132,7 @@ int xUBufGetUsedBlock(ubuf_t * psUB) {
 	return iRV;
 }
 
-int xUBufEmptyBlock(ubuf_t * psUB, int (*hdlr)(u8_t *, ssize_t)) {
+int xUBufEmptyBlock(ubuf_t * psUB, int (*hdlr)(const void *, size_t)) {
 	IF_myASSERT(debugPARAM, (hdlr != NULL) && halMemoryRAM(psUB));
 	if (psUB->Used == 0)
 		return 0;
