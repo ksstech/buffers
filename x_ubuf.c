@@ -61,7 +61,7 @@ static int xUBufCheckAvail(ubuf_t * psUB) {
 			return EOF;
 		}
 		while (psUB->Used == 0)
-			vTaskDelay(2);
+			vTaskDelay(pdMS_TO_TICKS(2));
 	}
 	return erSUCCESS;
 }
@@ -95,10 +95,11 @@ static ssize_t xUBufBlockSpace(ubuf_t * psUB, size_t Size) {
 
 	} else {											// block till available
 		do {											// loop waiting for sufficient space
-			if (xTaskGetSchedulerState() == taskSCHEDULER_RUNNING)
-				vTaskDelay(2);							
-			else
-				xClockDelayMsec(2);
+			if (xTaskGetSchedulerState() == taskSCHEDULER_RUNNING) {
+				vTaskDelay(pdMS_TO_TICKS(2));						
+			} else {
+				vClockDelayMsec(2);
+			}
 		} while (xUBufGetSpace(psUB) < Size);			// wait for space to open...
 	}
 	return Size;
