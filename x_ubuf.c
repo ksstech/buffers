@@ -161,19 +161,6 @@ int xUBufEmptyBlock(ubuf_t * psUB, int (*hdlr)(const void *, size_t)) {
 	return (iRV < erSUCCESS) ? iRV : Total;
 }
 
-int	xUBufGetC(ubuf_t * psUB) {
-	int iRV = xUBufCheckAvail(psUB);
-	if (iRV != erSUCCESS)
-		return iRV;
-	xUBufLock(psUB);
-	iRV = psUB->pBuf[psUB->IdxRD++];
-	psUB->IdxRD %= psUB->Size;							// handle wrap
-	if (--psUB->Used == 0)
-		psUB->IdxRD = psUB->IdxWR = 0;					// reset In/Out indexes
-	xUBufUnLock(psUB);
-	return iRV;
-}
-
 ssize_t xUBufRead(ubuf_t * psUB, const void * pBuf, size_t Size) {
 	if (psUB->pBuf == NULL || Size == 0)
 		return erINV_PARA;
@@ -194,19 +181,34 @@ ssize_t xUBufRead(ubuf_t * psUB, const void * pBuf, size_t Size) {
 	return count;
 }
 
-int	xUBufPutC(ubuf_t * psUB, int cChr) {
-	int iRV = xUBufBlockSpace(psUB, sizeof(char));
-	if (iRV != sizeof(char))
+int	xUBufGetC(ubuf_t * psUB) {
+	int iRV = xUBufCheckAvail(psUB);
+	if (iRV != erSUCCESS)
 		return iRV;
 	xUBufLock(psUB);
-	psUB->pBuf[psUB->IdxWR++] = cChr;					// store character in buffer, adjust pointer
-	psUB->IdxWR %= psUB->Size;							// handle wrap
-	++psUB->Used;
-//	IF_CP(debugTRACK && (psUB->Used == psUB->Size) && (psUB->IdxRD != psUB->IdxWR), "ALERT!!! s=%d u=%d w=%d r=%d cChr=%d" strNL, psUB->Size, psUB->Used, psUB->IdxWR, psUB->IdxRD, cChr);
+	iRV = psUB->pBuf[psUB->IdxRD++];
+	psUB->IdxRD %= psUB->Size;							// handle wrap
+	if (--psUB->Used == 0)
+		psUB->IdxRD = psUB->IdxWR = 0;					// reset In/Out indexes
 	xUBufUnLock(psUB);
-	// ensure that the indexes are same when buffer is full
-//	IF_myASSERT(debugTRACK && (psUB->Used == psUB->Size), psUB->IdxRD == psUB->IdxWR);
-	return cChr;
+	return iRV;
+}
+
+char * pcUBufGetS(char * pBuf, int Number, ubuf_t * psUB) {
+	char *	pTmp = pBuf;
+	while (Number > 1) {
+		int cChr = xUBufGetC(psUB);
+		if (cChr == CHR_LF || cChr == CHR_NUL)
+			break;					// end of string reached
+		if (cChr == EOF) {			// EOF reached before NEWLINE?
+			*pTmp = 0;				// indicate so...
+			return NULL;
+		}
+		*pTmp++ = cChr;									// store character & adjust pointer
+		--Number;										// update remaining chars to read
+	}
+	*pTmp = 0;
+	return pBuf;										// and return a valid state
 }
 
 ssize_t xUBufWrite(ubuf_t * psUB, const void * pBuf, size_t Size) {
@@ -228,21 +230,19 @@ ssize_t xUBufWrite(ubuf_t * psUB, const void * pBuf, size_t Size) {
 	return Count;
 }
 
-char * pcUBufGetS(char * pBuf, int Number, ubuf_t * psUB) {
-	char *	pTmp = pBuf;
-	while (Number > 1) {
-		int cChr = xUBufGetC(psUB);
-		if (cChr == CHR_LF || cChr == CHR_NUL)
-			break;					// end of string reached
-		if (cChr == EOF) {			// EOF reached before NEWLINE?
-			*pTmp = 0;				// indicate so...
-			return NULL;
-		}
-		*pTmp++ = cChr;									// store character & adjust pointer
-		--Number;										// update remaining chars to read
-	}
-	*pTmp = 0;
-	return pBuf;										// and return a valid state
+int	xUBufPutC(ubuf_t * psUB, int iChr) {
+	int iRV = xUBufBlockSpace(psUB, sizeof(char));
+	if (iRV != sizeof(char))
+		return iRV;
+	xUBufLock(psUB);
+	psUB->pBuf[psUB->IdxWR++] = iChr;					// store character in buffer, adjust pointer
+	psUB->IdxWR %= psUB->Size;							// handle wrap
+	++psUB->Used;
+//	IF_CP(debugTRACK && (psUB->Used == psUB->Size) && (psUB->IdxRD != psUB->IdxWR), "ALERT!!! s=%d u=%d w=%d r=%d iChr=%d" strNL, psUB->Size, psUB->Used, psUB->IdxWR, psUB->IdxRD, iChr);
+	xUBufUnLock(psUB);
+	// ensure that the indexes are same when buffer is full
+//	IF_myASSERT(debugTRACK && (psUB->Used == psUB->Size), psUB->IdxRD == psUB->IdxWR);
+	return iChr;
 }
 
 u8_t * pcUBufTellRead(ubuf_t * psUB) {
