@@ -138,11 +138,10 @@ int xUBufEmptyBlock(ubuf_t * psUB, int (*hdlr)(const void *, size_t)) {
 	if (psUB->Used == 0)
 		return 0;
 	int iRV = 0;
-	ssize_t Size, Total = 0;
+	ssize_t Total = 0;
 	xUBufLock(psUB);
 	if (psUB->IdxRD >= psUB->IdxWR) {
-		Size = psUB->Size - psUB->IdxRD;
-		iRV = hdlr(psUB->pBuf + psUB->IdxRD, Size);
+		iRV = hdlr(psUB->pBuf + psUB->IdxRD, psUB->Size - psUB->IdxRD);
 		if (iRV > 0) {
 			Total += iRV;								// Update bytes written count
 			psUB->Used -= iRV;							// decrease total available
