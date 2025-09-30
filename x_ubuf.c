@@ -157,21 +157,20 @@ int xUBufEmptyBlock(ubuf_t * psUB, int (*hdlr)(const void *, size_t)) {
 ssize_t xUBufRead(ubuf_t * psUB, const void * pBuf, size_t Size) {
 	if (psUB->pBuf == NULL || Size == 0)
 		return erINV_PARA;
-	int iRV = xUBufCheckAvail(psUB);
-	if (iRV != erSUCCESS)
-		return iRV;
-	ssize_t	count = 0;
+	ssize_t	sRV = xUBufCheckAvail(psUB);
+	if (sRV != erSUCCESS)
+		return sRV;
 	xUBufLock(psUB);
-	while((psUB->Used > 0) && (count < Size)) {
 		*(char *)pBuf++ = *(psUB->pBuf + psUB->IdxRD++);
 		--psUB->Used;
-		++count;
 		if (psUB->IdxRD == psUB->Size) {				// past the end?
 			psUB->IdxRD = 0;							// yes, reset to start
 		}
+	while((psUB->Used > 0) && (sRV < Size)) {
+		++sRV;											// adjust read count
 	}
 	xUBufUnLock(psUB);
-	return count;
+	return sRV;
 }
 
 int	xUBufGetC(ubuf_t * psUB) {
@@ -210,17 +209,17 @@ ssize_t xUBufWrite(ubuf_t * psUB, const void * pBuf, size_t Size) {
 	ssize_t Avail = xUBufBlockSpace(psUB, Size);
 	if (Avail < 1)
 		return EOF;
-	ssize_t	Count = 0;
+	ssize_t	sRV = 0;
 	xUBufLock(psUB);
-	while((psUB->Used < psUB->Size) && (Count < Avail)) {
 		*(psUB->pBuf + psUB->IdxWR++) = *(const char *)pBuf++;
+	while((psUB->Used < psUB->Size) && (sRV < Avail)) {
 		++psUB->Used;
-		++Count;
 		if (psUB->IdxWR == psUB->Size)					// past the end?
 			psUB->IdxWR = 0;							// yes, reset to start
+		++sRV;
 	}
 	xUBufUnLock(psUB);
-	return Count;
+	return sRV;
 }
 
 int	xUBufPutC(ubuf_t * psUB, int iChr) {
