@@ -400,7 +400,6 @@ void vUBufStringAdd(ubuf_t * psUB, u8_t * pu8Buf, int Size) {
 static ubuf_t sUBuf[ubufMAX_OPEN] = { 0 };
 
 static int _xUBufOpen(const char * pccPath, int flags, int Size) {
-//	CP("path='%s'  flags=0x%x  Size=%d", pccPath, flags, Size);
 	IF_myASSERT(debugPARAM, (*pccPath == CHR_FWDSLASH) && INRANGE(ubufSIZE_MINIMUM, Size, ubufSIZE_MAXIMUM));
 	int fd = 0;
 	do {
