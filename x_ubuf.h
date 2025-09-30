@@ -67,13 +67,6 @@ int	xUBufGetUsed(ubuf_t * psUB);
 int	xUBufGetSpace(ubuf_t * psUB);
 
 /**
- * @brief		get number of bytes that can be read as a contiguous block
- * @param[in]	psUB - pointer to buffer control structure
- * @return		positive integer 0 or greater
- */
-int xUBufGetUsedBlock(ubuf_t * psUB);
-
-/**
  * @brief		empty buffer using the block handler supplied
  * @param[in]	psUB - pointer to buffer control structure
  * @param[in]	hdlr - block write handler API

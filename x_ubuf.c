@@ -125,14 +125,6 @@ int	xUBufGetSpace(ubuf_t * psUB) {
 	#endif
 }
 
-int xUBufGetUsedBlock(ubuf_t * psUB) {
-	int iRV;
-	xUBufLock(psUB);
-	iRV = (psUB->IdxRD >= psUB->IdxWR) ? (psUB->Size - psUB->IdxRD) : psUB->Used;
-	xUBufUnLock(psUB);
-	return iRV;
-}
-
 int xUBufEmptyBlock(ubuf_t * psUB, int (*hdlr)(const void *, size_t)) {
 	IF_myASSERT(debugPARAM, (hdlr != NULL) && halMemoryRAM(psUB));
 	if (psUB->Used == 0)
