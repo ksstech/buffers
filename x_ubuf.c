@@ -161,13 +161,13 @@ ssize_t xUBufRead(ubuf_t * psUB, const void * pBuf, size_t Size) {
 	if (sRV != erSUCCESS)
 		return sRV;
 	xUBufLock(psUB);
-		*(char *)pBuf++ = *(psUB->pBuf + psUB->IdxRD++);
-		--psUB->Used;
-		if (psUB->IdxRD == psUB->Size) {				// past the end?
-			psUB->IdxRD = 0;							// yes, reset to start
-		}
 	while((psUB->Used > 0) && (sRV < Size)) {
+		*(char *)pBuf++ = psUB->pBuf[psUB->IdxRD++];	// read from circular to supplied buffer, adjust pointer
 		++sRV;											// adjust read count
+		if (--psUB->Used == 0)							// if nothing left to read
+			psUB->IdxRD = psUB->IdxWR = 0;				// reset In/Out indexes
+		else 
+			psUB->IdxRD %= psUB->Size;					// handle wrap
 	}
 	xUBufUnLock(psUB);
 	return sRV;
@@ -211,12 +211,11 @@ ssize_t xUBufWrite(ubuf_t * psUB, const void * pBuf, size_t Size) {
 		return EOF;
 	ssize_t	sRV = 0;
 	xUBufLock(psUB);
-		*(psUB->pBuf + psUB->IdxWR++) = *(const char *)pBuf++;
 	while((psUB->Used < psUB->Size) && (sRV < Avail)) {
+		psUB->pBuf[psUB->IdxWR++] = *(char *)pBuf++;	// store character in buffer, adjust pointer
 		++psUB->Used;
-		if (psUB->IdxWR == psUB->Size)					// past the end?
-			psUB->IdxWR = 0;							// yes, reset to start
 		++sRV;
+		psUB->IdxWR %= psUB->Size;						// handle wrap
 	}
 	xUBufUnLock(psUB);
 	return sRV;
