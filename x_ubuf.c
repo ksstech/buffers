@@ -174,16 +174,9 @@ ssize_t xUBufRead(ubuf_t * psUB, const void * pBuf, size_t Size) {
 }
 
 int	xUBufGetC(ubuf_t * psUB) {
-	int iRV = xUBufCheckAvail(psUB);
-	if (iRV != erSUCCESS)
-		return iRV;
-	xUBufLock(psUB);
-	iRV = psUB->pBuf[psUB->IdxRD++];
-	psUB->IdxRD %= psUB->Size;							// handle wrap
-	if (--psUB->Used == 0)
-		psUB->IdxRD = psUB->IdxWR = 0;					// reset In/Out indexes
-	xUBufUnLock(psUB);
-	return iRV;
+	u8_t u8Chr;
+	int iRV = xUBufRead(psUB, &u8Chr, sizeof(u8Chr));
+	return (iRV != sizeof(u8Chr)) ? iRV : u8Chr;
 }
 
 char * pcUBufGetS(char * pBuf, int Number, ubuf_t * psUB) {
@@ -222,18 +215,9 @@ ssize_t xUBufWrite(ubuf_t * psUB, const void * pBuf, size_t Size) {
 }
 
 int	xUBufPutC(ubuf_t * psUB, int iChr) {
-	int iRV = xUBufBlockSpace(psUB, sizeof(char));
-	if (iRV != sizeof(char))
-		return iRV;
-	xUBufLock(psUB);
-	psUB->pBuf[psUB->IdxWR++] = iChr;					// store character in buffer, adjust pointer
-	psUB->IdxWR %= psUB->Size;							// handle wrap
-	++psUB->Used;
-//	IF_CP(debugTRACK && (psUB->Used == psUB->Size) && (psUB->IdxRD != psUB->IdxWR), "ALERT!!! s=%d u=%d w=%d r=%d iChr=%d" strNL, psUB->Size, psUB->Used, psUB->IdxWR, psUB->IdxRD, iChr);
-	xUBufUnLock(psUB);
-	// ensure that the indexes are same when buffer is full
-//	IF_myASSERT(debugTRACK && (psUB->Used == psUB->Size), psUB->IdxRD == psUB->IdxWR);
-	return iChr;
+ 	u8_t u8Chr = (u8_t)iChr;
+	int iRV = xUBufWrite(psUB, &u8Chr, sizeof(u8Chr));
+	return (iRV != sizeof(u8Chr)) ? iRV : iChr;
 }
 
 u8_t * pcUBufTellRead(ubuf_t * psUB) {
