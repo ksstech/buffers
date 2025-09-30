@@ -130,18 +130,24 @@ int xUBufEmptyBlock(ubuf_t * psUB, int (*hdlr)(const void *, size_t)) {
 	IF_myASSERT(debugPARAM, (hdlr != NULL) && halMemoryRAM(psUB));
 	if (psUB->Used == 0)
 		return 0;
+	if ((psUB->IdxRD == 0) & (psUB->IdxWR == 0))
+		PX("u=%d r=%d w=%d" strNL, psUB->Used, psUB->IdxRD, psUB->IdxWR);
 	int iRV = 0;
-	ssize_t Total = 0;
+	ssize_t Now = 0, Total = 0;
 	xUBufLock(psUB);
-	if (psUB->IdxRD >= psUB->IdxWR) {
-		iRV = hdlr(psUB->pBuf + psUB->IdxRD, psUB->Size - psUB->IdxRD);
+	// Check 1: if read pointer is ahead of the write pointer we MIGHT have 2 blocks to process
+	if (psUB->IdxRD >= psUB->IdxWR) {					// write bytes between IdxRd and end of buffer
+		Now = (psUB->Used < (psUB->Size - psUB->IdxRD)) ? psUB->Used : (psUB->Size - psUB->IdxRD);
+		iRV = hdlr(psUB->pBuf + psUB->IdxRD, Now);
 		if (iRV > 0) {
 			Total += iRV;								// Update bytes written count
 			psUB->Used -= iRV;							// decrease total available
-			psUB->IdxRD = 0;							// reset read index
+			psUB->IdxRD += iRV;							// Update read index
+			psUB->IdxRD %= psUB->Size;					// handle wrap
 		}
 	}
-	if ((iRV > erFAILURE) && psUB->Used) {
+	// Check 2: if anything (left) at start of circular buffer?
+	if ((iRV >= 0) && psUB->Used) {
 		iRV = hdlr(psUB->pBuf, psUB->Used);
 		if (iRV > 0) {
 			Total += iRV;
@@ -149,8 +155,9 @@ int xUBufEmptyBlock(ubuf_t * psUB, int (*hdlr)(const void *, size_t)) {
 			psUB->IdxWR = 0;							// reset write index
 		}
 	}
-	IF_myASSERT(debugTRACK, psUB->Used == 0 && psUB->IdxRD == 0 && psUB->IdxWR == 0);
 	xUBufUnLock(psUB);
+	if (psUB->Used || psUB->IdxRD || psUB->IdxWR)
+		PX("Hdlr=%p iRV=%d u=%d  r=%d  w=%d" strNL, hdlr, iRV, psUB->Used, psUB->IdxRD, psUB->IdxWR);
 	return (iRV < erSUCCESS) ? iRV : Total;
 }
 
