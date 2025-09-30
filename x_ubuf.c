@@ -75,23 +75,24 @@ static int xUBufCheckAvail(ubuf_t * psUB) {
  */
 static ssize_t xUBufBlockSpace(ubuf_t * psUB, size_t Size) {
 	IF_myASSERT(debugPARAM, Size <= psUB->Size);
+	// Step 1: check if sufficient free space available
 	ssize_t Avail = psUB->Size - psUB->Used;
-	if (Avail >= Size)
-		return Size;									// sufficient space ?
+	if (Avail >= Size)									// sufficient space ?
+		return Size;									// yes, return
 
-	// at this point we do NOT have sufficient space available, must make some space
-	if (psUB->f_history || FF_STCHK(psUB, O_TRUNC)) {	// yes, supposed to TRUNCate ?
-		xUBufLock(psUB);
-		int Req = Size - (psUB->Size - psUB->Used);
+	// Step 2: insufficient space available, free some up if possible
+	if (psUB->f_history || FF_STCHK(psUB, O_TRUNC)) {	// supposed to TRUNCate ?
+		xUBufLock(psUB);								// yes
+		int Req = Size - (psUB->Size - psUB->Used);		// calculate shortfall
 		psUB->IdxRD += Req;								// adjust output/read index accordingly
 		psUB->IdxRD %= psUB->Size;						// correct for wrap
 		psUB->Used -= Req;								// adjust remaining character count
 		xUBufUnLock(psUB);
 
 	} else if (FF_STCHK(psUB, O_NONBLOCK)) {			// non-blocking mode ?
-		FF_SET(psUB, FF_STATERR);
-		errno = EAGAIN;									// yes, set error code
-		return Avail;									// and return actual space available
+		FF_SET(psUB, FF_STATERR);						// yes, set error state
+		errno = EAGAIN;									// and error code
+		return Avail;									// return actual space available
 
 	} else {											// block till available
 		do {											// loop waiting for sufficient space
