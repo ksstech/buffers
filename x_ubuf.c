@@ -136,6 +136,7 @@ int xUBufEmptyBlock(ubuf_t * psUB, int (*hdlr)(const void *, size_t)) {
 	ssize_t Total = 0;
 	xUBufLock(psUB);
 	// Check 1: if read pointer is ahead of the write pointer we MIGHT have 2 blocks to process
+	if (psUB->IdxRD) {
 		ssize_t Now = psUB->Size - psUB->IdxRD;			// write bytes between IdxRd and end of buffer
 		iRV = hdlr(psUB->pBuf + psUB->IdxRD, Now);
 		if (iRV > 0) {
