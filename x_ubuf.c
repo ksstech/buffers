@@ -130,8 +130,6 @@ int xUBufEmptyBlock(ubuf_t * psUB, int (*hdlr)(const void *, size_t)) {
 	IF_myASSERT(debugPARAM, (hdlr != NULL) && halMemoryRAM(psUB));
 	if (psUB->Used == 0)
 		return 0;
-	if ((psUB->IdxRD == 0) & (psUB->IdxWR == 0))
-		PX("u=%d r=%d w=%d" strNL, psUB->Used, psUB->IdxRD, psUB->IdxWR);
 	int iRV = 0;
 	ssize_t Total = 0;
 	xUBufLock(psUB);
@@ -147,6 +145,7 @@ int xUBufEmptyBlock(ubuf_t * psUB, int (*hdlr)(const void *, size_t)) {
 			psUB->IdxRD += iRV;							// Update read index
 			psUB->IdxRD %= psUB->Size;					// handle wrap
 		} else {
+			PXL("Total=%d  iRV=%d  s=%d  u=%d  r=%d  w=%d" strNL, Total, iRV, psUB->Size, psUB->Used, psUB->IdxRD, psUB->IdxWR);
 			psUB->IdxRD = 0;							// reset read index
 		}
 	}
@@ -161,7 +160,7 @@ int xUBufEmptyBlock(ubuf_t * psUB, int (*hdlr)(const void *, size_t)) {
 	}
 	xUBufUnLock(psUB);
 	if (psUB->Used || psUB->IdxRD || psUB->IdxWR)
-		PX("Hdlr=%p iRV=%d u=%d  r=%d  w=%d" strNL, hdlr, iRV, psUB->Used, psUB->IdxRD, psUB->IdxWR);
+		PXL("Total=%d  iRV=%d  s=%d  u=%d  r=%d  w=%d" strNL, Total, iRV, psUB->Size, psUB->Used, psUB->IdxRD, psUB->IdxWR);
 	return (iRV < erSUCCESS) ? iRV : Total;
 }
 
