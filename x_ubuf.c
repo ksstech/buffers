@@ -133,17 +133,20 @@ int xUBufEmptyBlock(ubuf_t * psUB, int (*hdlr)(const void *, size_t)) {
 	if ((psUB->IdxRD == 0) & (psUB->IdxWR == 0))
 		PX("u=%d r=%d w=%d" strNL, psUB->Used, psUB->IdxRD, psUB->IdxWR);
 	int iRV = 0;
-	ssize_t Now = 0, Total = 0;
+	ssize_t Total = 0;
 	xUBufLock(psUB);
 	// Check 1: if read pointer is ahead of the write pointer we MIGHT have 2 blocks to process
-	if (psUB->IdxRD >= psUB->IdxWR) {					// write bytes between IdxRd and end of buffer
-		Now = (psUB->Used < (psUB->Size - psUB->IdxRD)) ? psUB->Used : (psUB->Size - psUB->IdxRD);
+		ssize_t Now = psUB->Size - psUB->IdxRD;			// write bytes between IdxRd and end of buffer
 		iRV = hdlr(psUB->pBuf + psUB->IdxRD, Now);
 		if (iRV > 0) {
 			Total += iRV;								// Update bytes written count
 			psUB->Used -= iRV;							// decrease total available
+		}
+		if (iRV == Now) {
 			psUB->IdxRD += iRV;							// Update read index
 			psUB->IdxRD %= psUB->Size;					// handle wrap
+		} else {
+			psUB->IdxRD = 0;							// reset read index
 		}
 	}
 	// Check 2: if anything (left) at start of circular buffer?
