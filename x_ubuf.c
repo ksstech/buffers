@@ -1,4 +1,4 @@
-// x_ubuf.c - Copyright (c) 2016-25 Andre M. Maree / KSS Technologies (Pty) Ltd.
+// x_ubuf.c - Copyright (c) 2016-26 Andre M. Maree / KSS Technologies (Pty) Ltd.
 
 #include "hal_platform.h"
 #include "x_ubuf.h"
@@ -133,6 +133,8 @@ int xUBufEmptyBlock(ubuf_t * psUB, int (*hdlr)(const void *, size_t)) {
 	int iRV = 0;
 	ssize_t Total = 0;
 	xUBufLock(psUB);
+	/* Partial writes are NORMAL here: xTelnetWrite() is a socket send and xStdOutWrite() a UART
+	 * write, both may take less than offered. IdxRD must therefore advance by what was ACCEPTED. */
 	// Check 1: if read pointer is ahead of the write pointer we MIGHT have 2 blocks to process
 	if (psUB->IdxRD) {
 		ssize_t Now = psUB->Size - psUB->IdxRD;			// write bytes between IdxRd and end of buffer
@@ -140,27 +142,24 @@ int xUBufEmptyBlock(ubuf_t * psUB, int (*hdlr)(const void *, size_t)) {
 		if (iRV > 0) {
 			Total += iRV;								// Update bytes written count
 			psUB->Used -= iRV;							// decrease total available
-		}
-		if (iRV == Now) {
-			psUB->IdxRD += iRV;							// Update read index
-			psUB->IdxRD %= psUB->Size;					// handle wrap
-		} else {
-			PXL("Total=%d  iRV=%d  s=%d  u=%d  r=%d  w=%d" strNL, Total, iRV, psUB->Size, psUB->Used, psUB->IdxRD, psUB->IdxWR);
-			psUB->IdxRD = 0;							// reset read index
+			psUB->IdxRD += iRV;							// advance by what was accepted, full or partial
+			psUB->IdxRD %= psUB->Size;					// wraps to 0 ONLY if this block fully drained
 		}
 	}
-	// Check 2: if anything (left) at start of circular buffer?
-	if ((iRV >= 0) && psUB->Used) {
+	// Check 2: anything (left) at start of circular buffer? ONLY once Check 1 wrapped, else the
+	// unsent tail of the [IdxRD,Size) block is still pending and pBuf[0] is not the read point.
+	if ((iRV >= 0) && psUB->Used && (psUB->IdxRD == 0)) {
 		iRV = hdlr(psUB->pBuf, psUB->Used);
 		if (iRV > 0) {
 			Total += iRV;
-			psUB->Used -= iRV;							// nothing left...
-			psUB->IdxWR = 0;							// reset write index
+			psUB->Used -= iRV;
+			if (psUB->Used == 0)
+				psUB->IdxRD = psUB->IdxWR = 0;			// fully drained, safe to reset both
+			else
+				psUB->IdxRD += iRV;						// partial, more to send on the next pass
 		}
 	}
 	xUBufUnLock(psUB);
-	if (psUB->Used || psUB->IdxRD || psUB->IdxWR)
-		PXL("Total=%d  iRV=%d  s=%d  u=%d  r=%d  w=%d" strNL, Total, iRV, psUB->Size, psUB->Used, psUB->IdxRD, psUB->IdxWR);
 	return (iRV < erSUCCESS) ? iRV : Total;
 }
 
