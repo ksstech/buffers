@@ -13,6 +13,7 @@
 
 #include <errno.h>
 #include <stdatomic.h>
+#include <string.h>
 
 #define	debugFLAG					0xF000
 
@@ -211,13 +212,29 @@ ssize_t xUBufWrite(ubuf_t * psUB, const void * pBuf, size_t Size) {
 	ssize_t Avail = xUBufBlockSpace(psUB, Size);
 	if (Avail < 1)
 		return EOF;
-	ssize_t	sRV = 0;
 	xUBufLock(psUB);
-	while((psUB->Used < psUB->Size) && (sRV < Avail)) {
-		psUB->pBuf[psUB->IdxWR++] = *(char *)pBuf++;	// store character in buffer, adjust pointer
-		++psUB->Used;
-		++sRV;
-		psUB->IdxWR %= psUB->Size;						// handle wrap
+	/* At most TWO memcpy: IdxWR to the end of the buffer, then the wrap back to the start.
+	 *
+	 * This was a per-byte loop, and IdxWR/Used are volatile u16_t living in sRTCvars, ie in RTC
+	 * SLOW memory (hal_memory.c, RTC_NOINIT_ATTR). Every byte therefore cost a volatile RMW of
+	 * IdxWR, one of Used, and a modulo - about six barriered accesses over the slow RTC bus for
+	 * each single byte stored. Measured at ~7 uS PER BYTE, which was 87% of a staged printfx call.
+	 * Reading each index once and writing it once moves that cost from per-byte to per-call. */
+	ssize_t sFree = psUB->Size - psUB->Used;			// real free space
+	ssize_t sRV = (Avail < sFree) ? Avail : sFree;		// same clamp the old loop condition applied
+	if (sRV > 0) {
+		u16_t Idx = psUB->IdxWR;						// ONE read of the volatile index
+		ssize_t Now = psUB->Size - Idx;					// bytes from IdxWR to end of buffer
+		if (Now > sRV)
+			Now = sRV;
+		memcpy(psUB->pBuf + Idx, pBuf, Now);
+		if (sRV > Now)									// wrapped, remainder goes at the start
+			memcpy(psUB->pBuf, (const char *)pBuf + Now, sRV - Now);
+		Idx += sRV;
+		if (Idx >= psUB->Size)							// conditional subtract, not a division
+			Idx -= psUB->Size;
+		psUB->IdxWR = Idx;								// ONE write of the volatile index
+		psUB->Used += sRV;
 	}
 	xUBufUnLock(psUB);
 	return sRV;
