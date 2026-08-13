@@ -362,16 +362,23 @@ int xUBufStringCopy(ubuf_t * psUB, u8_t * pu8Buf, int xLen) {
 
 int xUBufStringNxt(ubuf_t * psUB, u8_t * pu8Buf, int Size) {
 	IF_myASSERT(debugPARAM, psUB->f_history);
+	if (psUB->Used == 0 || Size < 2)
+		return 0;										// nothing stored yet: do NOT scan the buffer,
+														//  psUBufCreate() mallocs it WITHOUT clearing
 	// step back over NUL and then further back to chr before next NUL
-	int xLen = 0;
-	do {
+	int xLen = 0, xMax = psUB->Size;
+	while (xMax--) {									// bounded: a buffer with no NUL looped forever
 		psUB->IdxRD = psUB->IdxRD ? (psUB->IdxRD - 1) : psUB->IdxWR;
 		if ((psUB->pBuf[psUB->IdxRD] == CHR_NUL) && (xLen > 0)) {
 			psUB->IdxRD = (psUB->IdxRD == (psUB->Size - 1)) ? 0 : (psUB->IdxRD + 1);
 			break;
 		}
 		++xLen;
-	} while (1);
+	}
+	if (xMax < 0)
+		return 0;										// no terminator anywhere, history unusable
+	if (xLen > (Size - 1))
+		xLen = Size - 1;								// Size was accepted and then ignored
 	u16_t iTmp = psUB->IdxRD;							// save for reuse
 	xLen = xUBufStringCopy(psUB, pu8Buf, xLen);
 	psUB->IdxRD = iTmp;
@@ -380,16 +387,28 @@ int xUBufStringNxt(ubuf_t * psUB, u8_t * pu8Buf, int Size) {
 
 int xUBufStringPrv(ubuf_t * psUB, u8_t * pu8Buf, int Size) {
 	IF_myASSERT(debugPARAM, psUB->f_history);
-	int xLen = 0;
+	if (psUB->Used == 0 || Size < 2)
+		return 0;										// nothing stored yet, see xUBufStringNxt()
+	int xLen = 0, xMax = psUB->Size;
 	if (psUB->Used == psUB->Size) {						// buffer is full then pointing at start of oldest/end
-		while (psUB->pBuf[psUB->IdxRD] == CHR_NUL)
+		while (xMax-- && psUB->pBuf[psUB->IdxRD] == CHR_NUL)
 			psUB->IdxRD = (psUB->IdxRD == (psUB->Size - 1)) ? 0 : (psUB->IdxRD + 1);	// skip NUL's
-		while (*(psUB->pBuf + psUB->IdxRD + xLen++) != CHR_NUL); //
-	} else {											// buffer NOT full, no wrap yet
-		if (psUB->IdxRD == psUB->IdxWR)					// at end of buffer ?
-			psUB->IdxRD = 0;							// yes, set to start....
-		while (psUB->pBuf[psUB->IdxRD + xLen++] != CHR_NUL); // calc length of string
+		if (xMax < 0)
+			return 0;									// all NUL, nothing to recall
+	} else if (psUB->IdxRD == psUB->IdxWR) {			// buffer NOT full, at end of buffer ?
+		psUB->IdxRD = 0;								// yes, set to start....
 	}
+	/* Measure the entry WRAPPING at Size and bounded by it. Both original scans indexed
+	 * pBuf[IdxRD + xLen] linearly, so an entry near the end of the ring read PAST the end of the
+	 * allocation. They also counted the terminating NUL, unlike xUBufStringNxt(), so UP and DOWN
+	 * returned lengths differing by one for the same entry. */
+	xMax = psUB->Size;
+	while (xMax-- && psUB->pBuf[(psUB->IdxRD + xLen) % psUB->Size] != CHR_NUL)
+		++xLen;
+	if (xMax < 0)
+		return 0;										// no terminator anywhere, history unusable
+	if (xLen > (Size - 1))
+		xLen = Size - 1;								// Size was accepted and then ignored
 	return xUBufStringCopy(psUB, pu8Buf, xLen);
 }
 
