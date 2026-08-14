@@ -1,4 +1,4 @@
-// x_buffers.c - Copyright (c) 2014-24 Andre M. Maree / KSS Technologies (Pty) Ltd.
+// x_buffers.c - Copyright (c) 2014-26 Andre M. Maree / KSS Technologies (Pty) Ltd.
 
 #include "hal_platform.h"
 #include "hal_memory.h"
@@ -205,7 +205,7 @@ void vBufReset(buf_t * psBuf, size_t Used) {
  * @return		erSUCCESS
  */
 static int xBufReuse(buf_t * psBuf, char * pBuf, size_t Size, u32_t flags, size_t Used) {
-	IF_myASSERT(debugPARAM, halMemorySRAM(psBuf) && pBuf != 0 && Used <= Size)
+	IF_myASSERT(debugPARAM, halMemorySRAM(psBuf) && pBuf != 0 && Used <= Size);
 	vBufIsrEntry(psBuf);
 	psBuf->pBeg		= pBuf;
 	psBuf->pEnd		= pBuf + Size;						// calculate & save end
@@ -361,7 +361,7 @@ int xBufPeek(buf_t * psBuf) {
  * @return
  */
 char * pcBufGetS(char * pBuf, int Number, buf_t * psBuf) {
-	IF_myASSERT(debugPARAM, halMemorySRAM(pBuf))
+	IF_myASSERT(debugPARAM, halMemorySRAM(pBuf));
 	char *	pTmp = pBuf;
 	while (Number > 1) {
 		int	cChr = xBufGetC(psBuf);
@@ -395,9 +395,9 @@ char * pcBufGetS(char * pBuf, int Number, buf_t * psBuf) {
  */
 size_t xBufWrite(void * pvBuf, size_t Size, size_t Count, buf_t * psBuf) {
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf);
-	IF_myASSERT(debugPARAM, halMemorySRAM(pvBuf))
+	IF_myASSERT(debugPARAM, halMemorySRAM(pvBuf));
 	if (FF_STCHK(psBuf, FF_CIRCULAR)) {
-		IF_myASSERT(debugRESULT, 0)
+		IF_myASSERT(debugRESULT, 0);
 		return 0;										// indicate nothing written
 	}
 
@@ -424,13 +424,13 @@ size_t xBufWrite(void * pvBuf, size_t Size, size_t Count, buf_t * psBuf) {
  */
 size_t xBufRead(void * pvBuf, size_t Size, size_t Count, buf_t * psBuf) {
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf);
-	IF_myASSERT(debugPARAM, halMemorySRAM(pvBuf))
+	IF_myASSERT(debugPARAM, halMemorySRAM(pvBuf));
 	if (FF_STCHK(psBuf, FF_CIRCULAR)) {
-		IF_myASSERT(debugRESULT, 0)
+		IF_myASSERT(debugRESULT, 0);
 		return 0;										// indicate nothing read
 	}
 	if (Size == 0 || Count == 0) {
-		IF_myASSERT(debugRESULT, 0)
+		IF_myASSERT(debugRESULT, 0);
 		return 0;
 	}
 
@@ -511,13 +511,13 @@ int	xBufTell(buf_t * psBuf, int flags) {
 	int	iRV = erFAILURE;
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf);
 	if (FF_STCHK(psBuf, FF_CIRCULAR)) {				// working on circular buffer
-		IF_myASSERT(debugRESULT, 0)
+		IF_myASSERT(debugRESULT, 0);
 		return erFAILURE;							// yes, abort..
 	}
 
 	// Can only ask for MODER or MODEW not both or MODERW
 	if (((flags & FF_MODER) && (flags & FF_MODEW)) || (flags & FF_MODERW)) {
-		IF_myASSERT(debugRESULT, 0)
+		IF_myASSERT(debugRESULT, 0);
 		return erFAILURE;
 	}
 	vBufIsrEntry(psBuf);
@@ -540,18 +540,18 @@ char * pcBufTellPointer(buf_t * psBuf, int flags) {
 char * pcRetVal = (char *) erFAILURE;
 	IF_EXEC_1(debugSTRUCTURE, xBufCheck, psBuf);
 	if (FF_STCHK(psBuf, FF_CIRCULAR)) {				// working on circular buffer
-		IF_myASSERT(debugRESULT, 0)
+		IF_myASSERT(debugRESULT, 0);
 		return pcRetVal;
 	}
 
 	// Can only ask for MODER or MODEW not both nor MODERW
 	if (((flags & FF_MODER) && (flags & FF_MODEW)) || (flags & FF_MODERW)) {
-		IF_myASSERT(debugRESULT, 0)
+		IF_myASSERT(debugRESULT, 0);
 		return pcRetVal;
 	}
 	if (flags & FF_MODER) pcRetVal = psBuf->pRead;
 	else if (flags & FF_MODEW) pcRetVal = psBuf->pWrite;
-	IF_myASSERT(debugRESULT, halMemorySRAM(pcRetVal))
+	IF_myASSERT(debugRESULT, halMemorySRAM(pcRetVal));
 	return pcRetVal;
 }
 
