@@ -360,56 +360,59 @@ int xUBufStringCopy(ubuf_t * psUB, u8_t * pu8Buf, int xLen) {
 	return xLen;
 }
 
-int xUBufStringNxt(ubuf_t * psUB, u8_t * pu8Buf, int Size) {
+/* ONE invariant for both: IdxRD is the FIRST byte of the entry displayed, IdxRD == IdxWR means
+ * "not browsing" ie the fresh line below the newest entry. Both stop at their end, neither wraps,
+ * and both return strlen EXCLUDING the terminator. */
+static u16_t uUBufBack(ubuf_t * psUB, u16_t Idx) { return Idx ? (Idx - 1) : (psUB->Size - 1); }
+static u16_t uUBufFwd(ubuf_t * psUB, u16_t Idx) { return (Idx + 1) % psUB->Size; }
+
+int xUBufStringNxt(ubuf_t * psUB, u8_t * pu8Buf, int Size) {	// cursor UP, OLDER entry
 	IF_myASSERT(debugPARAM, psUB->f_history);
 	if (psUB->Used == 0 || Size < 2)
-		return 0;										// nothing stored yet: do NOT scan the buffer,
-														//  psUBufCreate() mallocs it WITHOUT clearing
-	// step back over NUL and then further back to chr before next NUL
-	int xLen = 0, xMax = psUB->Size;
-	while (xMax--) {									// bounded: a buffer with no NUL looped forever
-		psUB->IdxRD = psUB->IdxRD ? (psUB->IdxRD - 1) : psUB->IdxWR;
-		if ((psUB->pBuf[psUB->IdxRD] == CHR_NUL) && (xLen > 0)) {
-			psUB->IdxRD = (psUB->IdxRD == (psUB->Size - 1)) ? 0 : (psUB->IdxRD + 1);
-			break;
-		}
-		++xLen;
-	}
-	if (xMax < 0)
-		return 0;										// no terminator anywhere, history unusable
+		return 0;										// nothing stored yet
+	u16_t Oldest = (psUB->IdxWR + psUB->Size - psUB->Used) % psUB->Size;
+	/* On a FULL ring Oldest == IdxWR, which is also the "not browsing" sentinel, so the first UP
+	 * off the fresh line must always be allowed. */
+	if (psUB->IdxRD != psUB->IdxWR && psUB->IdxRD == Oldest)
+		return 0;										// nothing older, caller leaves the line as is
+	u16_t End = uUBufBack(psUB, psUB->IdxRD);			// NUL terminating the previous entry
+	u16_t Start = End;									// walk back to that entry's first character
+	while (Start != Oldest && psUB->pBuf[uUBufBack(psUB, Start)] != CHR_NUL)
+		Start = uUBufBack(psUB, Start);
+	int xLen = (End + psUB->Size - Start) % psUB->Size;
 	if (xLen > (Size - 1))
-		xLen = Size - 1;								// Size was accepted and then ignored
-	u16_t iTmp = psUB->IdxRD;							// save for reuse
-	xLen = xUBufStringCopy(psUB, pu8Buf, xLen);
-	psUB->IdxRD = iTmp;
+		xLen = Size - 1;
+	psUB->IdxRD = Start;
+	xUBufStringCopy(psUB, pu8Buf, xLen);				// advances IdxRD...
+	psUB->IdxRD = Start;								// ...so put it back on the entry displayed
 	return xLen;
 }
 
-int xUBufStringPrv(ubuf_t * psUB, u8_t * pu8Buf, int Size) {
+int xUBufStringPrv(ubuf_t * psUB, u8_t * pu8Buf, int Size) {	// cursor DOWN, NEWER entry
 	IF_myASSERT(debugPARAM, psUB->f_history);
 	if (psUB->Used == 0 || Size < 2)
-		return 0;										// nothing stored yet, see xUBufStringNxt()
-	int xLen = 0, xMax = psUB->Size;
-	if (psUB->Used == psUB->Size) {						// buffer is full then pointing at start of oldest/end
-		while (xMax-- && psUB->pBuf[psUB->IdxRD] == CHR_NUL)
-			psUB->IdxRD = (psUB->IdxRD == (psUB->Size - 1)) ? 0 : (psUB->IdxRD + 1);	// skip NUL's
-		if (xMax < 0)
-			return 0;									// all NUL, nothing to recall
-	} else if (psUB->IdxRD == psUB->IdxWR) {			// buffer NOT full, at end of buffer ?
-		psUB->IdxRD = 0;								// yes, set to start....
+		return 0;										// nothing stored yet
+	if (psUB->IdxRD == psUB->IdxWR)
+		return 0;										// on the fresh line, nothing newer
+	u16_t Idx = psUB->IdxRD;
+	int xMax = psUB->Size;								// bounded: a ring with no NUL looped forever
+	while (xMax-- && psUB->pBuf[Idx] != CHR_NUL)
+		Idx = uUBufFwd(psUB, Idx);
+	Idx = uUBufFwd(psUB, Idx);							// step OVER the terminator
+	if (Idx == psUB->IdxWR) {							// stepped past the newest ?
+		psUB->IdxRD = psUB->IdxWR;						// yes, park on the fresh line
+		return 0;
 	}
-	/* Measure the entry WRAPPING at Size and bounded by it. Both original scans indexed
-	 * pBuf[IdxRD + xLen] linearly, so an entry near the end of the ring read PAST the end of the
-	 * allocation. They also counted the terminating NUL, unlike xUBufStringNxt(), so UP and DOWN
-	 * returned lengths differing by one for the same entry. */
+	int xLen = 0;
 	xMax = psUB->Size;
-	while (xMax-- && psUB->pBuf[(psUB->IdxRD + xLen) % psUB->Size] != CHR_NUL)
+	while (xMax-- && psUB->pBuf[(Idx + xLen) % psUB->Size] != CHR_NUL)
 		++xLen;
-	if (xMax < 0)
-		return 0;										// no terminator anywhere, history unusable
 	if (xLen > (Size - 1))
-		xLen = Size - 1;								// Size was accepted and then ignored
-	return xUBufStringCopy(psUB, pu8Buf, xLen);
+		xLen = Size - 1;
+	psUB->IdxRD = Idx;
+	xUBufStringCopy(psUB, pu8Buf, xLen);
+	psUB->IdxRD = Idx;
+	return xLen;
 }
 
 void vUBufStringAdd(ubuf_t * psUB, u8_t * pu8Buf, int Size) {
